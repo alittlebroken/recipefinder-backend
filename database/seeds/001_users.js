@@ -5,6 +5,7 @@ exports.seed = async function(knex) {
   // Add the new data
   await knex('users').insert([
     {
+      id: 1,
       username: 'admin',
       password: 'admin',
       email: 'admin@localhost',
@@ -14,6 +15,7 @@ exports.seed = async function(knex) {
       roles: 'Admin'
     },
     {
+      id: 2,
       username: 'user',
       password: 'user',
       email: 'user@localhost',
