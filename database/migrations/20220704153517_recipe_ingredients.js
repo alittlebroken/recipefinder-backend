@@ -18,7 +18,7 @@ exports.up = function(knex) {
       .inTable('ingredients')
       .onUpdate('CASCADE')
       .onDelete('CASCADE');
-     table.integer('amount').unsigned().notNullable();
+     table.float('amount').unsigned().notNullable();
      table.string('amount_type');
      table.timestamps(true, true);
    });
