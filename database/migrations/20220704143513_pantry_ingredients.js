@@ -29,6 +29,6 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  return kenx.schema
+  return knex.schema
    .dropTable('pantry_ingredients');
 };
