@@ -2,7 +2,14 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 module.exports = {
-
+  test: {
+    client: 'sqlite3',
+    connection: ':memory:',
+    useNullAsDefault: true,
+    migrations: {
+      tableName: 'knex_migrations'
+    }
+  },
   development: {
     client: 'pg',
     connection: {
@@ -15,4 +22,5 @@ module.exports = {
       tableName: 'knex_migrations'
     }
   },
+
 };
