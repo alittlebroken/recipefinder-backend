@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./index.js",
+    "testMigrate": "knex migrate:latest --knexfile database/knexfile.js --env=test",
+    "testRollback": "knex migrate:rollback --knexfile database/knexfile.js --env=test",
+    "testSeed": "knex seed:run --knexfile database/knexfile.js --env=test",
     "migrate": "knex migrate:latest --knexfile database/knexfile.js",
     "rollback": "knex migrate:rollback --knexfile database/knexfile.js",
     "seed": "knex seed:run --knexfile database/knexfile.js"
