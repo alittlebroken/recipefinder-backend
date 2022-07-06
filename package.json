@@ -4,10 +4,8 @@
   "description": "��#\u0000 \u0000r\u0000e\u0000c\u0000i\u0000p\u0000e\u0000f\u0000i\u0000n\u0000d\u0000e\u0000r\u0000-\u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
+    "test":"jest --watch --collect-coverage",
     "dev": "nodemon ./index.js",
-    "testMigrate": "knex migrate:latest --knexfile database/knexfile.js --env=test",
-    "testRollback": "knex migrate:rollback --knexfile database/knexfile.js --env=test",
-    "testSeed": "knex seed:run --knexfile database/knexfile.js --env=test",
     "migrate": "knex migrate:latest --knexfile database/knexfile.js",
     "rollback": "knex migrate:rollback --knexfile database/knexfile.js",
     "seed": "knex seed:run --knexfile database/knexfile.js"
@@ -31,6 +29,7 @@
     "sqlite3": "^5.0.8"
   },
   "devDependencies": {
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "jest": "^28.1.2"
   }
 }
