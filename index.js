@@ -1,17 +1,20 @@
 /*
  * Required Packages
  */
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
-require('dotenv').config();
+const passport = require('passport');
 
 /*
  * Configure the app
  */
+ require('./config/passport');
  app.use(express.json());
  app.use(express.urlencoded({ extended: true }));
  app.use(cors);
+ app.use(passport.initialize());
 
 /*
  * Import our routes
