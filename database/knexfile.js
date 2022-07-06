@@ -8,10 +8,14 @@ module.exports = {
     useNullAsDefault: true,
     pool: {
       min: 1,
-      max: 1,
+      max: 10,
     },
     migrations: {
+      directory: './database/migrations',
       tableName: 'knex_migrations'
+    },
+    seeds: {
+      directory: './database/seeds'
     }
   },
   development: {
