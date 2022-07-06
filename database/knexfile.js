@@ -24,7 +24,6 @@ module.exports = {
       host: process.env.DB_HOST
     },
     migrations: {
-      directory: './database/migrations',
       tableName: 'knex_migrations'
     }
   },
