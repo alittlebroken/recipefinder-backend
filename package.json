@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "dotenv": "^16.0.1",
-    "jest": "^28.1.2"
+    "jest": "^28.1.2",
+    "mock-knex": "^0.4.11"
   }
 }
