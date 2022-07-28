@@ -16,8 +16,152 @@ jest.mock('../database', () => {
 /* Tracker for the SQL commands */
 let tracker;
 
+xdescribe('categoryModel.create', () => {
 
-xdescribe('cookbookModel.<method>', () => {
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should ...', async () => {
+
+    /** Mock the DB responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
+
+});
+
+xdescribe('categoryModel.remove', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should ...', async () => {
+
+    /** Mock the DB responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
+
+});
+
+xdescribe('categoryModel.update', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should ...', async () => {
+
+    /** Mock the DB responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
+
+});
+
+xdescribe('categoryModel.findOne', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should ...', async () => {
+
+    /** Mock the DB responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
+
+});
+
+xdescribe('categoryModel.findAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should ...', async () => {
+
+    /** Mock the DB responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
+
+});
+
+xdescribe('<resource>Model.<method>', () => {
 
   /*
    * Steps to run before and after this test suite
