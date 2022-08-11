@@ -393,6 +393,23 @@ describe('categoryModel.findAll', () => {
 
   });
 
+  it('should return an empty array if no entries found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const name = 'Vegon';
+
+    /** Execute the function */
+    const result = await categoryModel.findAll(name);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
   it('should should return a generic error to hide library errors', async () => {
 
     /** Mock the DB responses */
