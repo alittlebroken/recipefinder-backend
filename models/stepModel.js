@@ -276,10 +276,61 @@ const findById = async recipeId => {
 
 };
 
+/*
+ * find all steps which belong to a particular recipe
+ * @param {number} recipeId - The unique identifier of the recipe to get the
+ * steps for
+ * @returns {array} An array containing all steps for a recipe or empty if
+ * the recipe has none yet
+ */
+const findByRecipeId = async recipeId => {
+
+  try{
+
+    /* validate the values passed into the function */
+    if(!recipeId || typeof recipeId !== 'number'){
+      throw {
+        name: 'STEPMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* Get the steps from the DB */
+    const result = await db('steps')
+     .select('*')
+     .where('recipeId', recipeId);
+
+     if(!result || result.length < 1){
+       return [];
+     } else {
+       return result;
+     }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'STEPMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
   removeAll,
   update,
-  findById
+  findById,
+  findByRecipeId
 };
