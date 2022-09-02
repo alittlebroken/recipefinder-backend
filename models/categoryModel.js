@@ -156,7 +156,7 @@ const update = async (categoryId, name) => {
  * @param {string} name - The name of the item to find
  * @returns {array} An object array of the category details
  */
-const findOne = async name => {
+const findByName = async name => {
 
   try{
 
@@ -302,7 +302,7 @@ module.exports  = {
   create,
   remove,
   update,
-  findOne,
+  findByName,
   findAll,
   findById
 };

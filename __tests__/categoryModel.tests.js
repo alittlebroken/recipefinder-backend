@@ -234,7 +234,7 @@ describe('categoryModel.update', () => {
 
 });
 
-describe('categoryModel.findOne', () => {
+describe('categoryModel.findByName', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -260,7 +260,7 @@ describe('categoryModel.findOne', () => {
     const name = 'Vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -278,7 +278,7 @@ describe('categoryModel.findOne', () => {
     const name = 'Vegon';
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -295,7 +295,7 @@ describe('categoryModel.findOne', () => {
     const name = null;
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -313,7 +313,7 @@ describe('categoryModel.findOne', () => {
     const name = 'Vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
