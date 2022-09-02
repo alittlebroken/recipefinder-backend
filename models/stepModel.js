@@ -233,12 +233,12 @@ const update = async (stepId, recipeId, stepNo, stepContent) => {
  * @returns {array} An array containing all steps for a recipe or empty if
  * the recipe has none yet
  */
-const findById = async recipeId => {
+const findById = async stepId => {
 
   try{
 
     /* validate the values passed into the function */
-    if(!recipeId || typeof recipeId !== 'number'){
+    if(!stepId || typeof stepId !== 'number'){
       throw {
         name: 'STEPMODEL_ERROR',
         message: 'One or more required values are missing or incorrect'
@@ -248,7 +248,7 @@ const findById = async recipeId => {
     /* Get the steps from the DB */
     const result = await db('steps')
      .select('*')
-     .where('recipeId', recipeId);
+     .where('id', stepId);
 
      if(!result || result.length < 1){
        return [];

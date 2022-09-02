@@ -369,98 +369,33 @@ describe('stepModel.findById', () => {
 
     /** Mock the DB responses */
     tracker.on.select('steps').response([
-      {id: 1, recipeId: 1, stepNo: 1, content: 'Preheat oven to 180 degrees centigrade' },
-      {id: 2, recipeId: 1, stepNo: 2, content: 'Mix dry ingredients together' },
-      {id: 3, recipeId: 1, stepNo: 3, content: 'Pour in the wet ingredients' },
-      {id: 4, recipeId: 1, stepNo: 4, content: 'Use an electric whisk on medium speed for 2 minutes until smooth' },
-      {id: 5, recipeId: 1, stepNo: 5, content: 'Grease two 20inch round sandwich tins' },
-      {id: 6, recipeId: 1, stepNo: 6, content: 'Split the mixture evenly between the two tins' },
-      {id: 7, recipeId: 1, stepNo: 7, content: 'Place in the middle of the oven for 30 minutes or until golden brown' },
-      {id: 8, recipeId: 1, stepNo: 8, content: 'Place on a cake rack to cool down for 5 minutes' },
-    ]);
+      {
+        id: 1,
+        recipeId: 1,
+        stepNo: 1,
+        content: 'Preheat oven to 180 degrees centigrade'
+      },
+      ]);
 
     /** Set the data to pass into the models function */
-    const recipeId = 1;
+    const stepId = 1;
 
     /** Execute the function */
-    const result = await stepModel.findById(recipeId);
+    const result = await stepModel.findById(stepId);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(8);
+    expect(result).toHaveLength(1);
 
     /* Check the content returned is OK */
     expect(typeof result[0].id).toBe('number');
-    expect(typeof result[1].id).toBe('number');
-    expect(typeof result[2].id).toBe('number');
-    expect(typeof result[3].id).toBe('number');
-    expect(typeof result[4].id).toBe('number');
-    expect(typeof result[5].id).toBe('number');
-    expect(typeof result[6].id).toBe('number');
-    expect(typeof result[7].id).toBe('number');
-
     expect(typeof result[0].recipeId).toBe('number');
-    expect(typeof result[1].recipeId).toBe('number');
-    expect(typeof result[2].recipeId).toBe('number');
-    expect(typeof result[3].recipeId).toBe('number');
-    expect(typeof result[4].recipeId).toBe('number');
-    expect(typeof result[5].recipeId).toBe('number');
-    expect(typeof result[6].recipeId).toBe('number');
-    expect(typeof result[7].recipeId).toBe('number');
-
     expect(typeof result[0].stepNo).toBe('number');
-    expect(typeof result[1].stepNo).toBe('number');
-    expect(typeof result[2].stepNo).toBe('number');
-    expect(typeof result[3].stepNo).toBe('number');
-    expect(typeof result[4].stepNo).toBe('number');
-    expect(typeof result[5].stepNo).toBe('number');
-    expect(typeof result[6].stepNo).toBe('number');
-    expect(typeof result[7].stepNo).toBe('number');
-
     expect(typeof result[0].content).toBe('string');
-    expect(typeof result[1].content).toBe('string');
-    expect(typeof result[2].content).toBe('string');
-    expect(typeof result[3].content).toBe('string');
-    expect(typeof result[4].content).toBe('string');
-    expect(typeof result[5].content).toBe('string');
-    expect(typeof result[6].content).toBe('string');
-    expect(typeof result[7].content).toBe('string');
-
     expect(result[0].id).toBe(1);
-    expect(result[1].id).toBe(2);
-    expect(result[2].id).toBe(3);
-    expect(result[3].id).toBe(4);
-    expect(result[4].id).toBe(5);
-    expect(result[5].id).toBe(6);
-    expect(result[6].id).toBe(7);
-    expect(result[7].id).toBe(8);
-
     expect(result[0].recipeId).toBe(1);
-    expect(result[1].recipeId).toBe(1);
-    expect(result[2].recipeId).toBe(1);
-    expect(result[3].recipeId).toBe(1);
-    expect(result[4].recipeId).toBe(1);
-    expect(result[5].recipeId).toBe(1);
-    expect(result[6].recipeId).toBe(1);
-    expect(result[7].recipeId).toBe(1);
-
     expect(result[0].stepNo).toBe(1);
-    expect(result[1].stepNo).toBe(2);
-    expect(result[2].stepNo).toBe(3);
-    expect(result[3].stepNo).toBe(4);
-    expect(result[4].stepNo).toBe(5);
-    expect(result[5].stepNo).toBe(6);
-    expect(result[6].stepNo).toBe(7);
-    expect(result[7].stepNo).toBe(8);
-
     expect(result[0].content).toEqual('Preheat oven to 180 degrees centigrade');
-    expect(result[1].content).toEqual('Mix dry ingredients together');
-    expect(result[2].content).toEqual('Pour in the wet ingredients');
-    expect(result[3].content).toEqual('Use an electric whisk on medium speed for 2 minutes until smooth');
-    expect(result[4].content).toEqual('Grease two 20inch round sandwich tins');
-    expect(result[5].content).toEqual('Split the mixture evenly between the two tins');
-    expect(result[6].content).toEqual('Place in the middle of the oven for 30 minutes or until golden brown');
-    expect(result[7].content).toEqual('Place on a cake rack to cool down for 5 minutes');
 
   });
 
@@ -470,10 +405,10 @@ describe('stepModel.findById', () => {
     tracker.on.select('steps').response([]);
 
     /** Set the data to pass into the models function */
-    const recipeId = 1;
+    const stepId = 1;
 
     /** Execute the function */
-    const result = await stepModel.findById(recipeId);
+    const result = await stepModel.findById(stepId);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -483,23 +418,11 @@ describe('stepModel.findById', () => {
 
   it('should error if one or more required values are missing or incorrect', async () => {
 
-    /** Mock the DB responses */
-    tracker.on.select('steps').response([
-      {id: 1, recipeId: 1, stepNo: 1, content: 'Preheat oven to 180 degrees centigrade' },
-      {id: 2, recipeId: 1, stepNo: 2, content: 'Mix dry ingredients together' },
-      {id: 3, recipeId: 1, stepNo: 3, content: 'Pour in the wet ingredients' },
-      {id: 4, recipeId: 1, stepNo: 4, content: 'Use an electric whisk on medium speed for 2 minutes until smooth' },
-      {id: 5, recipeId: 1, stepNo: 5, content: 'Grease two 20inch round sandwich tins' },
-      {id: 6, recipeId: 1, stepNo: 6, content: 'Split the mixture evenly between the two tins' },
-      {id: 7, recipeId: 1, stepNo: 7, content: 'Place in the middle of the oven for 30 minutes or until golden brown' },
-      {id: 8, recipeId: 1, stepNo: 8, content: 'Place on a cake rack to cool down for 5 minutes' },
-    ]);
-
     /** Set the data to pass into the models function */
-    const recipeId = null;
+    const stepId = null;
 
     /** Execute the function */
-    const result = await stepModel.findById(recipeId);
+    const result = await stepModel.findById(stepId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -514,10 +437,10 @@ describe('stepModel.findById', () => {
     tracker.on.select('steps').simulateError('Lost connection to the database');
 
     /** Set the data to pass into the models function */
-    const recipeId = 1;
+    const stepId = 1;
 
     /** Execute the function */
-    const result = await stepModel.findById(recipeId);
+    const result = await stepModel.findById(stepId);
 
     /** Test the response back from the function */
     /** Test the response back from the function */
