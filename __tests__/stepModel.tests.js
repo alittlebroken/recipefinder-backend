@@ -350,7 +350,7 @@ describe('stepModel.update', () => {
 
 });
 
-describe('stepModel.find', () => {
+describe('stepModel.findById', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -383,7 +383,7 @@ describe('stepModel.find', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findById(recipeId);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -473,7 +473,7 @@ describe('stepModel.find', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findById(recipeId);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -499,7 +499,7 @@ describe('stepModel.find', () => {
     const recipeId = null;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findById(recipeId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -517,7 +517,7 @@ describe('stepModel.find', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findById(recipeId);
 
     /** Test the response back from the function */
     /** Test the response back from the function */

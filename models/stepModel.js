@@ -233,7 +233,7 @@ const update = async (stepId, recipeId, stepNo, stepContent) => {
  * @returns {array} An array containing all steps for a recipe or empty if
  * the recipe has none yet
  */
-const find = async recipeId => {
+const findById = async recipeId => {
 
   try{
 
@@ -281,5 +281,5 @@ module.exports = {
   remove,
   removeAll,
   update,
-  find
+  findById
 };
