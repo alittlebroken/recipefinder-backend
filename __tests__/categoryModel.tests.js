@@ -324,6 +324,96 @@ describe('categoryModel.findOne', () => {
 
 });
 
+describe('categoryModel.findById', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  });
+
+  it('should return a specific category', async () => {
+
+    /* Mock the DB responses */
+    tracker.on.select('categories').response([
+      { id: 1, name: 'Vegan'}
+    ]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual('Vegan');
+
+  });
+
+  it('should return an empty array if no entries found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = 2;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should return an error if required arguments are missing or invalid', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = null;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('One or more required values are missing or incorrect');
+
+  });
+
+  it('should should return a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').simulateError('DB Connection lost');
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
 describe('categoryModel.findAll', () => {
 
   /*

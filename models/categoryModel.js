@@ -202,6 +202,56 @@ const findOne = async name => {
 };
 
 /*
+ * Finds a category based on the passed in identifier
+ * @param {number} id - The unique identifier of the category to find
+ * @returns {array} An object array of the category details
+ */
+const findById = async id => {
+
+  try{
+
+    /* Validate the passed in arguments */
+    if(!id || typeof id !== 'number'){
+      throw {
+        name: 'CATEGORYMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* Extract the record from the database */
+    const result = await db('categories')
+     .select('*')
+     .where('id', id);
+
+     if(result.length >= 1){
+       return result;
+     } else {
+       return [];
+     }
+
+  } catch(e) {
+
+    /* We only wish to output our custom messages and not those passed to from
+     * various libraries for security reasons */
+    let message;
+    if(e.name === 'CATEGORYMODEL_ERROR'){
+      message = e.message;
+    } else {
+      /* Create a generic message for other error types */
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    /* Lets let the calling process know we have failed */
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+/*
  * Returns all occurances of a category matching the passed in name
  * @param {string} name - Text to match on
  * @returns {array} Array of objects for each match found
@@ -253,5 +303,6 @@ module.exports  = {
   remove,
   update,
   findOne,
-  findAll
+  findAll,
+  findById
 };
