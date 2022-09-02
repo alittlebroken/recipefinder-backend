@@ -601,3 +601,66 @@ describe('userModel.verify', () => {
   });
 
 });
+
+describe('userModel.findAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+ it('should return all users', async () => {
+
+   /* Mock the DB response */
+   tracker.on.select('users').response(users);
+
+   /* Execute the function */
+   const result = await userModel.findAll();
+
+   /* Check the response back */
+   expect(Array.isArray(result)).toBe(true);
+   expect(result).toHaveLength(1);
+   expect(result[0].id).toEqual(users[0].id);
+   expect(result[0].username).toEqual(users[0].username);
+   expect(result[0].email).toEqual(users[0].email);
+
+ });
+
+ it('should return an empty array if no records found', async () => {
+
+   /* Mock the DB response error */
+   tracker.on.select('users').response([]);
+
+   /* Execute the function with the passed in data */
+   const result = await userModel.findAll();
+
+   /* Check the response */
+   expect(Array.isArray(result)).toBe(true);
+   expect(result).toHaveLength(0);
+
+ });
+
+ it('should give generic error message for any other issues encountered', async () => {
+
+   /* Mock the DB response error */
+   tracker.on.select('users').simulateError('connection lost');
+
+   /* Execute the function with the passed in data */
+   const result = await userModel.findAll();
+
+   /* Check the response */
+   expect(result instanceof Object).toBe(true);
+   expect(result.success).toBe(false);
+   expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+ });
+
+});

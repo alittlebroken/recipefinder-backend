@@ -316,6 +316,35 @@ const verify  = async (password, hash) => {
 
 };
 
+/**
+ * return all users in the DB
+ * @returns {array} an array of user objects
+ */
+const findAll = async () => {
+
+  try{
+
+    /* Find the user by Id */
+    const result = await db('users')
+     .select('id', 'username', 'email', 'roles', 'forename', 'surname');
+
+    /* Check we have some results */
+    if(!result || !result.length > 0){
+      return [];
+    }
+
+    /* All OK so return */
+    return result;
+
+  } catch(e) {
+    return {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
+  }
+
+};
+
 module.exports = {
   insert,
   findByEmail,
@@ -323,5 +352,6 @@ module.exports = {
   update,
   remove,
   hash,
-  verify
+  verify,
+  findAll
 }
