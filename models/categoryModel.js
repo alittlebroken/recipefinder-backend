@@ -298,11 +298,59 @@ const findAll = async name => {
 
 };
 
+/*
+ * Returns all occurances of a category matching the passed in name
+ * @param {string} name - Text to match on
+ * @returns {array} Array of objects for each match found
+ */
+const findAllByName = async name => {
+
+  try{
+
+    /* Validate the passed in arguments */
+    if(!name || typeof name !== 'string'){
+      throw {
+        name: 'CATEGORYMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* Extract data from the database */
+    const results = await db('categories')
+     .whereILike('name', `%${name}%`);
+
+     if(results.length >= 1){
+       return results;
+     } else {
+       return [];
+     }
+
+  } catch(e){
+    /* We only wish to output our custom messages and not those passed to from
+     * various libraries for security reasons */
+    let message;
+    if(e.name === 'CATEGORYMODEL_ERROR'){
+      message = e.message;
+    } else {
+      /* Create a generic message for other error types */
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    /* Lets let the calling process know we have failed */
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
 module.exports  = {
   create,
   remove,
   update,
   findByName,
   findAll,
-  findById
+  findById,
+  findAllByName
 };
