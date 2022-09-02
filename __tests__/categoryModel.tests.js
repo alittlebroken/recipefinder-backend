@@ -438,11 +438,8 @@ describe('categoryModel.findAll', () => {
       { id: 3, name: 'Vegan treats'}
     ]);
 
-    /** Set the data to pass into the models function */
-    const name = 'Vegan';
-
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAll();
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -465,34 +462,13 @@ describe('categoryModel.findAll', () => {
 
   });
 
-  it('should throw an error if input argument validation fails', async () => {
-
-    /** Mock the DB responses */
-    tracker.on.select('categories').response([]);
-
-    /** Set the data to pass into the models function */
-    const name = null;
-
-    /** Execute the function */
-    const result = await categoryModel.findAll(name);
-
-    /** Test the response back from the function */
-    expect(typeof result).toBe('object');
-    expect(result.success).toBe(false);
-    expect(result.message).toEqual('One or more required values are missing or incorrect');
-
-  });
-
   it('should return an empty array if no entries found', async () => {
 
     /** Mock the DB responses */
     tracker.on.select('categories').response([]);
 
-    /** Set the data to pass into the models function */
-    const name = 'Vegon';
-
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAll();
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -505,11 +481,9 @@ describe('categoryModel.findAll', () => {
     /** Mock the DB responses */
     tracker.on.select('categories').simulateError('Lost connection to database');
 
-    /** Set the data to pass into the models function */
-    const name = 'vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAll();
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');

@@ -256,21 +256,13 @@ const findById = async id => {
  * @param {string} name - Text to match on
  * @returns {array} Array of objects for each match found
  */
-const findAll = async name => {
+const findAll = async () => {
 
   try{
 
-    /* Validate the passed in arguments */
-    if(!name || typeof name !== 'string'){
-      throw {
-        name: 'CATEGORYMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    }
-
     /* Extract data from the database */
     const results = await db('categories')
-     .whereILike('name', `%${name}%`);
+     .select('*');
 
      if(results.length >= 1){
        return results;
@@ -281,13 +273,7 @@ const findAll = async name => {
   } catch(e){
     /* We only wish to output our custom messages and not those passed to from
      * various libraries for security reasons */
-    let message;
-    if(e.name === 'CATEGORYMODEL_ERROR'){
-      message = e.message;
-    } else {
-      /* Create a generic message for other error types */
-      message = 'There was a problem with the resource, please try again later';
-    }
+    message = 'There was a problem with the resource, please try again later';
 
     /* Lets let the calling process know we have failed */
     return {
