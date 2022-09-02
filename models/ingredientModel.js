@@ -185,34 +185,23 @@ const findOne = async term => {
 
 };
 
-
-
-/* Find all occurances of the required search term
+/* Retrieve all ingredients from the DB
  * @param {string} term - The search term being looked for in the DB table
- * @returns {array} Set of results for the searched for term or an emtpy array
+ * @returns {array} All ingredients from the DB
  * if nothing found
  */
-const findAll = async term => {
+const findAll = async () => {
 
   try{
 
-    /* Validate the passed in arguments */
-    if(!term || typeof term !== 'string'){
-      throw {
-        name: 'INGREDIENTMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    }
-
     /* Search the table for the specified term */
-    const result = await db('ingredients')
-     .select('id', 'name')
-     .whereILike('name', `%${term}%`);
+    const results = await db('ingredients')
+     .select('*');
 
-     if(!result || result.length < 1){
+     if(!results || results.length < 1){
        return [];
      } else {
-       return result;
+       return results;
      }
 
   } catch(e) {
@@ -220,11 +209,7 @@ const findAll = async term => {
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
-    if(e.name === 'INGREDIENTMODEL_ERROR'){
-      message = e.message;
-    } else {
-      message = 'There was a problem with the resource, please try again later';
-    }
+    message = 'There was a problem with the resource, please try again later';
 
     return {
       success: false,
