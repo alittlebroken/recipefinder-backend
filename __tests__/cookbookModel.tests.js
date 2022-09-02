@@ -348,111 +348,6 @@ describe('cookbookModel.findAll', () => {
 
 });
 
-describe('cookbookModel.findOne', () => {
-
-  /*
-   * Steps to run before and after this test suite
-   */
-  beforeEach(async () => {
-    /* Initialize the tracker of the various commands */
-    tracker = getTracker();
-  });
-
-  afterEach(() => {
-    /* Reset the tracker */
-    tracker.reset();
-  })
-
-  it('should return the requested item', async () => {
-
-    /** Mock the DB responses */
-    tracker.on.select('cookbooks').response([
-      {
-        id: 1,
-        userId: 3,
-        name: 'Gluten Free bread recipes',
-        description: 'Collection of bread recipes made with gluten free flour',
-        image: 'gluten_free.jpg'
-      }
-    ]);
-
-    /** Set the data to pass into the models function */
-    const cookbookId = 1;
-
-    /** Execute the function */
-    const result = await cookbookModel.findOne(cookbookId);
-
-    /** Test the response back from the function */
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(1);
-    expect(typeof result[0].id).toBe('number');
-    expect(result[0].id).toEqual(1);
-    expect(typeof result[0].userId).toBe('number');
-    expect(result[0].userId).toEqual(3);
-    expect(typeof result[0].name).toBe('string');
-    expect(result[0].name).toEqual('Gluten Free bread recipes');
-    expect(typeof result[0].description).toBe('string');
-    expect(result[0].description).toEqual('Collection of bread recipes made with gluten free flour');
-    expect(typeof result[0].image).toBe('string');
-    expect(result[0].image).toEqual('gluten_free.jpg');
-
-  });
-
-  it('should error if required values are missing or incorrect', async () => {
-
-    /** Mock the DB responses if needed */
-
-    /** Set the data to pass into the models function */
-    const cookbookId = null;
-
-    /** Execute the function */
-    const result = await cookbookModel.findOne(cookbookId);
-
-    /** Test the response back from the function */
-    expect(typeof result).toBe('object');
-    expect(result.success).toBe(false);
-    expect(result.message).toEqual('One or more required values are missing or incorrect');
-
-  });
-
-  it('should return nothing if no items found', async () => {
-
-    /** Mock the DB responses */
-    tracker.on.select('cookbooks').response([]);
-
-    /** Set the data to pass into the models function */
-    const cookbookId = 2309;
-
-    /** Execute the function */
-    const result = await cookbookModel.findOne(cookbookId);
-
-    /** Test the response back from the function */
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(0);
-
-  });
-
-  it('should show a generic error for non custom errors', async () => {
-
-    /** Mock the DB responses */
-    tracker.on.select('cookbooks').simulateError('lost connection to database');
-
-    /** Set the data to pass into the models function */
-    const cookbookId = 1;
-
-    /** Execute the function */
-    const result = await cookbookModel.findOne(cookbookId);
-
-    /** Test the response back from the function */
-    expect(typeof result).toBe('object');
-    expect(result.success).toBe(false);
-    expect(result.message).toEqual('There was an issue with the resource, please try again later');
-
-
-  });
-
-});
-
 describe('cookbookModel.recipes', () => {
 
   /*
@@ -604,6 +499,328 @@ describe('cookbookModel.recipes', () => {
     expect(typeof result).toBe('object');
     expect(result.success).toBe(false);
     expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('cookbookModel.findById', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return the requested item', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([
+      {
+        id: 1,
+        userId: 3,
+        name: 'Gluten Free bread recipes',
+        description: 'Collection of bread recipes made with gluten free flour',
+        image: 'gluten_free.jpg'
+      }
+    ]);
+
+    /** Set the data to pass into the models function */
+    const cookbookId = 1;
+
+    /** Execute the function */
+    const result = await cookbookModel.findById(cookbookId);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toEqual(1);
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toEqual(3);
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Gluten Free bread recipes');
+    expect(typeof result[0].description).toBe('string');
+    expect(result[0].description).toEqual('Collection of bread recipes made with gluten free flour');
+    expect(typeof result[0].image).toBe('string');
+    expect(result[0].image).toEqual('gluten_free.jpg');
+
+  });
+
+  it('should error if required values are missing or incorrect', async () => {
+
+    /** Mock the DB responses if needed */
+
+    /** Set the data to pass into the models function */
+    const cookbookId = null;
+
+    /** Execute the function */
+    const result = await cookbookModel.findById(cookbookId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return nothing if no items found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([]);
+
+    /** Set the data to pass into the models function */
+    const cookbookId = 2309;
+
+    /** Execute the function */
+    const result = await cookbookModel.findById(cookbookId);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should show a generic error for non custom errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').simulateError('lost connection to database');
+
+    /** Set the data to pass into the models function */
+    const cookbookId = 1;
+
+    /** Execute the function */
+    const result = await cookbookModel.findById(cookbookId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
+
+
+  });
+
+});
+
+describe('cookbookModel.findByName', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return the requested item', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([
+      {
+        id: 1,
+        userId: 3,
+        name: 'Gluten Free bread recipes',
+        description: 'Collection of bread recipes made with gluten free flour',
+        image: 'gluten_free.jpg'
+      }
+    ]);
+
+    /** Set the data to pass into the models function */
+    const term = 'bread';
+
+    /** Execute the function */
+    const result = await cookbookModel.findByName(term);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toEqual(1);
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toEqual(3);
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Gluten Free bread recipes');
+    expect(typeof result[0].description).toBe('string');
+    expect(result[0].description).toEqual('Collection of bread recipes made with gluten free flour');
+    expect(typeof result[0].image).toBe('string');
+    expect(result[0].image).toEqual('gluten_free.jpg');
+
+  });
+
+  it('should error if required values are missing or incorrect', async () => {
+
+    /** Mock the DB responses if needed */
+
+    /** Set the data to pass into the models function */
+    const term = null;
+
+    /** Execute the function */
+    const result = await cookbookModel.findByName(term);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return nothing if no items found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([]);
+
+    /** Set the data to pass into the models function */
+    const term = 'balls';
+
+    /** Execute the function */
+    const result = await cookbookModel.findByName(term);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should show a generic error for non custom errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').simulateError('lost connection to database');
+
+    /** Set the data to pass into the models function */
+    const term = 'bread';
+
+    /** Execute the function */
+    const result = await cookbookModel.findByName(term);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
+
+
+  });
+
+});
+
+describe('cookbookModel.findAllByName', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return a list of all cookbooks', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([
+      { id: 1, userId: 1, name: 'Ultimate Vegan Recipes', description: 'Collection of some amazingly tasty vegan recipes', image: ''},
+      { id: 2, userId: 2, name: 'Choclovers paradise', description: 'A small collection of chocholate dishes for everyones taste', image: ''}
+    ]);
+
+    /** Set the data to pass into the models function */
+    const terms = 'e';
+
+    /** Execute the function */
+    const result = await cookbookModel.findAllByName(terms);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(2);
+
+    /* Check each record returned */
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toEqual(1);
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toEqual(1);
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Ultimate Vegan Recipes');
+    expect(typeof result[0].description).toBe('string');
+    expect(result[0].description).toEqual('Collection of some amazingly tasty vegan recipes');
+    expect(typeof result[0].image).toBe('string');
+    expect(result[0].image).toEqual('');
+
+    expect(typeof result[1].id).toBe('number');
+    expect(result[1].id).toEqual(2);
+    expect(typeof result[1].userId).toBe('number');
+    expect(result[1].userId).toEqual(2);
+    expect(typeof result[1].name).toBe('string');
+    expect(result[1].name).toEqual('Choclovers paradise');
+    expect(typeof result[1].description).toBe('string');
+    expect(result[1].description).toEqual('A small collection of chocholate dishes for everyones taste');
+    expect(typeof result[1].image).toBe('string');
+    expect(result[1].image).toEqual('');
+
+  });
+
+  it('should error if required values are missing or incorrect', async () => {
+
+    /** Mock the DB responses if needed */
+
+    /** Set the data to pass into the models function */
+    const terms = null;
+
+    /** Execute the function */
+    const result = await cookbookModel.findAllByName(terms);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return an empty array if no cookbooks to find', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([]);
+
+    /** Set the data to pass into the models function */
+    const terms = 'fourteen';
+
+    /** Execute the function */
+    const result = await cookbookModel.findAllByName(terms);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should show a generic error if any other issue occurs', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').simulateError('lost connection to database');
+
+    //** Set the data to pass into the models function */
+    const terms = 'e';
+
+    /** Execute the function */
+    const result = await cookbookModel.findAllByName(terms);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
 
   });
 
