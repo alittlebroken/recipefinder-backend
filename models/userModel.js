@@ -303,7 +303,7 @@ const verify  = async (password, hash) => {
 
   try{
 
-    if(!password || !hash){
+    if(!password || !hash || password.length < 1 || hash.length < 1){
       return false;
     }
 
@@ -311,7 +311,10 @@ const verify  = async (password, hash) => {
     return await bcrypt.compare(password, hash);
 
   } catch(e) {
-    return false;
+    return {
+      success: false,
+      message: 'There was an issue with the resource, please try again later'
+    };
   }
 
 };
