@@ -376,6 +376,54 @@ const findById = async id => {
 
  };
 
+ /*
+  * Retrieve all entries associated with a specific ingredient
+  * @param {number} id The unique identifier for the recipe whose ingredients
+  * we are extracting
+  * @returns {array} Array of objects with details on each ingredient found
+  */
+  const findByIngredient = async id => {
+
+    try{
+
+      /* Validate the passed in data */
+      if(!validation.validator(id, 'number')){
+        throw {
+          name: 'RECIPEINGREDIENTMODEL_ERROR',
+          message: 'One or more required values are missing or incorrect'
+        }
+      };
+
+     /* Gather the data from the DB */
+     const results = await db('recipe_ingredients')
+      .select('*')
+      .where('ingredientId', id);
+
+     if(results && results.length > 0){
+       return results;
+     } else {
+       return [];
+     }
+
+    } catch(e) {
+      /* Check for library errors and if found swap them out for a generic
+         one to send back over the API for security */
+      let message;
+
+      if(e.name === 'RECIPEINGREDIENTMODEL_ERROR'){
+        message = e.message;
+      } else {
+        message = 'There was a problem with the resource, please try again later';
+      }
+
+      return {
+        success: false,
+        message: message
+      }
+    }
+
+  };
+
 /*
  * returns all ingredients for all available recipes
  * @returns {array} An array of ingredient objects for each recipe we have stored
@@ -415,5 +463,6 @@ module.exports = {
   update,
   findById,
   findByRecipeId,
-  findAll
+  findAll,
+  findByIngredient
 }

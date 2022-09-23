@@ -6,6 +6,8 @@ const db = require('../database');
 const recipeIngredientsModel = require('../models/recipeIngredientsModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 
+const messageHelper = require('../helpers/constants');
+
 /* Mock the DB library */
 jest.mock('../database', () => {
   const knex = require('knex');
@@ -764,6 +766,111 @@ describe('recipeIngredientsModel.findByRecipeId', () => {
     expect(typeof results).toBe('object');
     expect(results.success).toBe(false);
     expect(results.message).toBe('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('recipeIngredientsModel.findByIngredient', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return an array with the required records', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipe_ingredients').response([{
+      id: 1,
+      recipeId: 1,
+      ingredientId: 1,
+      amount: 150,
+      amount_type: 'grams'
+    }]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const results = await recipeIngredientsModel.findByIngredient(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toHaveLength(1);
+
+    expect(typeof results[0].id).toBe('number');
+    expect(typeof results[0].recipeId).toBe('number');
+    expect(typeof results[0].ingredientId).toBe('number');
+    expect(typeof results[0].amount).toBe('number');
+    expect(typeof results[0].amount_type).toBe('string');
+
+    expect(results[0].id).toBe(1);
+    expect(results[0].recipeId).toBe(1);
+    expect(results[0].ingredientId).toBe(1);
+    expect(results[0].amount).toBe(150);
+    expect(results[0].amount_type).toBe('grams');
+
+  });
+
+  it('should return an empty array if no records found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipe_ingredients').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const results = await recipeIngredientsModel.findByIngredient(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toHaveLength(0);
+
+  });
+
+  it('should throw an error if passed in value is missing or incorrect', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipe_ingredients').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = null;
+
+    /** Execute the function */
+    const results = await recipeIngredientsModel.findByRecipeId(id);
+
+    /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(results.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+  });
+
+  it('should throw a generic error if library throws an error', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipe_ingredients').simulateError(messageHelper.ERROR_SIMULATE);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const results = await recipeIngredientsModel.findByIngredient(id);
+
+    /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(results.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
 
   });
 
