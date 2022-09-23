@@ -3,9 +3,9 @@
  * the API.
  */
 
-const INFO_RECORD_CREATED = "Record successfully created succesffuly";
-const INFO_RECORD_UPDATED = "Record successfully updated successfully";
-const INFO_RECORD_REMOVED = "Record successfully removed successfully";
+const INFO_RECORD_CREATED = "Record successfully created";
+const INFO_RECORD_UPDATED = "Record successfully updated";
+const INFO_RECORD_REMOVED = "Record successfully removed";
 
 const ERROR_MISSING_VALUES = "One or more required values are missing or incorrect";
 const ERROR_GENERIC_RESOURCE = "There was a problem with the resource, please try again later";
