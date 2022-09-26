@@ -6,6 +6,8 @@ const db = require('../database');
 const recipeCategoriesModel = require('../models/recipeCategoriesModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 
+const messageHelper = require('../helpers/constants');
+
 /* Mock the DB library */
 jest.mock('../database', () => {
   const knex = require('knex');
