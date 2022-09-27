@@ -299,9 +299,11 @@ const findById = async id => {
     };
 
    /* Gather the data from the DB */
-   const results = await db('recipe_ingredients')
-    .select('*')
-    .where('id', id);
+   const results = await db('recipe_ingredients ri')
+    .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
+    .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
+    .where('ri.id', id);
+
 
    if(results && results.length > 0){
      return results;
@@ -347,9 +349,10 @@ const findById = async id => {
      };
 
     /* Gather the data from the DB */
-    const results = await db('recipe_ingredients')
-     .select('*')
-     .where('recipeId', id);
+    const results = await db('recipe_ingredients ri')
+     .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
+     .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
+     .where('ri.recipeId', id);
 
     if(results && results.length > 0){
       return results;
@@ -395,9 +398,10 @@ const findById = async id => {
       };
 
      /* Gather the data from the DB */
-     const results = await db('recipe_ingredients')
-      .select('*')
-      .where('ingredientId', id);
+     const results = await db('recipe_ingredients ri')
+      .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
+      .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
+      .where('ri.ingredientId', id);
 
      if(results && results.length > 0){
        return results;
@@ -436,6 +440,10 @@ const findById = async id => {
     /* Gather the data from the DB */
     const results = await db('recipe_ingredients')
      .select('*');
+
+    const results = await db('recipe_ingredients ri')
+     .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
+     .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type');
 
     if(results && results.length > 0){
       return results;

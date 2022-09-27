@@ -581,8 +581,7 @@ describe('recipeIngredientsModel.findById', () => {
     /** Mock the DB responses */
     tracker.on.select('recipe_ingredients').response([{
       id: 1,
-      recipeId: 1,
-      ingredientId: 1,
+      name: 'flour',
       amount: 150,
       amount_type: 'grams'
     }]);
@@ -600,11 +599,8 @@ describe('recipeIngredientsModel.findById', () => {
     expect(typeof result[0].id).toBe('number');
     expect(result[0].id).toBe(1);
 
-    expect(typeof result[0].recipeId).toBe('number');
-    expect(result[0].recipeId).toBe(1);
-
-    expect(typeof result[0].ingredientId).toBe('number');
-    expect(result[0].recipeId).toBe(1);
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toBe('flour');
 
     expect(typeof result[0].amount).toBe('number');
     expect(result[0].amount).toBe(150);
@@ -686,8 +682,7 @@ describe('recipeIngredientsModel.findByRecipeId', () => {
     /** Mock the DB responses */
     tracker.on.select('recipe_ingredients').response([{
       id: 1,
-      recipeId: 1,
-      ingredientId: 1,
+      name: 'flour',
       amount: 150,
       amount_type: 'grams'
     }]);
@@ -703,14 +698,12 @@ describe('recipeIngredientsModel.findByRecipeId', () => {
     expect(results).toHaveLength(1);
 
     expect(typeof results[0].id).toBe('number');
-    expect(typeof results[0].recipeId).toBe('number');
-    expect(typeof results[0].ingredientId).toBe('number');
+    expect(typeof results[0].name).toBe('string');
     expect(typeof results[0].amount).toBe('number');
     expect(typeof results[0].amount_type).toBe('string');
 
     expect(results[0].id).toBe(1);
-    expect(results[0].recipeId).toBe(1);
-    expect(results[0].ingredientId).toBe(1);
+    expect(results[0].name).toBe('flour');
     expect(results[0].amount).toBe(150);
     expect(results[0].amount_type).toBe('grams');
 
@@ -791,8 +784,7 @@ describe('recipeIngredientsModel.findByIngredient', () => {
     /** Mock the DB responses */
     tracker.on.select('recipe_ingredients').response([{
       id: 1,
-      recipeId: 1,
-      ingredientId: 1,
+      name: 'flour',
       amount: 150,
       amount_type: 'grams'
     }]);
@@ -808,14 +800,12 @@ describe('recipeIngredientsModel.findByIngredient', () => {
     expect(results).toHaveLength(1);
 
     expect(typeof results[0].id).toBe('number');
-    expect(typeof results[0].recipeId).toBe('number');
-    expect(typeof results[0].ingredientId).toBe('number');
+    expect(typeof results[0].name).toBe('string');
     expect(typeof results[0].amount).toBe('number');
     expect(typeof results[0].amount_type).toBe('string');
 
     expect(results[0].id).toBe(1);
-    expect(results[0].recipeId).toBe(1);
-    expect(results[0].ingredientId).toBe(1);
+    expect(results[0].name).toBe('flour');
     expect(results[0].amount).toBe(150);
     expect(results[0].amount_type).toBe('grams');
 
@@ -897,15 +887,13 @@ describe('recipeIngredientsModel.findAll', () => {
     tracker.on.select('recipe_ingredients').response([
       {
         id: 1,
-        recipeId: 1,
-        ingredientId: 1,
+        name: 'flour',
         amount: 150,
         amount_type: 'grams'
       },
       {
         id: 2,
-        recipeId: 2,
-        ingredientId: 2,
+        name: 'eggs',
         amount: 4,
         amount_type: 'medium sized'
       }
@@ -919,26 +907,22 @@ describe('recipeIngredientsModel.findAll', () => {
     expect(results).toHaveLength(2);
 
     expect(typeof results[0].id).toBe('number');
-    expect(typeof results[0].recipeId).toBe('number');
-    expect(typeof results[0].ingredientId).toBe('number');
+    expect(typeof results[0].name).toBe('string');
     expect(typeof results[0].amount).toBe('number');
     expect(typeof results[0].amount_type).toBe('string');
 
     expect(typeof results[1].id).toBe('number');
-    expect(typeof results[1].recipeId).toBe('number');
-    expect(typeof results[1].ingredientId).toBe('number');
+    expect(typeof results[1].name).toBe('string');
     expect(typeof results[1].amount).toBe('number');
     expect(typeof results[1].amount_type).toBe('string');
 
     expect(results[0].id).toBe(1);
-    expect(results[0].recipeId).toBe(1);
-    expect(results[0].ingredientId).toBe(1);
+    expect(results[0].name).toBe('flour');
     expect(results[0].amount).toBe(150);
     expect(results[0].amount_type).toBe('grams');
 
     expect(results[1].id).toBe(2);
-    expect(results[1].recipeId).toBe(2);
-    expect(results[1].ingredientId).toBe(2);
+    expect(results[1].name).toBe('eggs');
     expect(results[1].amount).toBe(4);
     expect(results[1].amount_type).toBe('medium sized');
 
