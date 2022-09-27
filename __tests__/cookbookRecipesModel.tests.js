@@ -538,7 +538,11 @@ describe('cookbookRecipesModel.findByCookbook', () => {
     tracker.on.select('cookbook_recipes').response([{
       id: 1,
       cookbookId: 1,
-      recipeId: 3
+      cookbookName: 'Fantastic meals and where to find them',
+      userId: 2,
+      username: 'Nate Scaremonger',
+      cookbookDescription: 'Magical recipes from around the world',
+      cookbookImage: null,
     }]);
 
     /** Set the data to pass into the models function */
@@ -553,11 +557,19 @@ describe('cookbookRecipesModel.findByCookbook', () => {
 
     expect(typeof result[0].id).toBe('number');
     expect(typeof result[0].cookbookId).toBe('number');
-    expect(typeof result[0].recipeId).toBe('number');
+    expect(typeof result[0].userId).toBe('number');
+    expect(typeof result[0].cookbookName).toBe('string');
+    expect(typeof result[0].username).toBe('string');
+    expect(typeof result[0].cookbookDescription).toBe('string');
+    expect(typeof result[0].cookbookImage).toBe('object');
 
     expect(result[0].id).toBe(1);
     expect(result[0].cookbookId).toBe(1);
-    expect(result[0].recipeId).toBe(3);
+    expect(result[0].userId).toBe(2);
+    expect(result[0].cookbookName).toBe('Fantastic meals and where to find them');
+    expect(result[0].username).toBe('Nate Scaremonger');
+    expect(result[0].cookbookDescription).toBe('Magical recipes from around the world');
+    expect(result[0].cookbookImage).toBeNull();
 
   });
 
@@ -647,7 +659,11 @@ describe('cookbookRecipesModel.findByRecipe', () => {
     tracker.on.select('cookbook_recipes').response([{
       id: 1,
       cookbookId: 1,
-      recipeId: 3
+      cookbookName: 'Fantastic meals and where to find them',
+      userId: 2,
+      username: 'Nate Scaremonger',
+      cookbookDescription: 'Magical recipes from around the world',
+      cookbookImage: null,
     }]);
 
     /** Set the data to pass into the models function */
@@ -662,11 +678,19 @@ describe('cookbookRecipesModel.findByRecipe', () => {
 
     expect(typeof result[0].id).toBe('number');
     expect(typeof result[0].cookbookId).toBe('number');
-    expect(typeof result[0].recipeId).toBe('number');
+    expect(typeof result[0].userId).toBe('number');
+    expect(typeof result[0].cookbookName).toBe('string');
+    expect(typeof result[0].username).toBe('string');
+    expect(typeof result[0].cookbookDescription).toBe('string');
+    expect(typeof result[0].cookbookImage).toBe('object');
 
     expect(result[0].id).toBe(1);
     expect(result[0].cookbookId).toBe(1);
-    expect(result[0].recipeId).toBe(3);
+    expect(result[0].userId).toBe(2);
+    expect(result[0].cookbookName).toBe('Fantastic meals and where to find them');
+    expect(result[0].username).toBe('Nate Scaremonger');
+    expect(result[0].cookbookDescription).toBe('Magical recipes from around the world');
+    expect(result[0].cookbookImage).toBeNull();
 
   });
 
@@ -743,24 +767,36 @@ describe('cookbookRecipesModel.findAll', () => {
     tracker.on.select('cookbook_recipes').response([{
       id: 1,
       cookbookId: 1,
-      recipeId: 3
+      cookbookName: 'Fantastic meals and where to find them',
+      userId: 2,
+      username: 'Nate Scaremonger',
+      cookbookDescription: 'Magical recipes from around the world',
+      cookbookImage: null,
     }]);
 
 
     /** Execute the function */
-    const results = await cookbookRecipesModel.findAll();
+    const result = await cookbookRecipesModel.findAll();
 
     /** Test the response back from the function */
-    expect(Array.isArray(results)).toBe(true);
-    expect(results).toHaveLength(1);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
 
-    expect(typeof results[0].id).toBe('number');
-    expect(typeof results[0].cookbookId).toBe('number');
-    expect(typeof results[0].recipeId).toBe('number');
+    expect(typeof result[0].id).toBe('number');
+    expect(typeof result[0].cookbookId).toBe('number');
+    expect(typeof result[0].userId).toBe('number');
+    expect(typeof result[0].cookbookName).toBe('string');
+    expect(typeof result[0].username).toBe('string');
+    expect(typeof result[0].cookbookDescription).toBe('string');
+    expect(typeof result[0].cookbookImage).toBe('object');
 
-    expect(results[0].id).toBe(1);
-    expect(results[0].cookbookId).toBe(1);
-    expect(results[0].recipeId).toBe(3);
+    expect(result[0].id).toBe(1);
+    expect(result[0].cookbookId).toBe(1);
+    expect(result[0].userId).toBe(2);
+    expect(result[0].cookbookName).toBe('Fantastic meals and where to find them');
+    expect(result[0].username).toBe('Nate Scaremonger');
+    expect(result[0].cookbookDescription).toBe('Magical recipes from around the world');
+    expect(result[0].cookbookImage).toBeNull();
 
   });
 

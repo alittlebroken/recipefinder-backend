@@ -308,8 +308,17 @@ const findByCookbook = async id => {
     };
 
     /* Get the data from the DB */
-    const results = await db('cookbook_recipes')
-     .select('*')
+    const results = await db('cookbook_recipes as cr')
+     .join('cookbooks as cb', 'cr.cookbookId', '=', 'cb.id')
+     .join('users as usr', 'cb.userId', '=', 'usr.id')
+     .select(
+       'cb.id as cookbookId',
+       'cb.name as cookbookName',
+       'usr.id as userId',
+       'usr.username as username',
+       'cb.description as cookbookDescription',
+       'cb.image as cookbookImage'
+     )
      .where('cookbookId', id);
 
     if(results && results.length > 0){
@@ -355,8 +364,17 @@ const findByRecipe = async id => {
     };
 
     /* Get the data from the DB */
-    const results = await db('cookbook_recipes')
-     .select('*')
+    const results = await db('cookbook_recipes as cr')
+     .join('cookbooks as cb', 'cr.cookbookId', '=', 'cb.id')
+     .join('users as usr', 'cb.userId', '=', 'usr.id')
+     .select(
+       'cb.id as cookbookId',
+       'cb.name as cookbookName',
+       'usr.id as userId',
+       'usr.username as username',
+       'cb.description as cookbookDescription',
+       'cb.image as cookbookImage'
+     )
      .where('recipeId', id);
 
     if(results && results.length > 0){
@@ -393,8 +411,17 @@ const findAll= async () => {
   try {
 
     /* Get the data from the DB */
-    const results = await db('cookbook_recipes')
-     .select('*');
+    const results = await db('cookbook_recipes as cr')
+     .join('cookbooks as cb', 'cr.cookbookId', '=', 'cb.id')
+     .join('users as usr', 'cb.userId', '=', 'usr.id')
+     .select(
+       'cb.id as cookbookId',
+       'cb.name as cookbookName',
+       'usr.id as userId',
+       'usr.username as username',
+       'cb.description as cookbookDescription',
+       'cb.image as cookbookImage'
+     );
 
     if(results && results.length > 0){
       return results;
