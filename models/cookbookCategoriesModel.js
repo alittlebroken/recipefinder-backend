@@ -342,8 +342,16 @@ const findAll = async () => {
   try{
 
     /* Add the record to the database */
-    const result = await db('cookbook_categories')
-     .select('*');
+    const result = await db('cookbook_categories as cc')
+     .join('cookbooks as c', 'cc.cookbookId', '=', 'cookbooks.id')
+     .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
+     .select(
+       'cc.id',
+       'c.name as cookbookName',
+       'c.id as categoryId',
+       'cat.name as categoryName',
+       'cat.id as categoryId'
+     );
 
     if(result && result.length > 0){
       return result;
@@ -384,8 +392,16 @@ const findByCookbook = async id => {
     };
 
     /* Add the record to the database */
-    const result = await db('cookbook_categories')
-     .select('*')
+    const result = await db('cookbook_categories as cc')
+     .join('cookbooks as c', 'cc.cookbookId', '=', 'cookbooks.id')
+     .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
+     .select(
+       'cc.id',
+       'c.name as cookbookName',
+       'c.id as categoryId',
+       'cat.name as categoryName',
+       'cat.id as categoryId'
+     )
      .where('cookbookId', id);
 
     if(result && result.length > 0){
@@ -432,8 +448,16 @@ const findByCategory = async id => {
     };
 
     /* Add the record to the database */
-    const result = await db('cookbook_categories')
-     .select('*')
+    const result = await db('cookbook_categories as cc')
+     .join('cookbooks as c', 'cc.cookbookId', '=', 'cookbooks.id')
+     .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
+     .select(
+       'cc.id',
+       'c.name as cookbookName',
+       'c.id as categoryId',
+       'cat.name as categoryName',
+       'cat.id as categoryId'
+     )
      .where('categoryId', id);
 
     if(result && result.length > 0){

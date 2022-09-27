@@ -628,7 +628,9 @@ describe('cookbookCategoriesModel.findAll', () => {
     tracker.on.select('cookbook_categories').response([{
       id: 1,
       cookbookId: 1,
-      categoryId: 3,
+      cookbookName: 'Fantastic meals and where to find them',
+      categoryId: 1,
+      categoryName: 'Breakfasts'
     }]);
 
     /** Set the data to pass into the models function */
@@ -646,8 +648,15 @@ describe('cookbookCategoriesModel.findAll', () => {
     expect(typeof result[0].cookbookId).toBe('number');
     expect(result[0].cookbookId).toBe(1);
 
+    expect(typeof result[0].cookbookName).toBe('string');
+    expect(result[0].cookbookName).toBe('Fantastic meals and where to find them');
+
     expect(typeof result[0].categoryId).toBe('number');
-    expect(result[0].categoryId).toBe(3);
+    expect(result[0].categoryId).toBe(1);
+
+    expect(typeof result[0].categoryName).toBe('string');
+    expect(result[0].categoryName).toBe('Breakfasts');
+
 
   });
 
@@ -707,7 +716,9 @@ describe('cookbookCategoriesModel.findByCookbook', () => {
     tracker.on.select('cookbook_categories').response([{
       id: 1,
       cookbookId: 1,
-      categoryId: 3
+      cookbookName: 'Fantastic meals and where to find them',
+      categoryId: 1,
+      categoryName: 'Breakfasts'
     }]);
 
     /** Set the data to pass into the models function */
@@ -726,8 +737,14 @@ describe('cookbookCategoriesModel.findByCookbook', () => {
     expect(typeof result[0].cookbookId).toBe('number');
     expect(result[0].cookbookId).toBe(1);
 
+    expect(typeof result[0].cookbookName).toBe('string');
+    expect(result[0].cookbookName).toBe('Fantastic meals and where to find them');
+
     expect(typeof result[0].categoryId).toBe('number');
-    expect(result[0].categoryId).toBe(3);
+    expect(result[0].categoryId).toBe(1);
+
+    expect(typeof result[0].categoryName).toBe('string');
+    expect(result[0].categoryName).toBe('Breakfasts');
 
   });
 
@@ -806,7 +823,9 @@ describe('cookbookCategoriesModel.findByCategory', () => {
     tracker.on.select('cookbook_categories').response([{
       id: 1,
       cookbookId: 1,
-      categoryId: 3
+      cookbookName: 'Fantastic meals and where to find them',
+      categoryId: 1,
+      categoryName: 'Breakfasts'
     }]);
 
     /** Set the data to pass into the models function */
@@ -825,8 +844,14 @@ describe('cookbookCategoriesModel.findByCategory', () => {
     expect(typeof result[0].cookbookId).toBe('number');
     expect(result[0].cookbookId).toBe(1);
 
+    expect(typeof result[0].cookbookName).toBe('string');
+    expect(result[0].cookbookName).toBe('Fantastic meals and where to find them');
+
     expect(typeof result[0].categoryId).toBe('number');
-    expect(result[0].categoryId).toBe(3);
+    expect(result[0].categoryId).toBe(1);
+
+    expect(typeof result[0].categoryName).toBe('string');
+    expect(result[0].categoryName).toBe('Breakfasts');
 
   });
 
