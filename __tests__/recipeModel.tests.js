@@ -965,6 +965,40 @@ describe('recipeModel.findByRecipe', () => {
       rating: 1236
     }]);
 
+    /* recipeIngredintsModel.findByRecipeId */
+    tracker.on.select('recipe_ingredients').responseOnce([{
+      id: 1,
+      name: 'flour',
+      amount: 250,
+      amount_type: 'grams'
+    }]);
+
+    /* stepModel.findByRecipeId */
+    tracker.on.select('steps').responseOnce([{
+      id: 1,
+      stepNo: 1,
+      content: 'Place flour into bowl'
+    }]);
+
+    /* recipeCategoriesModel.findByRecipe */
+    tracker.on.select('recipe_categories').responseOnce([{
+      id: 1,
+      recipeId: 1,
+      categoryId: 1,
+      catgeoryName: 'Breakfasts'
+    }]);
+
+    /* cookbookRecipesModel.findByRecipe */
+    tracker.on.select('cookbook_recipes').responseOnce([{
+      cookbookId: 1,
+      cookbookName: 'Fantastic meals and how to make them',
+      userId: 1,
+      username: 'Nate Scaremonger',
+      cookbookDescription: 'Magical recipes from around the world',
+      cookbookImage: '/media/images/64726383.jpg'
+    }]);
+
+
     /** Set the data to pass into the models function */
     const id = 1;
 
@@ -1002,7 +1036,62 @@ describe('recipeModel.findByRecipe', () => {
     expect(typeof result[0].rating).toBe('number');
     expect(result[0].rating).toBe(1236);
 
-    expect(tracker.history.select).toHaveLength(1);
+    /* Check the ingredients */
+    expect(Array.isArray(result[0].ingredients)).toBe(true);
+    expect(result[0].ingredients).toHaveLength(1);
+
+    expect(typeof result[0].ingredients[0].id).toBe('number');
+    expect(result[0].ingredients[0].id).toBe(1);
+
+    expect(typeof result[0].ingredients[0].name).toBe('string');
+    expect(result[0].ingredients[0].name).toBe('flour');
+
+    expect(typeof result[0].ingredients[0].amount).toBe('number');
+    expect(result[0].ingredients[0].amount).toBe(250);
+
+    expect(typeof result[0].ingredients[0].amount_type).toBe('string');
+    expect(result[0].ingredients[0].amount_type).toBe('grams');
+
+    /* Check the steps */
+    expect(Array.isArray(result[0].steps)).toBe(true);
+    expect(result[0].steps).toHaveLength(1);
+
+    expect(typeof result[0].steps[0].id).toBe('number');
+    expect(result[0].steps[0].id).toBe(1);
+
+    expect(typeof result[0].steps[0].stepNo).toBe('number');
+    expect(result[0].steps[0].stepNo).toBe(1);
+
+    expect(typeof result[0].steps[0].content).toBe('string');
+    expect(result[0].steps[0].content).toBe('Place flour into bowl');
+
+    /* Check the categories */
+    expect(Array.isArray(result[0].categories)).toBe(true);
+    expect(result[0].categories).toHaveLength(1);
+
+    expect(typeof result[0].categories[0].id).tobe('number');
+    expect(result[0].categories[0].id).tobe(1);
+
+    expect(typeof result[0].categories[0].name).tobe('string');
+    expect(result[0].categories[0].name).tobe('Breakfasts');
+
+    /* Check the cookbooks */
+    expect(Array.isArray(result[0].cookbooks)).toBe(true);
+    expect(result[0].cookbooks).toHaveLength(1);
+
+    expect(typeof result[0].cookbooks[0].id).toBe('number');
+    expect(result[0].cookbooks[0].id).toBe(1);
+
+    expect(typeof result[0].cookbooks[0].name).toBe('string');
+    expect(result[0].cookbooks[0].name).toBe('Fantastic meals and how to make them');
+
+    expect(typeof result[0].cookbooks[0].description).toBe('string');
+    expect(result[0].cookbooks[0].description).toBe('Magical recipes from around the world');
+
+    expect(typeof result[0].cookbooks[0].image).toBe('string');
+    expect(result[0].cookbooks[0].image).toBe('/media/images/64726383.jpg');
+
+    expect(tracker.history.select).toHaveLength(5);
 
   });
 
