@@ -13,9 +13,11 @@ jest.mock('../database', () => {
   return knex({ client: MockClient })
 });
 
+const messageHelper = require('../helpers/constants');
+
 /* Tracker for the SQL commands */
 let tracker;
-xdescribe('recipeModel.create', () => {
+describe('recipeModel.create', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -364,7 +366,7 @@ xdescribe('recipeModel.create', () => {
 
 });
 
-xdescribe('recipeModel.remove', () => {
+describe('recipeModel.remove', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -439,7 +441,7 @@ xdescribe('recipeModel.remove', () => {
 
 });
 
-xdescribe('recipeModel.update', () => {
+describe('recipeModel.update', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -736,7 +738,7 @@ xdescribe('recipeModel.update', () => {
 
 });
 
-xdescribe('recipeModel.find', () => {
+describe('recipeModel.find', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -876,6 +878,7 @@ xdescribe('recipeModel.find', () => {
 
   });
 
+
   it('should return an empty array if no recipes found', async () => {
 
     /** Mock the DB responses */
@@ -932,7 +935,135 @@ xdescribe('recipeModel.find', () => {
 
 });
 
-xdescribe('recipeModel.findByIngredients', () => {
+describe('recipeModel.findByRecipe', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should find one or more recipes by recipeId', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').responseOnce([{
+      id: 1,
+      userId: 1,
+      name: 'Gooey chocolate cake',
+      description: 'Sumptious and gooey chocolate cake. Perfect for an after dinner treat',
+      servings: 4,
+      calories_per_serving: 235,
+      prep_time: 60,
+      cook_time: 15,
+      rating: 1236
+    }]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.findByRecipe(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toBe(1);
+
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toBe(1);
+
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Gooey chocolate cake');
+
+    expect(typeof result[0].description).toBe('string');
+    expect(result[0].description).toEqual('Sumptious and gooey chocolate cake. Perfect for an after dinner treat');
+
+    expect(typeof result[0].servings).toBe('number');
+    expect(result[0].servings).toBe(4);
+
+    expect(typeof result[0].calories_per_serving).toBe('number');
+    expect(result[0].calories_per_serving).toBe(235);
+
+    expect(typeof result[0].prep_time).toBe('number');
+    expect(result[0].prep_time).toBe(60);
+
+    expect(typeof result[0].cook_time).toBe('number');
+    expect(result[0].cook_time).toBe(15);
+
+    expect(typeof result[0].rating).toBe('number');
+    expect(result[0].rating).toBe(1236);
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+
+  it('should return an empty array if no recipes found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').responseOnce([]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.findByRecipe(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+  it('should return an error if required values are missing or incorrect', async () => {
+
+    /** Set the data to pass into the models function */
+    const id = null;
+
+    /** Execute the function */
+    const result = await recipeModel.findByRecipe(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return a generic error if any libraries have issues for security', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').simulateError('lost connection to the database');
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.findByRecipe(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+});
+
+describe('recipeModel.findByIngredients', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -950,6 +1081,7 @@ xdescribe('recipeModel.findByIngredients', () => {
   it('should find all recipes that have specific ingredients', async () => {
 
     /** Mock the DB responses */
+    /** ingredientModel.findAllByName */
     tracker.on.select('ingredients').responseOnce([
       { id: 1, name: 'eggs' }
     ]);
@@ -1285,6 +1417,45 @@ xdescribe('recipeModel.findByIngredients', () => {
 
   });
 
+  it('returns a generic error if library errors within ingredientModel.findAllByName', async () => {
+
+    /** Mock the DB responses */
+    /** ingredientModel.findAllByName */
+    tracker.on.select('ingredients').simulateError(messageHelper.ERROR_SIMULATE);
+
+    /** Set the data to pass into the models function */
+    const terms = 'egg';
+
+    /** Execute the function */
+    const results = await recipeModel.findByIngredients(terms);
+
+    /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(results.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+  it('returns an error if non library error is sent by ingredientModel.findAllByName', async () => {
+
+    /** Mock the DB responses */
+    /** ingredientModel.findAllByName */
+    tracker.on.select('ingredients').response(12);
+
+    /** Set the data to pass into the models function */
+    const terms = 'egg';
+
+    /** Execute the function */
+    const results = await recipeModel.findByIngredients(terms);
+
+    /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
   it('should return an empty array if no recipes found', async () => {
 
     /** Mock the DB responses */
@@ -1319,10 +1490,94 @@ xdescribe('recipeModel.findByIngredients', () => {
 
   });
 
+  it('returns a generic error if library errors within ingredientModel.findByIngredients', async () => {
+
+    /** Mock the DB responses */
+    /** ingredientModel.findAllByName */
+    tracker.on.select('ingredients').responseOnce([
+      { id: 1, name: 'eggs' }
+    ]);
+
+    /* ingredientModel.findAllByIngredient */
+    tracker.on.select('recipe_ingredients').simulateError(messageHelper.ERROR_GENERIC_RESOURCE);
+
+    /** Set the data to pass into the models function */
+    const terms = 'egg';
+
+    /** Execute the function */
+    const results = await recipeModel.findByIngredients(terms);
+
+    /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(results.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+    expect(tracker.history.select).toHaveLength(2);
+
+  });
+
+  it('returns a error if an issue or unexpected data is returned within ingredientModel.findByIngredients', async () => {
+
+    /** Mock the DB responses */
+    /** ingredientModel.findAllByName */
+    tracker.on.select('ingredients').responseOnce([
+      { id: 1, name: 'eggs' }
+    ]);
+
+    /* ingredientModel.findAllByIngredient */
+    tracker.on.select('recipe_ingredients').responseOnce(12);
+
+    /** Set the data to pass into the models function */
+    const terms = 'egg';
+
+    /** Execute the function */
+    const results = await recipeModel.findByIngredients(terms);
+
+    /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(tracker.history.select).toHaveLength(2);
+
+  });
+
+  it('returns an empty array if no recipes are found within ingredientModel.findByIngredients', async () => {
+
+    /** Mock the DB responses */
+    /** ingredientModel.findAllByName */
+    tracker.on.select('ingredients').responseOnce([
+      { id: 1, name: 'eggs' }
+    ]);
+
+    /* ingredientModel.findByIngredient */
+    tracker.on.select('recipe_ingredients').responseOnce([
+      {
+        id: 1,
+        recipeId: 1,
+        ingredientId: 1,
+        amount: 12,
+        amount_type: 'large'
+      }
+    ]);
+
+    /* recipeModel.findByRecipe */
+    tracker.on.select('recipes').responseOnce([]);
+
+    /** Set the data to pass into the models function */
+    const terms = 'egg';
+
+    /** Execute the function */
+    const results = await recipeModel.findByIngredients(terms);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toHaveLength(0);
+    expect(tracker.history.select).toHaveLength(3);
+
+  });
+
   it('should return a generic error if any libraries have issues for security', async () => {
 
     /** Mock the DB responses */
-    tracker.on.select('ingredients').simulateErrorOnce('lost connection to database');
+    tracker.on.select('ingredients').simulateError('lost connection to database');
 
     /** Set the data to pass into the models function */
     const terms = 'eggs';
@@ -1341,7 +1596,7 @@ xdescribe('recipeModel.findByIngredients', () => {
 
 });
 
-xdescribe('recipeModel.findByCategory', () => {
+describe('recipeModel.findByCategory', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -1356,7 +1611,7 @@ xdescribe('recipeModel.findByCategory', () => {
     tracker.reset();
   })
 
-  xit('should find all recipes that belong to a certain category', async () => {
+  it('should find all recipes that belong to a certain category', async () => {
 
     /** Mock the DB responses */
     tracker.on.select('categories').responseOnce([
@@ -1387,7 +1642,7 @@ xdescribe('recipeModel.findByCategory', () => {
       }
     ]);
 
-    tracker.on.select('recipe_ingredients').responceOnce([{
+    tracker.on.select('recipe_ingredients').responseOnce([{
       id: 1,
       recipeId: 1,
       ingredientId: 1,
@@ -1455,46 +1710,157 @@ xdescribe('recipeModel.findByCategory', () => {
     expect(results[0].userId).toBe(1);
 
     expect(typeof results[0].name).toBe('string');
-    expect()
+    expect(results[0].name).toBe('Toast');
 
+    expect(typeof results[0].description).toBe('string');
+    expect(results[0].descriptipon).toBe("Staple for breakfasts for when you're on the go");
+
+    expect(typeof results[0].servings).toBe('number');
+    expect(results[0].servings).toBe(2);
+
+    expect(typeof results[0].calories_per_serving).toBe('number');
+    expect(results[0].calories_per_serving).toBe(109);
+
+    expect(typeof results[0].prep_time).toBe('number');
+    expect(results[0].prep_time).toBe(1);
+
+    expect(typeof results[0].cook_time).toBe('number');
+    expect(results[0].cook_time).toBe(3);
+
+    expect(typeof results[0].rating).toBe('number');
+    expect(results[0].rating).toBe(5);
+
+    expect(Array.isArray(results[0].ingredients)).toBe(true);
+    expect(results[0].ingrdients).toHaveLength(1);
+
+    expect(typeof results[0].ingredients[0].id).toBe('number');
+    expect(results[0].ingredients[0].id).toBe(1);
+
+    expect(typeof results[0].ingredients[0].name).toBe('string');
+    expect(results[0].ingredients[0].name).toBe('white bread');
+
+    expect(typeof results[0].ingredients[0].amount).toBe('number');
+    expect(results[0].ingredients[0].amount).toBe(2);
+
+    expect(typeof results[0].ingredients[0].amount_type).toBe('string');
+    expect(results[0].ingredients[0].amount_type).toBe('slices');
+
+    expect(Array.isArray(results[0].cookbooks)).toBe(true);
+    expect(results[0].cookbooks).toHaveLength(1);
+
+    expect(typeof results[0].cookbooks[0].id).toBe('number');
+    expect(results[0].cookbooks[0].id).toBe(1);
+
+    expect(typeof results[0].cookbooks[0].name).toBe('string');
+    expect(results[0].cookbooks[0].name).tobe('Quick and easy Breakfasts');
+
+    expect(Array.isArray(results[0].steps)).toBe(true);
+    expect(results[0].steps).toHaveLength(4);
+
+    expect(typeof results[0].steps[0].id).toBe('number');
+    expect(results[0].steps[0].id).toBe(1);
+
+    expect(typeof results[0].steps[0].stepNo).toBe('number');
+    expect(results[0].steps[0].stepNo).toBe(1);
+
+    expect(typeof results[0].steps[0].content).toBe('string');
+    expect(results[0].steps[0].content).toBe('Set toaster heat to desired level');
+
+    expect(typeof results[0].steps[1].id).toBe('number');
+    expect(results[0].steps[1].id).toBe(2);
+
+    expect(typeof results[0].steps[1].stepNo).toBe('number');
+    expect(results[0].steps[1].stepNo).toBe(2);
+
+    expect(typeof results[0].steps[1].content).toBe('string');
+    expect(results[0].steps[1].content).toBe('Place bread in toaster slots');
+
+    expect(typeof results[0].steps[2].id).toBe('number');
+    expect(results[0].steps[2].id).toBe(3);
+
+    expect(typeof results[0].steps[2].stepNo).toBe('number');
+    expect(results[0].steps[2].stepNo).toBe(3);
+
+    expect(typeof results[0].steps[2].content).toBe('string');
+    expect(results[0].steps[2].content).toBe('Start toasting');
+
+    expect(typeof results[0].steps[3].id).toBe('number');
+    expect(results[0].steps[3].id).toBe(4);
+
+    expect(typeof results[0].steps[3].stepNo).toBe('number');
+    expect(results[0].steps[3].stepNo).toBe(4);
+
+    expect(typeof results[0].steps[3].content).toBe('string');
+    expect(results[0].steps[3].content).toBe('Once cooked, spread butter and or your favourite toppings and enjoy');
+
+    expect(Array.isArray(results[0].categories)).toBe(true);
+    expect(results[0].categories).tohaveLength(1);
+
+    expect(typeof results[0].categories[0].id).tobe('number');
+    expect(results[0].categories[0].id).tobe(1);
+
+    expect(typeof results[0].categories[0].name).tobe('string');
+    expect(results[0].categories[0].name).tobe('Breakfasts');
 
     expect(tracker.history.select).toHaveLength(7)
 
   });
 
-  xit('should return an empty array if no recipes found', async () => {
+  it('should return an empty array if no recipes found', async () => {
 
     /** Mock the DB responses */
+    tracker.on.select('categories').responseOnce([]);
 
     /** Set the data to pass into the models function */
+    const terms = 'Breakfasts';
 
     /** Execute the function */
+    const results = await recipeModel.findByCategory(terms);
 
     /** Test the response back from the function */
+    expect(Array.isArray(results)).toBe(true);
+    expect(results).toHaveLength(0);
+
+    expect(tracker.history.select).toHaveLength(1)
 
   });
 
-  xit('should return an error if required values are missing or incorrect', async () => {
+  it('should return an error if required values are missing or incorrect', async () => {
 
     /** Mock the DB responses */
 
     /** Set the data to pass into the models function */
+    const terms = null;
 
     /** Execute the function */
+    const results = await recipeModel.findByCategory(terms);
 
     /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(results.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+    expect(tracker.history.select).toHaveLength(0)
 
   });
 
-  xit('should return a generic error if any libraries have issues for security', async () => {
+  it('should return a generic error if any libraries have issues for security', async () => {
 
     /** Mock the DB responses */
+    tracker.on.select('categories').simulateError(messageHelper.ERROR_SIMULATE);
 
     /** Set the data to pass into the models function */
+    const terms = 'Breakfasts';
 
     /** Execute the function */
+    const results = await recipeModel.findByCategory(terms);
 
     /** Test the response back from the function */
+    expect(typeof results).toBe('object');
+    expect(results.success).toBe(false);
+    expect(results.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+
+    expect(tracker.history.select).toHaveLength(1);
 
   });
 
