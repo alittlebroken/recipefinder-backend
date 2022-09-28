@@ -359,8 +359,19 @@ const findAll = async () => {
   try{
 
     /* Update the data */
-    const result = await db('pantry_ingredients')
-     .select('*');
+    const result = await db('pantry_ingredients as pi')
+     .join('users as u', 'pi.userId', '=', 'u.id')
+     .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .select(
+       'pi.id as id',
+       'pi.pantryId as pantryId',
+       'i.id as ingredientId',
+       'u.id as userId',
+       'u.username as username',
+       'i.name as ingredientName',
+       'pi.amount as amount',
+       'pi.amount_type as amount_type'
+     );
 
      if(result && result.length > 0){
        return result;
@@ -400,9 +411,20 @@ const findByPantry = async id => {
     };
 
     /* Update the data */
-    const result = await db('pantry_ingredients')
-     .select('*')
-     .where('pantryId', id);
+    const result = await db('pantry_ingredients as pi')
+     .join('users as u', 'pi.userId', '=', 'u.id')
+     .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .select(
+       'pi.id as id',
+       'pi.pantryId as pantryId',
+       'i.id as ingredientId',
+       'u.id as userId',
+       'u.username as username',
+       'i.name as ingredientName',
+       'pi.amount as amount',
+       'pi.amount_type as amount_type'
+     )
+     .where('pi.pantryId', id);
 
      if(result && result.length > 0){
        return result;
@@ -414,7 +436,7 @@ const findByPantry = async id => {
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;
-    
+
     if(e.name === 'PANTRYINGREDIENTSMODEL_ERROR'){
       message = e.message;
     } else {
@@ -448,9 +470,20 @@ const findByIngredient = async id => {
     };
 
     /* Update the data */
-    const result = await db('pantry_ingredients')
-     .select('*')
-     .where('ingredientId', id);
+    const result = await db('pantry_ingredients as pi')
+     .join('users as u', 'pi.userId', '=', 'u.id')
+     .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .select(
+       'pi.id as id',
+       'pi.pantryId as pantryId',
+       'i.id as ingredientId',
+       'u.id as userId',
+       'u.username as username',
+       'i.name as ingredientName',
+       'pi.amount as amount',
+       'pi.amount_type as amount_type'
+     )
+     .where('pi.ingredientId', id);
 
      if(result && result.length > 0){
        return result;

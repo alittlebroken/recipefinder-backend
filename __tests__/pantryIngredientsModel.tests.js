@@ -757,6 +757,10 @@ describe('pantryIngredientsModel.findAll', () => {
       id: 1,
       pantryId: 1,
       ingredientId: 1,
+      userId: 3,
+      username: 'Newt Scaremonger',
+      ingredientId: 2,
+      ingredientName: 'Dragon fruit',
       amount: 6,
       amount_type: 'large'
     }]);
@@ -776,8 +780,17 @@ describe('pantryIngredientsModel.findAll', () => {
     expect(typeof result[0].pantryId).toBe('number');
     expect(result[0].pantryId).toBe(1);
 
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toBe(3);
+
+    expect(typeof result[0].username).toBe('string');
+    expect(result[0].username).toBe('Newt Scaremonger');
+
+    expect(typeof result[0].ingredientName).toBe('string');
+    expect(result[0].ingredientName).toBe('Dragon fruit');
+
     expect(typeof result[0].ingredientId).toBe('number');
-    expect(result[0].ingredientId).toBe(1);
+    expect(result[0].ingredientId).toBe(2);
 
     expect(typeof result[0].amount).toBe('number');
     expect(result[0].amount).toBe(6);
@@ -844,6 +857,10 @@ describe('pantryIngredientsModel.findByPantry', () => {
       id: 1,
       pantryId: 1,
       ingredientId: 1,
+      userId: 3,
+      username: 'Newt Scaremonger',
+      ingredientId: 2,
+      ingredientName: 'Dragon fruit',
       amount: 6,
       amount_type: 'large'
     }]);
@@ -864,14 +881,24 @@ describe('pantryIngredientsModel.findByPantry', () => {
     expect(typeof result[0].pantryId).toBe('number');
     expect(result[0].pantryId).toBe(1);
 
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toBe(3);
+
+    expect(typeof result[0].username).toBe('string');
+    expect(result[0].username).toBe('Newt Scaremonger');
+
+    expect(typeof result[0].ingredientName).toBe('string');
+    expect(result[0].ingredientName).toBe('Dragon fruit');
+
     expect(typeof result[0].ingredientId).toBe('number');
-    expect(result[0].ingredientId).toBe(1);
+    expect(result[0].ingredientId).toBe(2);
 
     expect(typeof result[0].amount).toBe('number');
     expect(result[0].amount).toBe(6);
 
     expect(typeof result[0].amount_type).toBe('string');
     expect(result[0].amount_type).toBe('large');
+
 
   });
 
@@ -951,6 +978,10 @@ describe('pantryIngredientsModel.findByIngredient', () => {
       id: 1,
       pantryId: 1,
       ingredientId: 1,
+      userId: 3,
+      username: 'Newt Scaremonger',
+      ingredientId: 2,
+      ingredientName: 'Dragon fruit',
       amount: 6,
       amount_type: 'large'
     }]);
@@ -971,8 +1002,17 @@ describe('pantryIngredientsModel.findByIngredient', () => {
     expect(typeof result[0].pantryId).toBe('number');
     expect(result[0].pantryId).toBe(1);
 
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toBe(3);
+
+    expect(typeof result[0].username).toBe('string');
+    expect(result[0].username).toBe('Newt Scaremonger');
+
+    expect(typeof result[0].ingredientName).toBe('string');
+    expect(result[0].ingredientName).toBe('Dragon fruit');
+
     expect(typeof result[0].ingredientId).toBe('number');
-    expect(result[0].ingredientId).toBe(1);
+    expect(result[0].ingredientId).toBe(2);
 
     expect(typeof result[0].amount).toBe('number');
     expect(result[0].amount).toBe(6);
