@@ -438,9 +438,6 @@ const findById = async id => {
    try{
 
     /* Gather the data from the DB */
-    const results = await db('recipe_ingredients')
-     .select('*');
-
     const results = await db('recipe_ingredients ri')
      .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
      .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type');
