@@ -544,7 +544,8 @@ describe('recipeCategoriesModel.findAll', () => {
       {
         id: 1,
         recipeId: 1,
-        categoryId: 1
+        categoryId: 1,
+        categoryName: 'Breakfasts'
       }
     ])
 
@@ -563,6 +564,9 @@ describe('recipeCategoriesModel.findAll', () => {
 
     expect(typeof results[0].categoryId).toBe('number');
     expect(results[0].categoryId).toBe(1);
+
+    expect(typeof results[0].categoryName).toBe('string');
+    expect(results[0].categoryName).toBe('Breakfasts');
 
 
   });
@@ -620,7 +624,8 @@ describe('recipeCategoriesModel.findByRecipe', () => {
       {
         id: 1,
         recipeId: 1,
-        categoryId: 1
+        categoryId: 1,
+        categoryName: 'Breakfasts'
       }
     ])
 
@@ -635,12 +640,16 @@ describe('recipeCategoriesModel.findByRecipe', () => {
     expect(results).toHaveLength(1);
 
     expect(typeof results[0].id).toBe('number');
-    expect(typeof results[0].recipeId).toBe('number');
-    expect(typeof results[0].categoryId).toBe('number');
-
     expect(results[0].id).toBe(1);
+
+    expect(typeof results[0].recipeId).toBe('number');
     expect(results[0].recipeId).toBe(1);
+
+    expect(typeof results[0].categoryId).toBe('number');
     expect(results[0].categoryId).toBe(1);
+
+    expect(typeof results[0].categoryName).toBe('string');
+    expect(results[0].categoryName).toBe('Breakfasts');
 
   });
 
@@ -718,7 +727,8 @@ describe('recipeCategoriesModel.findByCategory', () => {
       {
         id: 1,
         recipeId: 1,
-        categoryId: 1
+        categoryId: 1,
+        categoryName: 'Breakfasts'
       }
     ])
 
@@ -733,12 +743,16 @@ describe('recipeCategoriesModel.findByCategory', () => {
     expect(results).toHaveLength(1);
 
     expect(typeof results[0].id).toBe('number');
-    expect(typeof results[0].recipeId).toBe('number');
-    expect(typeof results[0].categoryId).toBe('number');
-
     expect(results[0].id).toBe(1);
+
+    expect(typeof results[0].recipeId).toBe('number');
     expect(results[0].recipeId).toBe(1);
+
+    expect(typeof results[0].categoryId).toBe('number');
     expect(results[0].categoryId).toBe(1);
+
+    expect(typeof results[0].categoryName).toBe('string');
+    expect(results[0].categoryName).toBe('Breakfasts');
 
   });
 

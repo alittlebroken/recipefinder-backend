@@ -301,8 +301,14 @@ const findAll = async () => {
   try{
 
     /* Retrieve the specified record(s) */
-    const result = await db('recipe_categories')
-     .select('*');
+    const result = await db('recipe_categories as rc')
+     .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+     .select(
+       'rc.id as id',
+       'rc.recipeId as recipeId',
+       'cat.id as categoryId',
+       'cat.name as categoryName'
+     );
 
     if(result && result.length > 0){
       return result;
@@ -345,9 +351,15 @@ const findByRecipe = async id => {
     };
 
     /* Retrieve the specified record(s) */
-    const result = await db('recipe_categories')
-     .select('*')
-     .where('recipeId', id);
+    const result = await db('recipe_categories as rc')
+     .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+     .select(
+       'rc.id as id',
+       'rc.recipeId as recipeId',
+       'cat.id as categoryId',
+       'cat.name as categoryName'
+     )
+     .where('rc.recipeId', id);
 
     if(result && result.length > 0){
       return result;
@@ -396,9 +408,15 @@ const findByCategory = async id => {
     };
 
     /* Retrieve the specified record(s) */
-    const result = await db('recipe_categories')
-     .select('*')
-     .where('categoryId', id);
+    const result = await db('recipe_categories as rc')
+     .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+     .select(
+       'rc.id as id',
+       'rc.recipeId as recipeId',
+       'cat.id as categoryId',
+       'cat.name as categoryName'
+     )
+     .where('rc.categoryId', id);
 
     if(result && result.length > 0){
       return result;
