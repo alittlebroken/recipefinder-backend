@@ -2,7 +2,18 @@
 require('dotenv').config();
 const db = require('../database');
 
+/* Include any other needed modules */
+const stepModel = require('./stepModel');
+const ingredientModel = require('./ingredientModel');
+const cookbookModel = require('./cookbookModel');
+const categoryModel = require('./categoryModel');
+
+const cookbookRecipesModel = require('./cookbookRecipesModel');
+const recipeIngredientsModel = require('./recipeIngredientsModel');
+const recipeCategoriesModel = require('./recipeCategoriesModel');
+
 const validation = require('../helpers/validation');
+const messageHelper = require('../helpers/constants');
 
 /*
  * Transactional knex method to add a recipe to the database as well as it's
@@ -336,7 +347,7 @@ const find = async terms => {
 
       let recipes = [];
 
-      /* Find all the recipes which map first */
+      /* Find all the recipes which match first */
       const results = await trx('recipes')
        .select(
          'id as recipeId',
@@ -349,8 +360,6 @@ const find = async terms => {
          'rating'
        )
        .whereILike('name',`%${terms}%`).transacting(trx);
-
-
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
@@ -425,6 +434,56 @@ const find = async terms => {
 
 };
 
+/* Return the recipe matching the passed in recipe ID
+ * @param {number} id - The ID of the record you are intersted in
+ * @returns {array} Contains the specified recipe if founf otherwise it returns
+ * an empty array
+ */
+const findByRecipe = async id => {
+
+  try{
+
+    /* Validate the passed in arguments */
+    if(!validation.validator(id, 'number')){
+      throw {
+        name: 'RECIPEMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    }
+
+    /* Gather the required data from the database */
+    const result = await db('recipes')
+     .select('*')
+     .where('id', id);
+
+    if(result && result.length > 0){
+      return result;
+    } else {
+      return [];
+    }
+
+
+  } catch(e) {
+
+        /* Check for library errors and if found swap them out for a generic
+           one to send back over the API for security */
+        let message;
+
+        if(e.name === 'RECIPEMODEL_ERROR'){
+          message = e.message;
+        } else {
+          message = 'There was a problem with the resource, please try again later';
+        }
+
+        return {
+          success: false,
+          message: message
+        }
+
+  }
+
+};
+
 /*
  * Fetch all recipes within the database that contain the specified ingredients
  * @param {string} terms - Ingredients for a recipe to have
@@ -438,7 +497,7 @@ const findByIngredients = async terms => {
     if(!validation.validator(terms, 'string')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: messageHelper.ERROR_MISSING_VALUES
       }
     }
 
@@ -449,11 +508,24 @@ const findByIngredients = async terms => {
       let recipes  = [];
 
       /* Get all ingredients which match first */
+      const ingredientResults = await ingredientModel.findAllByName(terms);
 
-      const ingredientResults = await trx('ingredients')
-       .select('id')
-       .whereILike('name', `%${terms}%`)
-       .transacting(trx);
+      /* Check to see if the results contain any errors and handle
+         them appropriately */
+      if(!Array.isArray(ingredientResults)){
+
+        if(!ingredientResults.message){
+          throw {
+            name: 'RECIPEMODEL_ERROR',
+            message: ingredientResults.message
+          }
+        } else {
+          throw {
+            name: 'LIBERROR',
+            message: ingredientResults.message
+          }
+        }
+      }
 
       /* Check we have ingredients to look through for the next phase */
       if(ingredientResults && ingredientResults.length > 0){
@@ -461,19 +533,13 @@ const findByIngredients = async terms => {
         /* Loop through each result and gather all supporting data */
         for ( let ingredient of ingredientResults ){
 
-          let recipeIngredients = await trx('recipe_ingredients')
-           .select('*')
-           .where('ingredientId', ingredient.id)
-           .transacting(trx);
+          let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id);
 
           if(recipeIngredients && recipeIngredients.length > 0){
 
               for ( recipeIngredient of recipeIngredients) {
 
-                let foundRecipes = await trx('recipes')
-                 .select('*')
-                 .where('id', 1)
-                 .transacting(trx);
+                let foundRecipes = await findByRecipe(recipeIngredient.recipeId);
 
                 if(foundRecipes && foundRecipes.length > 0){
 
@@ -519,6 +585,20 @@ const findByIngredients = async terms => {
 
               }
 
+          } else {
+
+            if(!recipeIngredients.message){
+              throw {
+                name: 'RECIPEMODEL_ERROR',
+                message: recipeIngredients.message
+              }
+            } else {
+              throw {
+                name: 'LIBERROR',
+                message: recipeIngredients.message
+              }
+            }
+
           }
 
         }
@@ -540,7 +620,7 @@ const findByIngredients = async terms => {
         if(e.name === 'RECIPEMODEL_ERROR'){
           message = e.message;
         } else {
-          message = 'There was a problem with the resource, please try again later';
+          message = messageHelper.ERROR_GENERIC_RESOURCE;
         }
 
         return {
@@ -552,11 +632,82 @@ const findByIngredients = async terms => {
 
 }
 
+/* Find all recipes that match a certain category
+ * @param {string} terms - The category names to find recipes by
+ * @returns {array} An array of recipes in object form
+ */
+const findByCategory = async terms => {
+
+  try {
+
+    /* Validate the passed in values */
+    if(!validation.validator(terms, 'string')){
+      throw {
+        name: 'RECIPEMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    }
+
+    /* The final list of recipes to return */
+    let recipes = [];
+
+    /* Get a list of categories which match the search terms passed
+       into the function */
+    const foundCategories = await categoryModel.findAllByName(terms);
+
+    if(!foundCategories && foundCategories.length < 1){
+      return recipes;
+    } else {
+
+      /* Get the ids of each recipe that has this category listed */
+      for( let foundCategory of foundCategories){
+
+        let foundRecipes = await recipeCategoriesModel.findByCategory(foundCategory.id);
+
+        if(!foundRecipes && foundRecipes.length < 1){
+          return null;
+        } else {
+
+          /* Now get each recipe and it's details and then add to the final
+             recipes array */
+          for(let foundRecipe of foundRecipes){
+
+            /* Get the different details of each recipe */
+            
+
+          }
+
+        }
+
+      }
+
+    }
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+
+    if(e.name === 'RECIPEMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = messageHelper.ERROR_GENERIC_RESOURCE;
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
 module.exports = {
   create,
   remove,
   update,
   find,
+  findByRecipe,
   findByIngredients,
-
+  findByCategory
 };
