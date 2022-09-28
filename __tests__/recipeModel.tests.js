@@ -985,7 +985,7 @@ describe('recipeModel.findByRecipe', () => {
       id: 1,
       recipeId: 1,
       categoryId: 1,
-      catgeoryName: 'Breakfasts'
+      categoryName: 'Breakfasts'
     }]);
 
     /* cookbookRecipesModel.findByRecipe */
@@ -1004,7 +1004,7 @@ describe('recipeModel.findByRecipe', () => {
 
     /** Execute the function */
     const result = await recipeModel.findByRecipe(id);
-
+    console.log(result)
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
     expect(result).toHaveLength(1);
@@ -1069,11 +1069,11 @@ describe('recipeModel.findByRecipe', () => {
     expect(Array.isArray(result[0].categories)).toBe(true);
     expect(result[0].categories).toHaveLength(1);
 
-    expect(typeof result[0].categories[0].id).tobe('number');
-    expect(result[0].categories[0].id).tobe(1);
+    expect(typeof result[0].categories[0].id).toBe('number');
+    expect(result[0].categories[0].id).toBe(1);
 
-    expect(typeof result[0].categories[0].name).tobe('string');
-    expect(result[0].categories[0].name).tobe('Breakfasts');
+    expect(typeof result[0].categories[0].name).toBe('string');
+    expect(result[0].categories[0].name).toBe('Breakfasts');
 
     /* Check the cookbooks */
     expect(Array.isArray(result[0].cookbooks)).toBe(true);
