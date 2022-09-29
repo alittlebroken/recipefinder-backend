@@ -303,6 +303,7 @@ const findAllByName = async name => {
 
     /* Extract data from the database */
     const results = await db('categories')
+     .select('*')
      .whereILike('name', `%${name}%`);
 
      if(results.length >= 1){
