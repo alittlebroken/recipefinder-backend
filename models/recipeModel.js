@@ -706,7 +706,7 @@ const findByCategory = async terms => {
        into the function */
     const foundCategories = await categoryModel.findAllByName(terms);
 
-    if(!foundCategories && foundCategories.length < 1){
+    if(!foundCategories || foundCategories.length < 1){
       return recipes;
     } else {
 
@@ -714,9 +714,8 @@ const findByCategory = async terms => {
       for( let foundCategory of foundCategories){
 
         let foundRecipeIds = await recipeCategoriesModel.findByCategory(foundCategory.id);
-
-        if(!foundRecipeIds && foundRecipeIds.length < 1){
-          return null;
+        if(!foundRecipeIds || foundRecipeIds.length < 1){
+          recipes.push(null);
         } else {
 
           /* Now get each recipe and it's details and then add to the final
