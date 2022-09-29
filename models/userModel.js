@@ -73,7 +73,7 @@ const findByEmail = async email => {
 
     /* Try and find the record by email */
     const result = await db('users')
-     .select('id', 'username', 'email', 'roles', 'forename', 'surname')
+     .select('id', 'username', 'email', 'roles', 'forename', 'surname', 'password')
      .where('email', email);
 
     if(!result || !result.length > 0){
