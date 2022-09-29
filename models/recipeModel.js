@@ -550,7 +550,7 @@ const findByRecipe = async id => {
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
-        console.log(e)
+
         if(e.name === 'RECIPEMODEL_ERROR'){
           message = e.message;
         } else {
@@ -592,6 +592,7 @@ const findByIngredients = async terms => {
       /* Get all ingredients which match first */
       const ingredientResults = await ingredientModel.findAllByName(terms);
 
+
       /* Check to see if the results contain any errors and handle
          them appropriately */
       if(!Array.isArray(ingredientResults)){
@@ -617,6 +618,7 @@ const findByIngredients = async terms => {
 
           let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id);
 
+
           if(recipeIngredients && recipeIngredients.length > 0){
 
               for ( recipeIngredient of recipeIngredients) {
@@ -626,41 +628,7 @@ const findByIngredients = async terms => {
                 if(foundRecipes && foundRecipes.length > 0){
 
                   for ( found of foundRecipes ){
-
-                    let ingredientResults = await trx('recipe_ingredients as ri')
-                      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
-                      .select(
-                        'i.id as id',
-                        'i.name as name',
-                        'ri.amount as amount',
-                        'ri.amount_type as amount_type'
-                      )
-                      .where('ri.recipeId', found.id).transacting(trx);
-
-                    let cookbookResults = await trx('cookbook_recipes as cr')
-                     .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
-                     .select('c.id as id', 'c.name as name')
-                     .where('cr.recipeId', found.id).transacting(trx);
-
-                    let stepResults = await trx('steps')
-                     .select('id', 'stepNo', 'content')
-                     .where('recipeId', found.id).transacting(trx);
-
-                    let categoryResults = await trx('recipe_categories as rc')
-                     .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
-                     .select('cat.id as id', 'cat.name as name')
-                     .where('rc.recipeId', found.id).transacting(trx);
-
-                    let recipe = {
-                      ...found,
-                      ingredients: [...ingredientResults],
-                      cookbooks: [...cookbookResults],
-                      steps: [...stepResults],
-                      categories: [...categoryResults]
-                    };
-
-                    recipes.push(recipe);
-
+                    recipes.push(found);
                   }
 
                 }
@@ -688,6 +656,7 @@ const findByIngredients = async terms => {
       } else {
         return [];
       }
+
 
       return recipes;
 
@@ -752,16 +721,27 @@ const findByCategory = async terms => {
 
           /* Now get each recipe and it's details and then add to the final
              recipes array */
-          for(let foundRecipe of foundRecipes){
+          for(let foundRecipeId of foundRecipeIds){
 
-            /* Get the different details of each recipe */
+            /* Extract the recipes and it's supporting information based
+            on the ID passed in and add to the final array being returned */
+            let foundRecipes = await findByRecipe(foundRecipeId.recipeId);
 
+            if(foundRecipes && foundRecipes.length > 0){
+
+              for ( found of foundRecipes ){
+                recipes.push(found);
+              }
+
+            }
 
           }
 
         }
 
       }
+
+      return recipes;
 
     }
 
