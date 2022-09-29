@@ -1004,7 +1004,7 @@ describe('recipeModel.findByRecipe', () => {
 
     /** Execute the function */
     const result = await recipeModel.findByRecipe(id);
-    console.log(result)
+
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
     expect(result).toHaveLength(1);
@@ -1175,16 +1175,18 @@ describe('recipeModel.findByIngredients', () => {
       { id: 1, name: 'eggs' }
     ]);
 
+    /* recipeIngredientsModel.findByIngredient */
     tracker.on.select('recipe_ingredients').responseOnce([
       {
         id: 1,
-        recipeId: 1,
-        ingredientId: 1,
+        name: 'eggs',
         amount: 12,
-        amount_type: 'large'
+        amount_type: 'large',
+        recipeId: 1
       }
     ]);
 
+    /* recipeModel.findByRecipe */
     tracker.on.select('recipes').responseOnce([
       {
         id: 1,
@@ -1199,115 +1201,99 @@ describe('recipeModel.findByIngredients', () => {
       }
     ]);
 
-    tracker.on.select('recipe_ingredients').responseOnce([
-      {
-        id: 1,
-        recipeId: 1,
-        ingredientId: 1,
-        name: 'eggs',
-        amount: 12,
-        amount_type: 'large'
-      },
-      {
-        id: 2,
-        recipeId: 1,
-        ingredientId: 3,
-        name: 'flour',
-        amount: 250,
-        amount_type: 'grams'
-      },
-      {
-        id: 3,
-        recipeId: 1,
-        ingredientId: 4,
-        name: 'sugar',
-        amount: 50,
-        amount_type: 'grams'
-      }
-    ]);
+      /* recipeIngredintsModel.findByRecipeId */
+      tracker.on.select('recipe_ingredients').responseOnce([
+        {
+          id: 1,
+          name: 'eggs',
+          amount: 12,
+          amount_type: 'large'
+        },
+        {
+          id: 2,
+          name: 'flour',
+          amount: 250,
+          amount_type: 'grams'
+        },
+        {
+          id: 3,name: 'sugar',
+          amount: 50,
+          amount_type: 'grams'
+        }
+      ]);
 
-    tracker.on.select('steps').responseOnce([
-      {
-        id: 1,
-        recipeId: 1,
-        stepNo: 1,
-        content: 'Preheat oven to 180 degrees C'
-      },
-      {
-        id: 2,
-        recipeId: 1,
-        stepNo: 2,
-        content: 'Crack 3 eggs into mixing bowl and mix well'
-      },
-      {
-        id: 3,
-        recipeId: 1,
-        stepNo: 3,
-        content: 'Sieve in the flour and mix well'
-      },
-      {
-        id: 4,
-        recipeId: 1,
-        stepNo: 4,
-        content: 'Pour in the sugar'
-      },
-      {
-        id: 5,
-        recipeId: 1,
-        stepNo: 5,
-        content: 'Use a mixer on high speed for two minutes'
-      },
-      {
-        id: 6,
-        recipeId: 1,
-        stepNo: 6,
-        content: 'Pour mixture into two greased tins'
-      },
-      {
-        id: 7,
-        recipeId: 1,
-        stepNo: 7,
-        content: 'Place in Oven on middle shelf for 35 minutes or until golden brown'
-      },
-      {
-        id: 8,
-        recipeId: 1,
-        stepNo: 8,
-        content: 'Leave in tins to cool down for 5 minutes'
-      },
-      {
-        id: 9,
-        recipeId: 1,
-        stepNo: 9,
-        content: 'Remove from tins onto cooling rack and leave to cool'
-      },
-      {
-        id: 10,
-        recipeId: 1,
-        stepNo: 10,
-        content: 'Once cooled, decorate as per your requirements'
-      }
-    ]);
+      /* stepModel.findByRecipeId */
+      tracker.on.select('steps').responseOnce([
+        {
+          id: 1,
+          stepNo: 1,
+          content: 'Preheat oven to 180 degrees C'
+        },
+        {
+          id: 2,
+          stepNo: 2,
+          content: 'Crack 3 eggs into mixing bowl and mix well'
+        },
+        {
+          id: 3,
+          stepNo: 3,
+          content: 'Sieve in the flour and mix well'
+        },
+        {
+          id: 4,
+          stepNo: 4,
+          content: 'Pour in the sugar'
+        },
+        {
+          id: 5,
+          stepNo: 5,
+          content: 'Use a mixer on high speed for two minutes'
+        },
+        {
+          id: 6,
+          stepNo: 6,
+          content: 'Pour mixture into two greased tins'
+        },
+        {
+          id: 7,
+          stepNo: 7,
+          content: 'Place in Oven on middle shelf for 35 minutes or until golden brown'
+        },
+        {
+          id: 8,
+          stepNo: 8,
+          content: 'Leave in tins to cool down for 5 minutes'
+        },
+        {
+          id: 9,
+          stepNo: 9,
+          content: 'Remove from tins onto cooling rack and leave to cool'
+        },
+        {
+          id: 10,
+          stepNo: 10,
+          content: 'Once cooled, decorate as per your requirements'
+        }
+      ]);
 
-    // cookbooks
-    tracker.on.select('cookbook_recipes').responseOnce([
-      {
-        id: 1,
-        recipeId: 1,
-        cookbookId: 1,
-        userId: 1,
-        name: 'Breakfasts',
-        description: null,
-        image: null
-      },
-    ]);
+      /* recipeCategoriesModel.findByRecipe */
+      tracker.on.select('recipe_categories').responseOnce([
+        { id: 1, recipeId: 1, categoryId: 1, categoryName: 'Breakfast'},
+        { id: 2, recipeId: 1, categoryId: 2, categoryName: 'Pudding'},
+        { id: 3, recipeId: 1, categoryId: 3, categoryName: 'Treat'}
+      ]);
 
-    // categories
-    tracker.on.select('recipe_categories').responseOnce([
-      { id: 1, recipeId: 1, name: 'Breakfast'},
-      { id: 2, recipeId: 1, name: 'Pudding'},
-      { id: 3, recipeId: 1, name: 'Treat'}
-    ]);
+      /* cookbookRecipesModel.findByRecipe */
+      tracker.on.select('cookbook_recipes').responseOnce([
+        {
+          cookbookId: 1,
+          cookbookName: 'Breakfasts',
+          userId: 1,
+          username: 'Brenda Lovegood',
+          cookbookDescription: null,
+          cookbookImage: null
+        },
+      ]);
 
     /** Set the data to pass into the models function */
     const terms = 'egg';
@@ -1337,20 +1323,6 @@ describe('recipeModel.findByIngredients', () => {
     expect(results[0].ingredients[1].id).toBe(2);
     expect(typeof results[0].ingredients[2].id).toBe('number');
     expect(results[0].ingredients[2].id).toBe(3);
-
-    expect(typeof results[0].ingredients[0].recipeId).toBe('number');
-    expect(results[0].ingredients[0].recipeId).toBe(1);
-    expect(typeof results[0].ingredients[1].recipeId).toBe('number');
-    expect(results[0].ingredients[1].recipeId).toBe(1);
-    expect(typeof results[0].ingredients[2].recipeId).toBe('number');
-    expect(results[0].ingredients[2].recipeId).toBe(1);
-
-    expect(typeof results[0].ingredients[0].ingredientId).toBe('number');
-    expect(results[0].ingredients[0].ingredientId).toBe(1);
-    expect(typeof results[0].ingredients[1].ingredientId).toBe('number');
-    expect(results[0].ingredients[1].ingredientId).toBe(3);
-    expect(typeof results[0].ingredients[2].ingredientId).toBe('number');
-    expect(results[0].ingredients[2].ingredientId).toBe(4);
 
     expect(typeof results[0].ingredients[0].name).toBe('string');
     expect(results[0].ingredients[0].name).toBe('eggs');
@@ -1394,8 +1366,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[0].id).toBe('number');
     expect(results[0].steps[0].id).toBe(1);
-    expect(typeof results[0].steps[0].recipeId).toBe('number');
-    expect(results[0].steps[0].recipeId).toBe(1);
     expect(typeof results[0].steps[0].stepNo).toBe('number');
     expect(results[0].steps[0].stepNo).toBe(1);
     expect(typeof results[0].steps[0].content).toBe('string');
@@ -1403,8 +1373,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[1].id).toBe('number');
     expect(results[0].steps[1].id).toBe(2);
-    expect(typeof results[0].steps[1].recipeId).toBe('number');
-    expect(results[0].steps[1].recipeId).toBe(1);
     expect(typeof results[0].steps[1].stepNo).toBe('number');
     expect(results[0].steps[1].stepNo).toBe(2);
     expect(typeof results[0].steps[1].content).toBe('string');
@@ -1412,8 +1380,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[2].id).toBe('number');
     expect(results[0].steps[2].id).toBe(3);
-    expect(typeof results[0].steps[2].recipeId).toBe('number');
-    expect(results[0].steps[2].recipeId).toBe(1);
     expect(typeof results[0].steps[2].stepNo).toBe('number');
     expect(results[0].steps[2].stepNo).toBe(3);
     expect(typeof results[0].steps[2].content).toBe('string');
@@ -1421,8 +1387,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[3].id).toBe('number');
     expect(results[0].steps[3].id).toBe(4);
-    expect(typeof results[0].steps[3].recipeId).toBe('number');
-    expect(results[0].steps[3].recipeId).toBe(1);
     expect(typeof results[0].steps[3].stepNo).toBe('number');
     expect(results[0].steps[3].stepNo).toBe(4);
     expect(typeof results[0].steps[3].content).toBe('string');
@@ -1430,8 +1394,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[4].id).toBe('number');
     expect(results[0].steps[4].id).toBe(5);
-    expect(typeof results[0].steps[4].recipeId).toBe('number');
-    expect(results[0].steps[4].recipeId).toBe(1);
     expect(typeof results[0].steps[4].stepNo).toBe('number');
     expect(results[0].steps[4].stepNo).toBe(5);
     expect(typeof results[0].steps[4].content).toBe('string');
@@ -1439,8 +1401,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[5].id).toBe('number');
     expect(results[0].steps[5].id).toBe(6);
-    expect(typeof results[0].steps[5].recipeId).toBe('number');
-    expect(results[0].steps[5].recipeId).toBe(1);
     expect(typeof results[0].steps[5].stepNo).toBe('number');
     expect(results[0].steps[5].stepNo).toBe(6);
     expect(typeof results[0].steps[5].content).toBe('string');
@@ -1448,8 +1408,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[6].id).toBe('number');
     expect(results[0].steps[6].id).toBe(7);
-    expect(typeof results[0].steps[6].recipeId).toBe('number');
-    expect(results[0].steps[6].recipeId).toBe(1);
     expect(typeof results[0].steps[6].stepNo).toBe('number');
     expect(results[0].steps[6].stepNo).toBe(7);
     expect(typeof results[0].steps[6].content).toBe('string');
@@ -1457,8 +1415,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[7].id).toBe('number');
     expect(results[0].steps[7].id).toBe(8);
-    expect(typeof results[0].steps[7].recipeId).toBe('number');
-    expect(results[0].steps[7].recipeId).toBe(1);
     expect(typeof results[0].steps[7].stepNo).toBe('number');
     expect(results[0].steps[7].stepNo).toBe(8);
     expect(typeof results[0].steps[7].content).toBe('string');
@@ -1466,8 +1422,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[8].id).toBe('number');
     expect(results[0].steps[8].id).toBe(9);
-    expect(typeof results[0].steps[8].recipeId).toBe('number');
-    expect(results[0].steps[8].recipeId).toBe(1);
     expect(typeof results[0].steps[8].stepNo).toBe('number');
     expect(results[0].steps[8].stepNo).toBe(9);
     expect(typeof results[0].steps[8].content).toBe('string');
@@ -1475,8 +1429,6 @@ describe('recipeModel.findByIngredients', () => {
 
     expect(typeof results[0].steps[9].id).toBe('number');
     expect(results[0].steps[9].id).toBe(10);
-    expect(typeof results[0].steps[9].recipeId).toBe('number');
-    expect(results[0].steps[9].recipeId).toBe(1);
     expect(typeof results[0].steps[9].stepNo).toBe('number');
     expect(results[0].steps[9].stepNo).toBe(10);
     expect(typeof results[0].steps[8].content).toBe('string');
@@ -1703,20 +1655,23 @@ describe('recipeModel.findByCategory', () => {
   it('should find all recipes that belong to a certain category', async () => {
 
     /** Mock the DB responses */
-    tracker.on.select('categories').responseOnce([
-      {
-        id: 1,
-      }
-    ]);
+    /* categoryModel.findAllByName */
+    tracker.on.select('categories').responseOnce([{
+      id: 1,
+      name: 'Breakfasts'
+    }]);
 
+    /* recipeCategoriesModel.findByCategory */
     tracker.on.select('recipe_categories').responseOnce([
       {
         id: 1,
         recipeId: 1,
-        categoryId: 1
+        categoryId: 1,
+        categoryName: 'Breakfasts'
       }
     ]);
 
+    /* recipeModel.findByRecipe */
     tracker.on.select('recipes').responseOnce([
       {
         id: 1,
@@ -1726,61 +1681,61 @@ describe('recipeModel.findByCategory', () => {
         servings: 2,
         calories_per_serving: 109,
         prep_time: 1,
-        cook_time: 3,
+        cook_time: 2,
         rating: 5
       }
     ]);
 
-    tracker.on.select('recipe_ingredients').responseOnce([{
-      id: 1,
-      recipeId: 1,
-      ingredientId: 1,
-      name: 'white bread',
-      amount: 2,
-      amount_type: 'slices'
-    }]);
+      /* recipeIngredintsModel.findByRecipeId */
+      tracker.on.select('recipe_ingredients').responseOnce([
+        {
+          id: 1,
+          name: 'white bread',
+          amount: 2,
+          amount_type: 'slices'
+        }
+      ]);
 
-    tracker.on.select('cookbook_recipes').responseOnce([{
-      id: 1,
-      cookbookId: 1,
-      recipeId: 1,
-      name: 'Quick and easy Breakfasts'
-    }]);
+      /* stepModel.findByRecipeId */
+      tracker.on.select('steps').responseOnce([
+        {
+          id: 1,
+          stepNo: 1,
+          content: 'Set toaster heat to desired level'
+        },
+        {
+          id: 2,
+          stepNo: 2,
+          content: 'Place bread in toaster slots'
+        },
+        {
+          id: 3,
+          stepNo: 3,
+          content: 'Start toasting'
+        },
+        {
+          id: 4,
+          stepNo: 4,
+          content: 'Once cooked, spread butter and or your favourite toppings and enjoy'
+        }
+      ]);
 
-    tracker.on.select('steps').responseOnce([
-      {
-       id: 1,
-       recipeId: 1,
-       stepNo: 1,
-       content: 'Set toaster heat to desired level'
-     },
-     {
-       id: 2,
-       recipeId: 1,
-       stepNo: 2,
-       content: 'Place bread in toaster slots'
-     },
-     {
-       id: 3,
-       recipeId: 1,
-       stepNo: 3,
-       content: 'Start toasting'
-     },
-     {
-       id: 4,
-       recipeId: 1,
-       stepNo: 4,
-       content: 'Once cooked, spread butter and or your favourite toppings and enjoy'
-     }
-  ]);
+      /* recipeCategoriesModel.findByRecipe */
+      tracker.on.select('recipe_categories').responseOnce([
+        { id: 1, recipeId: 1, categoryId: 1, categoryName: 'Breakfasts'}
+      ]);
 
-    tracker.on.select('recipe_categories').responseOnce([{
-      id: 1,
-      recipeId: 1,
-      categoryId: 1,
-      name: 'Breakfasts'
-    }]);
-
+      /* cookbookRecipesModel.findByRecipe */
+      tracker.on.select('cookbook_recipes').responseOnce([
+        {
+          cookbookId: 1,
+          cookbookName: 'Quick and easy Breakfasts',
+          userId: 1,
+          username: 'Brenda Lovegood',
+          cookbookDescription: 'some yummy goods in here',
+          cookbookImage: '/media/64637292/6463828.jpg'
+        },
+      ]);
 
     /** Set the data to pass into the models function */
     const terms = 'Breakfasts';
@@ -1802,7 +1757,7 @@ describe('recipeModel.findByCategory', () => {
     expect(results[0].name).toBe('Toast');
 
     expect(typeof results[0].description).toBe('string');
-    expect(results[0].descriptipon).toBe("Staple for breakfasts for when you're on the go");
+    expect(results[0].description).toBe("Staple for breakfasts for when you're on the go");
 
     expect(typeof results[0].servings).toBe('number');
     expect(results[0].servings).toBe(2);
@@ -1814,13 +1769,13 @@ describe('recipeModel.findByCategory', () => {
     expect(results[0].prep_time).toBe(1);
 
     expect(typeof results[0].cook_time).toBe('number');
-    expect(results[0].cook_time).toBe(3);
+    expect(results[0].cook_time).toBe(2);
 
     expect(typeof results[0].rating).toBe('number');
     expect(results[0].rating).toBe(5);
 
     expect(Array.isArray(results[0].ingredients)).toBe(true);
-    expect(results[0].ingrdients).toHaveLength(1);
+    expect(results[0].ingredients).toHaveLength(1);
 
     expect(typeof results[0].ingredients[0].id).toBe('number');
     expect(results[0].ingredients[0].id).toBe(1);
@@ -1841,7 +1796,13 @@ describe('recipeModel.findByCategory', () => {
     expect(results[0].cookbooks[0].id).toBe(1);
 
     expect(typeof results[0].cookbooks[0].name).toBe('string');
-    expect(results[0].cookbooks[0].name).tobe('Quick and easy Breakfasts');
+    expect(results[0].cookbooks[0].name).toBe('Quick and easy Breakfasts');
+
+    expect(typeof results[0].cookbooks[0].description).toBe('string');
+    expect(results[0].cookbooks[0].description).toBe('some yummy goods in here');
+
+    expect(typeof results[0].cookbooks[0].image).toBe('string');
+    expect(results[0].cookbooks[0].image).toBe('/media/64637292/6463828.jpg');
 
     expect(Array.isArray(results[0].steps)).toBe(true);
     expect(results[0].steps).toHaveLength(4);
@@ -1883,15 +1844,15 @@ describe('recipeModel.findByCategory', () => {
     expect(results[0].steps[3].content).toBe('Once cooked, spread butter and or your favourite toppings and enjoy');
 
     expect(Array.isArray(results[0].categories)).toBe(true);
-    expect(results[0].categories).tohaveLength(1);
+    expect(results[0].categories).toHaveLength(1);
 
-    expect(typeof results[0].categories[0].id).tobe('number');
-    expect(results[0].categories[0].id).tobe(1);
+    expect(typeof results[0].categories[0].id).toBe('number');
+    expect(results[0].categories[0].id).toBe(1);
 
-    expect(typeof results[0].categories[0].name).tobe('string');
-    expect(results[0].categories[0].name).tobe('Breakfasts');
+    expect(typeof results[0].categories[0].name).toBe('string');
+    expect(results[0].categories[0].name).toBe('Breakfasts');
 
-    expect(tracker.history.select).toHaveLength(7)
+    expect(tracker.history.select).toHaveLength(7);
 
   });
 
