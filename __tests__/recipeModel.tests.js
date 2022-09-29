@@ -1859,14 +1859,14 @@ describe('recipeModel.findByCategory', () => {
   it('should return an empty array if no recipes found', async () => {
 
     /** Mock the DB responses */
-    tracker.on.select('categories').responseOnce([]);
+    tracker.on.select('categories').response([]);
 
     /** Set the data to pass into the models function */
     const terms = 'Breakfasts';
 
     /** Execute the function */
     const results = await recipeModel.findByCategory(terms);
-
+    
     /** Test the response back from the function */
     expect(Array.isArray(results)).toBe(true);
     expect(results).toHaveLength(0);
