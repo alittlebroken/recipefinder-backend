@@ -338,7 +338,182 @@ describe('ingredientModel.findOne', () => {
 
 });
 
+describe('ingredientModel.findById', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should find the specified ingredient', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').response([ { id: 1, name: 'Vegan Cheese' }]);
+
+    /** Set the data to pass into the models function */
+    const term = 1;
+
+    /** Execute the function */
+    const result = await ingredientModel.findById(term);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe(1);
+    expect(result[0].name).toEqual('Vegan Cheese');
+
+  });
+
+  it('should return an empty array if no ingredients found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').response([]);
+
+    /** Set the data to pass into the models function */
+    const term = 1;
+
+    /** Execute the function */
+    const result = await ingredientModel.findById(term);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should throw an error if one or more required values are missing or incorrect', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').response([ { id: 1, name: 'Vegan Cheese' }]);
+
+    /** Set the data to pass into the models function */
+    const term = null;
+
+    /** Execute the function */
+    const result = await ingredientModel.findById(term);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should throw a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').simulateError('Lost connection to database');
+
+    /** Set the data to pass into the models function */
+    const term = 1;
+
+    /** Execute the function */
+    const result = await ingredientModel.findById(term);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
 describe('ingredientModel.findAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should find all the ingredients', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').response([
+      { id: 1, name: 'Eggs'},
+      { id: 2, name: 'Flour'},
+      { id: 3, name: 'Milk'},
+      { id: 4, name: 'Butter'}
+    ]);
+
+    /** Execute the function */
+    const result = await ingredientModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(4);
+
+    /* Check the data returned */
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toBe(1);
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Eggs');
+
+    expect(typeof result[1].id).toBe('number');
+    expect(result[1].id).toBe(2);
+    expect(typeof result[1].name).toBe('string');
+    expect(result[1].name).toEqual('Flour');
+
+    expect(typeof result[2].id).toBe('number');
+    expect(result[2].id).toBe(3);
+    expect(typeof result[2].name).toBe('string');
+    expect(result[2].name).toEqual('Milk');
+
+    expect(typeof result[3].id).toBe('number');
+    expect(result[3].id).toBe(4);
+    expect(typeof result[3].name).toBe('string');
+    expect(result[3].name).toEqual('Butter');
+
+  });
+
+  it('should return an empty array if no ingredients found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').response([]);
+
+    /** Execute the function */
+    const result = await ingredientModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should throw a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('ingredients').simulateError('Lost connection to the database');
+
+    /** Execute the function */
+    const result = await ingredientModel.findAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('ingredientModel.findAllByName', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -366,7 +541,7 @@ describe('ingredientModel.findAll', () => {
     const term = 'vegan';
 
     /** Execute the function */
-    const result = await ingredientModel.findAll(term);
+    const result = await ingredientModel.findAllByName(term);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -399,7 +574,7 @@ describe('ingredientModel.findAll', () => {
     const term = 'vegon';
 
     /** Execute the function */
-    const result = await ingredientModel.findAll(term);
+    const result = await ingredientModel.findAllByName(term);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -420,7 +595,7 @@ describe('ingredientModel.findAll', () => {
     const term = null;
 
     /** Execute the function */
-    const result = await ingredientModel.findAll(term);
+    const result = await ingredientModel.findAllByName(term);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -438,7 +613,7 @@ describe('ingredientModel.findAll', () => {
     const term = 'vegan';
 
     /** Execute the function */
-    const result = await ingredientModel.findAll(term);
+    const result = await ingredientModel.findAllByName(term);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');

@@ -303,7 +303,7 @@ const verify  = async (password, hash) => {
 
   try{
 
-    if(!password || !hash){
+    if(!password || !hash || password.length < 1 || hash.length < 1){
       return false;
     }
 
@@ -311,7 +311,39 @@ const verify  = async (password, hash) => {
     return await bcrypt.compare(password, hash);
 
   } catch(e) {
-    return false;
+    return {
+      success: false,
+      message: 'There was an issue with the resource, please try again later'
+    };
+  }
+
+};
+
+/**
+ * return all users in the DB
+ * @returns {array} an array of user objects
+ */
+const findAll = async () => {
+
+  try{
+
+    /* Find the user by Id */
+    const result = await db('users')
+     .select('id', 'username', 'email', 'roles', 'forename', 'surname');
+
+    /* Check we have some results */
+    if(!result || !result.length > 0){
+      return [];
+    }
+
+    /* All OK so return */
+    return result;
+
+  } catch(e) {
+    return {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
   }
 
 };
@@ -323,5 +355,6 @@ module.exports = {
   update,
   remove,
   hash,
-  verify
+  verify,
+  findAll
 }

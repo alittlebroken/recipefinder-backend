@@ -234,7 +234,7 @@ describe('categoryModel.update', () => {
 
 });
 
-describe('categoryModel.findOne', () => {
+describe('categoryModel.findByName', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -260,7 +260,7 @@ describe('categoryModel.findOne', () => {
     const name = 'Vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -278,7 +278,7 @@ describe('categoryModel.findOne', () => {
     const name = 'Vegon';
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -295,7 +295,7 @@ describe('categoryModel.findOne', () => {
     const name = null;
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -313,7 +313,97 @@ describe('categoryModel.findOne', () => {
     const name = 'Vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findOne(name);
+    const result = await categoryModel.findByName(name);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('categoryModel.findById', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  });
+
+  it('should return a specific category', async () => {
+
+    /* Mock the DB responses */
+    tracker.on.select('categories').response([
+      { id: 1, name: 'Vegan'}
+    ]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toEqual('Vegan');
+
+  });
+
+  it('should return an empty array if no entries found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = 2;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should return an error if required arguments are missing or invalid', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = null;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('One or more required values are missing or incorrect');
+
+  });
+
+  it('should should return a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').simulateError('DB Connection lost');
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await categoryModel.findById(id);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -348,11 +438,91 @@ describe('categoryModel.findAll', () => {
       { id: 3, name: 'Vegan treats'}
     ]);
 
+    /** Execute the function */
+    const result = await categoryModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(3);
+
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toEqual(1);
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Vegan');
+
+    expect(typeof result[1].id).toBe('number');
+    expect(result[1].id).toEqual(2);
+    expect(typeof result[1].name).toBe('string');
+    expect(result[1].name).toEqual('Vegan pies');
+
+    expect(typeof result[2].id).toBe('number');
+    expect(result[2].id).toEqual(3);
+    expect(typeof result[2].name).toBe('string');
+    expect(result[2].name).toEqual('Vegan treats');
+
+  });
+
+  it('should return an empty array if no entries found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([]);
+
+    /** Execute the function */
+    const result = await categoryModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should should return a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').simulateError('Lost connection to database');
+
+
+    /** Execute the function */
+    const result = await categoryModel.findAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('categoryModel.findAllByName', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return all categories', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('categories').response([
+      { id: 1, name: 'Vegan' },
+      { id: 2, name: 'Vegan pies'},
+      { id: 3, name: 'Vegan treats'}
+    ]);
+
     /** Set the data to pass into the models function */
     const name = 'Vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAllByName(name);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -384,7 +554,7 @@ describe('categoryModel.findAll', () => {
     const name = null;
 
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAllByName(name);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -402,7 +572,7 @@ describe('categoryModel.findAll', () => {
     const name = 'Vegon';
 
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAllByName(name);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -419,7 +589,7 @@ describe('categoryModel.findAll', () => {
     const name = 'vegan';
 
     /** Execute the function */
-    const result = await categoryModel.findAll(name);
+    const result = await categoryModel.findAllByName(name);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');

@@ -5,6 +5,7 @@ const knex = require('knex');
 const db = require('../database');
 const userModel = require('../models/userModel');
 const { getTracker, Tracker } = require('knex-mock-client');
+const bcrypt = require('bcrypt');
 
 /* Mock the DB library */
 jest.mock('../database', () => {
@@ -508,7 +509,7 @@ describe('userModel.hash', () => {
 
   it('should hash the supplied data and return it', async () => {
 
-    /* database to be hashed */
+    /* password to be hashed */
     const userPassword = '!Tw3lv£D4ysL0st@-';
 
     /* Execute the function */
@@ -534,11 +535,32 @@ describe('userModel.hash', () => {
 
   });
 
+  it('should show a generic issue if the underlying library throws an error', async () => {
+
+    /* Mock the bcrypt has function so it throws an error */
+    bcrypt.__setErrorMode('libfail');
+
+    /* Data to be passed to function */
+    const userPassword = 'twelvemonkeys';
+
+    /* Execute the function being tested */
+    const result = await userModel.hash(userPassword);
+
+    /* Test the return value of the function tested */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
+
+  });
+
 });
 
 describe('userModel.verify', () => {
 
   it('should correctly verify the users password against the hash', async () => {
+
+    /* Set the error mode */
+    bcrypt.__setErrorMode('none');
 
     /* Set the data to be sent to the function */
     const userPassword = 'password';
@@ -557,6 +579,9 @@ describe('userModel.verify', () => {
 
   it('should return false if no data supplied', async () => {
 
+    /* Set the error mode */
+    bcrypt.__setErrorMode('fail');
+
     /* data to send to the function */
     const userPassword = '';
     const userHashedPassword = '';
@@ -571,6 +596,9 @@ describe('userModel.verify', () => {
   });
 
   it('should return an error if the password and hash do not match', async () => {
+
+    /* Set the error mode for the auto mocked bcrypt module */
+    bcrypt.__setErrorMode('fail');
 
     /* Data to send to the function */
     const userPassword = 'password';
@@ -587,6 +615,9 @@ describe('userModel.verify', () => {
 
   it('should error for any other reason', async () => {
 
+    /* Set the mocked bcrypt module to throw an error */
+    bcrypt.__setErrorMode('libfail');
+
     /* Set data to send to the function */
     const userPassword = { };
     const userHash = { };
@@ -595,9 +626,73 @@ describe('userModel.verify', () => {
     const result = await userModel.verify(userPassword, userHash);
 
     /* Test the response */
-    expect(typeof result).toEqual('boolean');
-    expect(result).toBe(false);
+    expect(typeof result).toEqual('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
 
   });
+
+});
+
+describe('userModel.findAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+ it('should return all users', async () => {
+
+   /* Mock the DB response */
+   tracker.on.select('users').response(users);
+
+   /* Execute the function */
+   const result = await userModel.findAll();
+
+   /* Check the response back */
+   expect(Array.isArray(result)).toBe(true);
+   expect(result).toHaveLength(1);
+   expect(result[0].id).toEqual(users[0].id);
+   expect(result[0].username).toEqual(users[0].username);
+   expect(result[0].email).toEqual(users[0].email);
+
+ });
+
+ it('should return an empty array if no records found', async () => {
+
+   /* Mock the DB response error */
+   tracker.on.select('users').response([]);
+
+   /* Execute the function with the passed in data */
+   const result = await userModel.findAll();
+
+   /* Check the response */
+   expect(Array.isArray(result)).toBe(true);
+   expect(result).toHaveLength(0);
+
+ });
+
+ it('should give generic error message for any other issues encountered', async () => {
+
+   /* Mock the DB response error */
+   tracker.on.select('users').simulateError('connection lost');
+
+   /* Execute the function with the passed in data */
+   const result = await userModel.findAll();
+
+   /* Check the response */
+   expect(result instanceof Object).toBe(true);
+   expect(result.success).toBe(false);
+   expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+ });
 
 });

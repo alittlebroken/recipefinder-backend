@@ -350,7 +350,109 @@ describe('stepModel.update', () => {
 
 });
 
-describe('stepModel.find', () => {
+describe('stepModel.findById', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return all steps for a recipe', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('steps').response([
+      {
+        id: 1,
+        recipeId: 1,
+        stepNo: 1,
+        content: 'Preheat oven to 180 degrees centigrade'
+      },
+      ]);
+
+    /** Set the data to pass into the models function */
+    const stepId = 1;
+
+    /** Execute the function */
+    const result = await stepModel.findById(stepId);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    /* Check the content returned is OK */
+    expect(typeof result[0].id).toBe('number');
+    expect(typeof result[0].recipeId).toBe('number');
+    expect(typeof result[0].stepNo).toBe('number');
+    expect(typeof result[0].content).toBe('string');
+    expect(result[0].id).toBe(1);
+    expect(result[0].recipeId).toBe(1);
+    expect(result[0].stepNo).toBe(1);
+    expect(result[0].content).toEqual('Preheat oven to 180 degrees centigrade');
+
+  });
+
+  it('should return an empty array if nothing found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('steps').response([]);
+
+    /** Set the data to pass into the models function */
+    const stepId = 1;
+
+    /** Execute the function */
+    const result = await stepModel.findById(stepId);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should error if one or more required values are missing or incorrect', async () => {
+
+    /** Set the data to pass into the models function */
+    const stepId = null;
+
+    /** Execute the function */
+    const result = await stepModel.findById(stepId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('steps').simulateError('Lost connection to the database');
+
+    /** Set the data to pass into the models function */
+    const stepId = 1;
+
+    /** Execute the function */
+    const result = await stepModel.findById(stepId);
+
+    /** Test the response back from the function */
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('stepModel.findByRecipeId', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -383,7 +485,7 @@ describe('stepModel.find', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findByRecipeId(recipeId);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -473,7 +575,7 @@ describe('stepModel.find', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findByRecipeId(recipeId);
 
     /** Test the response back from the function */
     expect(Array.isArray(result)).toBe(true);
@@ -499,7 +601,7 @@ describe('stepModel.find', () => {
     const recipeId = null;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findByRecipeId(recipeId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -517,7 +619,86 @@ describe('stepModel.find', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.find(recipeId);
+    const result = await stepModel.findByRecipeId(recipeId);
+
+    /** Test the response back from the function */
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('stepModel.findAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return all steps for a recipe', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('steps').response([
+      {
+        id: 1,
+        recipeId: 1,
+        stepNo: 1,
+        content: 'Preheat oven to 180 degrees centigrade'
+      },
+      ]);
+
+
+    /** Execute the function */
+    const result = await stepModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    /* Check the content returned is OK */
+    expect(typeof result[0].id).toBe('number');
+    expect(typeof result[0].recipeId).toBe('number');
+    expect(typeof result[0].stepNo).toBe('number');
+    expect(typeof result[0].content).toBe('string');
+    expect(result[0].id).toBe(1);
+    expect(result[0].recipeId).toBe(1);
+    expect(result[0].stepNo).toBe(1);
+    expect(result[0].content).toEqual('Preheat oven to 180 degrees centigrade');
+
+  });
+
+  it('should return an empty array if nothing found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('steps').response([]);
+
+    /** Execute the function */
+    const result = await stepModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should return a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('steps').simulateError('Lost connection to the database');
+
+    /** Execute the function */
+    const result = await stepModel.findAll();
 
     /** Test the response back from the function */
     /** Test the response back from the function */

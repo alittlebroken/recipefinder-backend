@@ -185,12 +185,97 @@ const findOne = async term => {
 
 };
 
+/* Retrieve all ingredients from the DB
+ * @param {string} term - The search term being looked for in the DB table
+ * @returns {array} All ingredients from the DB
+ * if nothing found
+ */
+const findAll = async () => {
+
+  try{
+
+    /* Search the table for the specified term */
+    const results = await db('ingredients')
+     .select('*');
+
+     if(!results || results.length < 1){
+       return [];
+     } else {
+       return results;
+     }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    message = 'There was a problem with the resource, please try again later';
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+/*
+ * extract from the DB the ingredient which matches the passed in id
+ * @param {number} id - The unique identifier of the ingredient sought
+ * @returns {array} Contains an object with details of the found ingredient or
+ * is empty if nothing is found
+ */
+const findById = async id => {
+
+  try{
+
+    /* Validate the passed in arguments */
+    if(!id || typeof id !== 'number'){
+      throw {
+        name: 'INGREDIENTMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* Extract the recipe form the database and return it otherwise lets
+       pass back an empty array */
+    const results = await db('ingredients')
+     .select('*')
+     .where('id', id);
+
+    if(!results || results.length < 1){
+      return [];
+    } else {
+      return results;
+    }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'INGREDIENTMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 /* Find all occurances of the required search term
  * @param {string} term - The search term being looked for in the DB table
  * @returns {array} Set of results for the searched for term or an emtpy array
  * if nothing found
  */
-const findAll = async term => {
+const findAllByName = async term => {
 
   try{
 
@@ -238,5 +323,7 @@ module.exports = {
   remove,
   update,
   findOne,
-  findAll
+  findAll,
+  findById,
+  findAllByName
 }

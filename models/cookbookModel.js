@@ -193,10 +193,10 @@ const findAll = async () => {
 };
 
 /*
- * Find one particular cookbook from the DB
+ * Find one particular cookbook from the DB via an ID
  * @param {integer} id - ID of the cookbook to return
  */
-const findOne = async id => {
+const findById = async id => {
 
   try {
 
@@ -218,6 +218,105 @@ const findOne = async id => {
     }
 
     return result;
+
+  } catch(e) {
+
+    /* Non custom messages should be returned as a generic message to the front
+       end */
+    let message;
+
+    if(e.name === 'COOKBOOKMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was an issue with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+/*
+ * Find a cookbook by it's name
+ * @param {string} term - The term used to find the cookbook
+ * @returns {Array} Returns the cookbook or an empty array if non found
+ */
+const findByName = async term => {
+
+  try {
+
+    /* Validate the passed in values */
+    if(!term || typeof term !== 'string'){
+      throw {
+        name: 'COOKBOOKMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* gather the data from the database */
+    const results = await db('cookbooks')
+     .where('name', term)
+     .select('*');
+
+    if(!results || results.length < 1){
+      return [];
+    }
+
+    return results;
+
+  } catch(e) {
+
+    /* Non custom messages should be returned as a generic message to the front
+       end */
+    let message;
+
+    if(e.name === 'COOKBOOKMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was an issue with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+/*
+ * Find all the cookbooks where their name matches the passed in terms
+ * @param {string} terms - The term used to find the cookbook
+ * @returns {Array} Returns the matching cookbooks or an empty array if non are
+ * found
+ */
+const findAllByName = async terms => {
+
+  try {
+
+    /* Validate the passed in values */
+    if(!terms || typeof terms !== 'string'){
+      throw {
+        name: 'COOKBOOKMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* gather the data from the database */
+    const results = await db('cookbooks')
+     .whereILike('name', `%${terms}%`)
+     .select('*');
+
+    if(!results || results.length < 1){
+      return [];
+    }
+
+    return results;
 
   } catch(e) {
 
@@ -313,6 +412,8 @@ module.exports = {
   remove,
   update,
   findAll,
-  findOne,
+  findById,
+  findByName,
+  findAllByName,
   recipes
 };

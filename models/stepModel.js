@@ -227,13 +227,61 @@ const update = async (stepId, recipeId, stepNo, stepContent) => {
 };
 
 /*
+ * find a step belonging to a particular id
+ * @param {number} stepId - The unique identifier of the step
+ * @returns {array} An array containing the step we are looking for
+ */
+const findById = async stepId => {
+
+  try{
+
+    /* validate the values passed into the function */
+    if(!stepId || typeof stepId !== 'number'){
+      throw {
+        name: 'STEPMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* Get the steps from the DB */
+    const result = await db('steps')
+     .select('*')
+     .where('id', stepId);
+
+     if(!result || result.length < 1){
+       return [];
+     } else {
+       return result;
+     }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'STEPMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+/*
  * find all steps which belong to a particular recipe
  * @param {number} recipeId - The unique identifier of the recipe to get the
  * steps for
  * @returns {array} An array containing all steps for a recipe or empty if
  * the recipe has none yet
  */
-const find = async recipeId => {
+const findByRecipeId = async recipeId => {
 
   try{
 
@@ -276,10 +324,50 @@ const find = async recipeId => {
 
 };
 
+/*
+ * Get all steps from the DB
+ * @returns {array} An array containing all the steps
+ */
+const findAll = async () => {
+
+  try{
+
+    /* Get the steps from the DB */
+    const result = await db('steps')
+     .select('*');
+
+     if(!result || result.length < 1){
+       return [];
+     } else {
+       return result;
+     }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'STEPMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
   removeAll,
   update,
-  find
+  findById,
+  findByRecipeId,
+  findAll
 };
