@@ -6,6 +6,18 @@ const db = require('../database');
 const userModel = require('../models/userModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+
+/* Mocks for the JWT library testing */
+const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
+const JWT_SECRET_KEY = 'mockedsecretkey!-758472<';
+const JWT_PAYLOAD = {
+  "id": 1,
+  "username": 'nscaremonger',
+  "email": 'nscaremonger@secretwizardcastle.net',
+  "roles": 'wizard',
+  "commonRoom": 3638237
+};
 
 /* Mock the DB library */
 jest.mock('../database', () => {
@@ -694,5 +706,110 @@ describe('userModel.findAll', () => {
    expect(result.message).toEqual('There was a problem with the resource, please try again later');
 
  });
+
+});
+
+describe('userModel.generateToken', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+    const mockJwtVerify = jest.spyOn(jwt, 'verify').mockImplementation((token, secretKeyOrToken) => {
+      if(!token || !secretKeyOrToken) return false;
+      return JWT_PAYLOAD;
+    });
+
+    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToekn) => {
+      if(!payload || !secretKeyOrToken) return false;
+      return JWT_TOKEN;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('returns a valid token when signing a payload', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = userModel.generateToken(JWT_PAYLOAD);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('string');
+    expect(result).toBe(JWT_TOKEN);
+    expect(mockJwtVerify).toHaveBeenCalled();
+    expect(mockJwtVerify).tohaveBeenCalledWith(JWT_PAYLOAD, JWT_SECRET_KEY);
+
+  });
+
+  it('returns an error if data payload is missing or incorrect', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+    let payload = null;
+
+    /** Execute the function */
+    const result = userModel.generateToken(payload);
+
+    /** Test the response back from the function */
+    expect(result).toBe(false);
+    expect(mockJwtVerify).toHaveBeenCalled();
+    expect(mockJwtVerify).tohaveBeenCalledWith(payload, JWT_SECRET_KEY);
+
+  });
+
+  it('returns an error if underlying library produces an error', async () => {
+
+    /** Mock the 3rd party library responses */
+    const mockJwtVerifyError = jest.spyOn(jwt, 'verify')
+      .mockImplementation(() => {throw new Error()});
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = userModel.generateToken(JWT_PAYLOAD);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Unable to sign the supplied payload');
+
+  });
+
+});
+
+xdescribe('<model>Model.<method>', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('returns ...', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
 
 });
