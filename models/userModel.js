@@ -2,6 +2,11 @@
 require('dotenv').config();
 const db = require('../database');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+/* Import helper modules */
+const validation = require('../helpers/validation');
+const messageHelper = require('../helpers/constants');
 
 /**
  * Insert a user into the database
@@ -340,10 +345,53 @@ const findAll = async () => {
     return result;
 
   } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message = 'There was a problem with the resource, please try again later';
+    
     return {
       success: false,
-      message: 'There was a problem with the resource, please try again later'
+      message: message
+    }
+  }
+
+};
+
+/* Create a new JWT token with the supplied payload
+ * @param {object} payload - The data to be included within the JWT token
+ * @returns {string} The token generated with the specified payload
+ */
+const generateToken = async data => {
+
+  try{
+
+    /* Validate the passed in data */
+    if(!validation.validator(data, 'object')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
     };
+
+    /* Sign the payload and return the generated token */
+    const genToken = await jwt.sign(data, process.env.JWT_TOKEN_SECRET);
+    return genToken;
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+
+    if(e.name === 'USERMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = messageHelper.ERROR_GENERIC_RESOURCE;
+    }
+
+    return {
+      success: false,
+      message: message
+    }
   }
 
 };
@@ -356,5 +404,6 @@ module.exports = {
   remove,
   hash,
   verify,
-  findAll
+  findAll,
+  generateToken
 }
