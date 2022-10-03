@@ -7,6 +7,7 @@ const userModel = require('../models/userModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
+const messageHelper = require('../helpers/constants');
 
 /* Mocks for the JWT library testing */
 const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
@@ -759,9 +760,9 @@ describe('userModel.generateToken', () => {
     const result = userModel.generateToken(payload);
 
     /** Test the response back from the function */
-    expect(result).toBe(false);
-    expect(mockJwtVerify).toHaveBeenCalled();
-    expect(mockJwtVerify).tohaveBeenCalledWith(payload, JWT_SECRET_KEY);
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_MISSING_VALUES);
 
   });
 
@@ -779,7 +780,7 @@ describe('userModel.generateToken', () => {
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
     expect(result.success).toBe(false);
-    expect(result.message).toBe('Unable to sign the supplied payload');
+    expect(result.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
 
   });
 
