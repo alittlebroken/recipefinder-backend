@@ -24,6 +24,6 @@ const passport = require('passport');
  * Start the server
  */
 app.listen(process.env.EXPRESS_PORT, error => {
-  if(error) console.error('Issue starting server');
-  console.log(`Server started on port ${process.env.EXPRESS_PORT}`)
+  if(error) console.error('Issue starting ${process.env.ENVIRONMENT} server');
+  console.log(`${process.env.ENVIRONMENT} server started on port ${process.env.EXPRESS_PORT}`)
 });
