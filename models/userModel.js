@@ -348,7 +348,7 @@ const findAll = async () => {
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message = 'There was a problem with the resource, please try again later';
-    
+
     return {
       success: false,
       message: message
@@ -396,6 +396,46 @@ const generateToken = async data => {
 
 };
 
+/* Verify that the passed in token is valid and if so return the original
+ * payload
+ * @param {string} token - The JWT token to be validated
+ * @returns {object} The original payload that was tokenized
+ */
+const verifyToken = async token => {
+
+  try{
+
+    /* Validate the passed in data */
+    if(!validation.validator(token, 'string')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    };
+
+    /* Sign the payload and return the generated token */
+    const payload = await jwt.verify(token, process.env.JWT_TOKEN_SECRET);
+    return payload;
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+
+    if(e.name === 'USERMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = messageHelper.ERROR_GENERIC_RESOURCE;
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
 module.exports = {
   insert,
   findByEmail,
@@ -405,5 +445,6 @@ module.exports = {
   hash,
   verify,
   findAll,
-  generateToken
+  generateToken,
+  verifyToken
 }
