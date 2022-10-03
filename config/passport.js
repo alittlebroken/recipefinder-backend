@@ -3,6 +3,8 @@
  */
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
+const JWTstrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJwt;
 const userModel = require('../models/userModel');
 
 
@@ -91,3 +93,28 @@ passport.use(
 
   }
 )
+
+
+/* Handler for verifying a JWT token */
+passport.use(
+  /* Specify the strategy to use */
+  new JWTstrategy(
+    /* Set the options for this strategy */
+    {
+      secretOrKey: process.env.JWT_TOKEN_SECRET;
+      jwtFromRequest: ExtractJWT.fromExtractors([
+        ExtractJWT.fromUrlQueryParameter('secret_token'),
+        ExtractJWT.fromHeader('secret_token'),
+        ExtractJWT.fromAuthHeaderAsBearerToken()
+      ]);
+    },
+    /* Callback used to process the strategy */
+    async (token, done) => {
+      try{
+        return done(null, token.user);
+      } catch(e) {
+        retrun done(error);
+      }
+    }
+  )
+);
