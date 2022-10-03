@@ -722,7 +722,7 @@ describe('userModel.generateToken', () => {
       return JWT_PAYLOAD;
     });
 
-    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToekn) => {
+    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToken) => {
       if(!payload || !secretKeyOrToken) return false;
       return JWT_TOKEN;
     });
@@ -739,13 +739,12 @@ describe('userModel.generateToken', () => {
     /** Set the data to pass into the models function */
 
     /** Execute the function */
-    const result = userModel.generateToken(JWT_PAYLOAD);
+    const result = await userModel.generateToken(JWT_PAYLOAD);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('string');
     expect(result).toBe(JWT_TOKEN);
-    expect(mockJwtVerify).toHaveBeenCalled();
-    expect(mockJwtVerify).tohaveBeenCalledWith(JWT_PAYLOAD, JWT_SECRET_KEY);
+
 
   });
 
@@ -757,7 +756,7 @@ describe('userModel.generateToken', () => {
     let payload = null;
 
     /** Execute the function */
-    const result = userModel.generateToken(payload);
+    const result = await userModel.generateToken(payload);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -769,13 +768,15 @@ describe('userModel.generateToken', () => {
   it('returns an error if underlying library produces an error', async () => {
 
     /** Mock the 3rd party library responses */
-    const mockJwtVerifyError = jest.spyOn(jwt, 'verify')
-      .mockImplementation(() => {throw new Error()});
+    const mockJwtVerifyError = jest.spyOn(jwt, 'sign')
+      .mockImplementation((token, secretKeyOrToken) => {
+        throw new Error('Test error')
+      });
 
     /** Set the data to pass into the models function */
 
     /** Execute the function */
-    const result = userModel.generateToken(JWT_PAYLOAD);
+    const result = await userModel.generateToken(JWT_PAYLOAD);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
