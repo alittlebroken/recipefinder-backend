@@ -819,8 +819,22 @@ describe('userModel.verifyToken', () => {
     const result = await userModel.verifyToken(JWT_TOKEN);
 
     /** Test the response back from the function */
-    expect(typeof result).toBe('string');
-    expect(result).toBe(JWT_TOKEN);
+    expect(typeof result).toBe('object');
+  
+    expect(typeof result.id).toBe('number');
+    expect(result.id).toBe(JWT_PAYLOAD.id);
+
+    expect(typeof result.username).toBe('string');
+    expect(result.username).toBe(JWT_PAYLOAD.username);
+
+    expect(typeof result.email).toBe('string');
+    expect(result.email).toBe(JWT_PAYLOAD.email);
+
+    expect(typeof result.roles).toBe('string');
+    expect(result.roles).toBe(JWT_PAYLOAD.roles);
+
+    expect(typeof result.commonRoom).toBe('number');
+    expect(result.commonRoom).toBe(JWT_PAYLOAD.commonRoom);
 
   });
 
