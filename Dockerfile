@@ -18,21 +18,21 @@ EXPOSE 3000
 
 # Set the default environment variables
 # Which environment are we running
-ENVIRONMENT=test
+env ENVIRONMENT test
 
 # Database properties
-DB_NAME=cookbooks
-DB_USER=cookbooks
-DB_PASS=FluffyBun135!-65Q
-DB_HOST=localhost
+env DB_NAME cookbooks
+env DB_USER cookbooks
+env DB_PASS FluffyBun135!-65Q
+env DB_HOST localhost
 
 ## EXPRESS ##
-EXPRESS_PORT=3000
+env EXPRESS_PORT 3000
 
 ## AUTHENTICATION ##
-JWT_TOKEN_SECRET=token-secret
-JWT_REFRESH_TOKEN_SECRET=refresh-token-secret
-SALT_ROUNDS=10
+env JWT_TOKEN_SECRET token-secret
+env JWT_REFRESH_TOKEN_SECRET refresh-token-secret
+env SALT_ROUNDS 10
 
 # Start the server
 CMD [ "node", "index.js" ]
