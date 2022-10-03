@@ -6,6 +6,19 @@ const db = require('../database');
 const userModel = require('../models/userModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+const messageHelper = require('../helpers/constants');
+
+/* Mocks for the JWT library testing */
+const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
+const JWT_SECRET_KEY = 'mockedsecretkey!-758472<';
+const JWT_PAYLOAD = {
+  "id": 1,
+  "username": 'nscaremonger',
+  "email": 'nscaremonger@secretwizardcastle.net',
+  "roles": 'wizard',
+  "commonRoom": 3638237
+};
 
 /* Mock the DB library */
 jest.mock('../database', () => {
@@ -694,5 +707,201 @@ describe('userModel.findAll', () => {
    expect(result.message).toEqual('There was a problem with the resource, please try again later');
 
  });
+
+});
+
+describe('userModel.generateToken', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+    const mockJwtVerify = jest.spyOn(jwt, 'verify').mockImplementation((token, secretKeyOrToken) => {
+      if(!token || !secretKeyOrToken) return false;
+      return JWT_PAYLOAD;
+    });
+
+    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToken) => {
+      if(!payload || !secretKeyOrToken) return false;
+      return JWT_TOKEN;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('returns a valid token when signing a payload', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.generateToken(JWT_PAYLOAD);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('string');
+    expect(result).toBe(JWT_TOKEN);
+
+
+  });
+
+  it('returns an error if data payload is missing or incorrect', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+    let payload = null;
+
+    /** Execute the function */
+    const result = await userModel.generateToken(payload);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+  });
+
+  it('returns an error if underlying library produces an error', async () => {
+
+    /** Mock the 3rd party library responses */
+    const mockJwtVerifyError = jest.spyOn(jwt, 'sign')
+      .mockImplementation((token, secretKeyOrToken) => {
+        throw new Error('Test error')
+      });
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.generateToken(JWT_PAYLOAD);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+
+  });
+
+});
+
+describe('userModel.verifyToken', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+    const mockJwtVerify = jest.spyOn(jwt, 'verify').mockImplementation((token, secretKeyOrToken) => {
+      if(!token || !secretKeyOrToken) return false;
+      return JWT_PAYLOAD;
+    });
+
+    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToken) => {
+      if(!payload || !secretKeyOrToken) return false;
+      return JWT_TOKEN;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('returns the payload from a valid JWT token', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.verifyToken(JWT_TOKEN);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+  
+    expect(typeof result.id).toBe('number');
+    expect(result.id).toBe(JWT_PAYLOAD.id);
+
+    expect(typeof result.username).toBe('string');
+    expect(result.username).toBe(JWT_PAYLOAD.username);
+
+    expect(typeof result.email).toBe('string');
+    expect(result.email).toBe(JWT_PAYLOAD.email);
+
+    expect(typeof result.roles).toBe('string');
+    expect(result.roles).toBe(JWT_PAYLOAD.roles);
+
+    expect(typeof result.commonRoom).toBe('number');
+    expect(result.commonRoom).toBe(JWT_PAYLOAD.commonRoom);
+
+  });
+
+  it('returns an error if token is missing or incorrect', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+    let invalidToken = null;
+
+    /** Execute the function */
+    const result = await userModel.verifyToken(invalidToken);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+  });
+
+  it('returns an error if underlying library produces an error', async () => {
+
+    /** Mock the 3rd party library responses */
+    const mockJwtVerifyError = jest.spyOn(jwt, 'verify')
+      .mockImplementation((token, secretKeyOrToken) => {
+        throw new Error('Token appears to be invalid')
+      });
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.verifyToken(JWT_TOKEN);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+
+  });
+
+});
+
+xdescribe('<model>Model.<method>', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('returns ...', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+
+    /** Test the response back from the function */
+
+  });
 
 });
