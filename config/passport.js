@@ -101,19 +101,19 @@ passport.use(
   new JWTstrategy(
     /* Set the options for this strategy */
     {
-      secretOrKey: process.env.JWT_TOKEN_SECRET;
+      secretOrKey: process.env.JWT_TOKEN_SECRET,
       jwtFromRequest: ExtractJWT.fromExtractors([
         ExtractJWT.fromUrlQueryParameter('secret_token'),
         ExtractJWT.fromHeader('secret_token'),
         ExtractJWT.fromAuthHeaderAsBearerToken()
-      ]);
+      ])
     },
     /* Callback used to process the strategy */
     async (token, done) => {
       try{
         return done(null, token.user);
       } catch(e) {
-        retrun done(error);
+        return done(error);
       }
     }
   )
