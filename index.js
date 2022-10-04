@@ -6,6 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const passport = require('passport');
+const morgan = require('morgan');
 
 /*
  * Configure the app
@@ -13,8 +14,13 @@ const passport = require('passport');
  require('./config/passport');
  app.use(express.json());
  app.use(express.urlencoded({ extended: true }));
- app.use(cors);
+ app.use(cors());
  app.use(passport.initialize());
+ app.use(morgan('combined'));
+
+ app.get('/', (req, res) => {
+   res.send('Boo!')
+ })
 
 /*
  * Import our routes
@@ -23,7 +29,6 @@ const passport = require('passport');
 /*
  * Start the server
  */
-app.listen(process.env.EXPRESS_PORT, error => {
-  if(error) console.error('Issue starting ${process.env.ENVIRONMENT} server');
+app.listen(process.env.EXPRESS_PORT, () => {
   console.log(`${process.env.ENVIRONMENT} server started on port ${process.env.EXPRESS_PORT}`)
 });
