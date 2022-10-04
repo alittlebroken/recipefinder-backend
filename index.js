@@ -9,6 +9,7 @@ const passport = require('passport');
 const morgan = require('morgan');
 const rfs = require('rotating-file-stream');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 /*
  * Log all errors for the app here
