@@ -60,6 +60,32 @@ const accessLogStream = rfs.createStream('access.log', {
  * Import our routes
  */
 
+/* Capture unknown routes */
+app.get('*', (req, res, next) => {
+  const err  = new Error(`Endpoint ${req.url} not found`);
+  err.status = 404;
+  next(err);
+});
+
+/* Default error handler */
+app.use((error, req, res, next) => {
+
+  let statusCode = 500;
+  let message = 'A problem has been encountered please check and try again';
+
+  if(error){
+      statusCode = error.status;
+      message = error.message;
+  }
+
+  res.status(statusCode).json({
+    status: false,
+    code: statusCode,
+    message: message
+  });
+
+});
+
 /*
  * Start the server
  */
