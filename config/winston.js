@@ -24,6 +24,17 @@ if(process.env.ENVIRONMENT !== 'production' || process.env.ENVIRONMENT !== 'prod
   }));
 };
 
+/*
+ * log a message
+ */
+const logMessage = (level, message) => {
+  logger.log({
+    level: level,
+    message: message,
+    timestamp: winston.format.timestamp()
+  })
+}
+
 module.exports = {
-  logger
+  logMessage
 }
