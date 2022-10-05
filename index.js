@@ -21,17 +21,20 @@ const bodyParser = require('body-parser');
  app.use(passport.initialize());
 
 /* Logging Information */
+
 /*
  * Log all errors for the app here
  */
-const httpErrorLogStream = rfs.createStream(process.env.LOG_HTTP_ERROR || 'http_error.log', {
-  interval: process.env.LOG_ROTATION || '1d',
-  path: path.join(__dirname, process.env.LOG_LOCATION)
-});
+const logger = require('./config/winston');
 
 /*
  * Log all http access and errors
  */
+ const httpErrorLogStream = rfs.createStream(process.env.LOG_HTTP_ERROR || 'http_error.log', {
+   interval: process.env.LOG_ROTATION || '1d',
+   path: path.join(__dirname, process.env.LOG_LOCATION)
+ });
+
 const accessLogStream = rfs.createStream(process.env.LOG_HTTP_ACCESS || 'http_access.log', {
   interval: process.env.LOG_ROTATION || '1d',
   path: path.join(__dirname, process.env.LOG_LOCATION)
@@ -91,5 +94,6 @@ app.use((error, req, res, next) => {
  * Start the server
  */
 app.listen(process.env.EXPRESS_PORT, () => {
-  console.log(`${process.env.ENVIRONMENT} server started on port ${process.env.EXPRESS_PORT}`)
+  let startupMessage = `${process.env.ENVIRONMENT} server started on port ${process.env.EXPRESS_PORT}`;
+  logger.logMessage('info', startupMessage);
 });
