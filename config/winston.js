@@ -28,7 +28,7 @@ const logger = winston.createLogger({
 
 /* Add a console transport if we are in development only */
 if(process.env.ENVIRONMENT !== 'production' || process.env.ENVIRONMENT !== 'prod'){
-  logger.add(new winston.transports.Console())
+  logger.add(new winston.transports.Console());
 }
 
 /*
