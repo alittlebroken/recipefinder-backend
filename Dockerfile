@@ -17,8 +17,19 @@ COPY . .
 EXPOSE 3000
 
 # Set the default environment variables
+# Application name
+env APP_NAME recipeFinder
 # Which environment are we running
 env ENVIRONMENT test
+
+# Logging
+env LOG_LEVEL info
+env LOG_LOCATION logs
+env LOG_APP application.log
+env LOG_ROTATION 1d
+env LOG_HTTP_ERROR http_error.log
+env LOG_HTTP_ACCESS http_access.log
+env LOG_APP_COMMON application.log
 
 # Database properties
 env DB_NAME cookbooks
