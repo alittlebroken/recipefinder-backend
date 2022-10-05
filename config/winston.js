@@ -4,7 +4,7 @@
 require('dotenv').config();
 const winston = require('winston');
 const path = require('path');
-const LOGPATH = path.join('../', process.env.LOG_LOCATION);
+const LOGPATH = path.join('.', process.env.LOG_LOCATION);
 
 /* Create custom format for log output */
 const customFormat = winston.format.printf(({ level, message, label, timestamp }) => {
