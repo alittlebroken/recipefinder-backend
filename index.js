@@ -58,6 +58,7 @@ app.use(morgan('combined', {
 
  app.get('/', (req, res) => {
    res.send('Boo!')
+   logger.logMessage('debug', 'Test API Route actiavted')
  })
 
 /*
@@ -81,6 +82,9 @@ app.use((error, req, res, next) => {
       statusCode = error.status;
       message = error.message;
   }
+
+  /* Log the error */
+  logger.logMessage('error', message)
 
   res.status(statusCode).json({
     status: false,
