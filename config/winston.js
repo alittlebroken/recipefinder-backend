@@ -2,14 +2,14 @@
  * Required Packages
  */
 require('dotenv').config();
-const winstom = require('winston');
+const winston = require('winston');
 const path = require('path');
 const LOGPATH = path.join('../', process.env.LOG_LOCATION);
 
 /* Create the logger for the appliation log */
-const logger = windton.createLogger({
+const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.JSON(),
+  format: winston.format.json(),
   transports: [
     new winston.transports.File({
       filename: path.join(LOGPATH, process.env.LOG_APP_COMMON)
