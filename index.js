@@ -12,22 +12,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 /*
- * Log all errors for the app here
- */
-const httpErrorLogStream = rfs.createStream('error.log', {
-  interval: '1d',
-  path: path.join(__dirname, 'logs')
-});
-
-/*
- * Log all access to the app here
- */
-const accessLogStream = rfs.createStream('access.log', {
-  interval: '1d',
-  path: path.join(__dirname, 'logs')
-});
-
-/*
  * Configure the app
  */
  require('./config/passport');
@@ -36,14 +20,31 @@ const accessLogStream = rfs.createStream('access.log', {
  app.use(cors());
  app.use(passport.initialize());
 
- app.use(morgan('dev', {
-   stream: httpErrorLogStream,
-   skip: (req, res) => { return res.statusCode < 400 }
- }));
+/* Logging Information */
+/*
+ * Log all errors for the app here
+ */
+const httpErrorLogStream = rfs.createStream(process.enc.LOG_HTTP_ERROR || 'http_error.log', {
+  interval: process.env.LOG_ROTATION || '1d',
+  path: path.join(__dirname, 'logs')
+});
 
- app.use(morgan('combined', {
-   stream: accessLogStream
- }));
+/*
+ * Log all http access and errors
+ */
+const accessLogStream = rfs.createStream(process.enc.LOG_HTTP_ACCESS || 'http_access.log', {
+  interval: process.env.LOG_ROTATION || '1d',
+  path: path.join(__dirname, 'logs')
+});
+
+app.use(morgan('dev', {
+  stream: httpErrorLogStream,
+  skip: (req, res) => { return res.statusCode < 400 }
+}));
+
+app.use(morgan('combined', {
+  stream: accessLogStream
+}));
 
  /*
   Only display logs to the console if in development mode
