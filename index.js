@@ -24,17 +24,17 @@ const bodyParser = require('body-parser');
 /*
  * Log all errors for the app here
  */
-const httpErrorLogStream = rfs.createStream(process.enc.LOG_HTTP_ERROR || 'http_error.log', {
+const httpErrorLogStream = rfs.createStream(process.env.LOG_HTTP_ERROR || 'http_error.log', {
   interval: process.env.LOG_ROTATION || '1d',
-  path: path.join(__dirname, 'logs')
+  path: path.join(__dirname, process.env.LOG_LOCATION)
 });
 
 /*
  * Log all http access and errors
  */
-const accessLogStream = rfs.createStream(process.enc.LOG_HTTP_ACCESS || 'http_access.log', {
+const accessLogStream = rfs.createStream(process.env.LOG_HTTP_ACCESS || 'http_access.log', {
   interval: process.env.LOG_ROTATION || '1d',
-  path: path.join(__dirname, 'logs')
+  path: path.join(__dirname, process.env.LOG_LOCATION)
 });
 
 app.use(morgan('dev', {
