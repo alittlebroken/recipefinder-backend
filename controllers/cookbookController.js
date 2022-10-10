@@ -22,6 +22,9 @@ const get = async (req, res, next) => {
     res.status(200).json(results);
 
   } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.get - Status Code ${e.status}: ${e.message}`);
+
     return next(e);
   }
 
@@ -64,6 +67,9 @@ const getById = async (req, res, next) => {
     res.status(200).json(results);
 
   } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.getById - Status Code ${e.status}: ${e.message}`);
+
       return next(e);
   }
 
@@ -110,6 +116,9 @@ const getByName = async (req, res, next) => {
     res.status(200).json(results);
 
   } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.getByName - Status Code ${e.status}: ${e.message}`);
+
     return next(e);
   }
 }
@@ -158,6 +167,9 @@ const create = async (req, res, next) => {
     res.status(200).json(results);
 
   }catch(e){
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.create - Status Code ${e.status}: ${e.message}`);
+
     return next(e);
   }
 }
@@ -251,6 +263,9 @@ const update = async (req, res, next) => {
     res.status(200).json(result)
 
   } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.update - Status Code ${e.status}: ${e.message}`);
+
     return next(e);
   }
 
@@ -292,6 +307,9 @@ const remove = async (req, res, next) => {
     res.status(200).json(result);
 
   } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.remove - Status Code ${e.status}: ${e.message}`);
+
     return next(e);
   }
 
@@ -334,6 +352,9 @@ const recipes = async (req, res, next) => {
     res.status(200).json(results);
 
   } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.recipes - Status Code ${e.status}: ${e.message}`);
+
     return next(e);
   }
 
