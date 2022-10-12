@@ -94,10 +94,5 @@ app.use((error, req, res, next) => {
 
 });
 
-/*
- * Start the server
- */
-app.listen(process.env.EXPRESS_PORT, () => {
-  let startupMessage = `${process.env.ENVIRONMENT} server started on port ${process.env.EXPRESS_PORT}`;
-  logger.logMessage('info', startupMessage);
-});
+/* export the server for testing */
+module.exports  = app;

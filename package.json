@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watch --collect-coverage",
-    "dev": "nodemon ./index.js",
+    "dev": "nodemon ./server.js",
     "migrate": "knex migrate:latest --knexfile database/knexfile.js",
     "rollback": "knex migrate:rollback --knexfile database/knexfile.js",
     "seed": "knex seed:run --knexfile database/knexfile.js",
-    "start": "node ./index.js",
-    "startDev": "nodemon ./index.js"
+    "start": "node ./server.js",
+    "startDev": "nodemon ./server.js"
   },
   "repository": {
     "type": "git",
