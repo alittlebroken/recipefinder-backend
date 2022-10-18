@@ -116,24 +116,14 @@ const removeAll = async () => {
 
      return {
        success: true,
-       message: 'Cookbook successfully removed'
+       message: 'All cookbooks removed successfully'
      }
 
    } catch(e) {
 
-     /* We wish to only pass back via the api our own errors, all others from
-        the DB etc get passed back as a generic message */
-     let message;
-
-     if(e.name === 'COOKBOOKMODEL_ERROR'){
-       message = e.message;
-     } else {
-       message = 'There was an issue with the resource, please try again later'
-     }
-
      return {
        success: false,
-       message: message
+       message: 'There was an issue with the resource, please try again later'
      }
 
    }
