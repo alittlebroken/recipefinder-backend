@@ -855,7 +855,7 @@ describe('cookbookModel.removeAll', () => {
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
     expect(result.success).toBe(true);
-    expect(result.message).toEqual('Cookbook successfully removed');
+    expect(result.message).toEqual('All cookbooks removed successfully');
 
   });
 
