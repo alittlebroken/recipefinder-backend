@@ -56,14 +56,15 @@ app.use(morgan('combined', {
    app.use(morgan('combined'));
  }
 
- app.get('/', (req, res) => {
-   res.send('Boo!')
-   logger.logMessage('debug', 'Test API Route actiavted')
- })
-
 /*
  * Import our routes
  */
+const cookbooksRoute = require('./routes/api/cookbooksRoute');
+
+/*
+ * Add the routes to the app
+ */
+app.use('/cookbooks', cookbooksRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
@@ -94,10 +95,5 @@ app.use((error, req, res, next) => {
 
 });
 
-/*
- * Start the server
- */
-app.listen(process.env.EXPRESS_PORT, () => {
-  let startupMessage = `${process.env.ENVIRONMENT} server started on port ${process.env.EXPRESS_PORT}`;
-  logger.logMessage('info', startupMessage);
-});
+/* export the server for testing */
+module.exports  = app;

@@ -398,7 +398,7 @@ const findByCookbook = async id => {
      .select(
        'cc.id',
        'c.name as cookbookName',
-       'c.id as categoryId',
+       'c.id as cookbookId',
        'cat.name as categoryName',
        'cat.id as categoryId'
      )

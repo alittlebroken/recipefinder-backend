@@ -4,13 +4,13 @@
   "description": "��#\u0000 \u0000r\u0000e\u0000c\u0000i\u0000p\u0000e\u0000f\u0000i\u0000n\u0000d\u0000e\u0000r\u0000-\u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watch --collect-coverage",
-    "dev": "nodemon ./index.js",
+    "test": "jest --watch --collect-coverage --detectOpenHandles",
+    "dev": "nodemon ./server.js",
     "migrate": "knex migrate:latest --knexfile database/knexfile.js",
     "rollback": "knex migrate:rollback --knexfile database/knexfile.js",
     "seed": "knex seed:run --knexfile database/knexfile.js",
-    "start": "node ./index.js",
-    "startDev": "nodemon ./index.js"
+    "start": "node ./server.js",
+    "startDev": "nodemon ./server.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,8 @@
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^4.18.1",
+    "jest-cli": "^29.1.2",
+    "jest-express": "^1.12.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^2.1.0",
     "morgan": "^1.10.0",
@@ -38,7 +40,7 @@
     "pg": "^8.7.3",
     "rotating-file-stream": "^3.0.4",
     "sqlite3": "^5.0.8",
-    "supertest": "^6.2.4",
+    "supertest": "^6.3.0",
     "winston": "^3.8.2"
   },
   "devDependencies": {

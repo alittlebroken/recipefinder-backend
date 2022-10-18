@@ -46,4 +46,4 @@ env JWT_REFRESH_TOKEN_SECRET refresh-token-secret
 env SALT_ROUNDS 10
 
 # Start the server
-CMD [ "node", "index.js" ]
+CMD [ "node", "server.js" ]

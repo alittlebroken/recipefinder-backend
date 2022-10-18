@@ -103,6 +103,34 @@ const remove = async cookbookId => {
 };
 
 /*
+ * Removes all cookbooks from the system
+ * @returns {object} Details on how successful the operation was and anyway
+ * supporting messages
+ */
+const removeAll = async () => {
+
+   try{
+
+     /* remove the cookbook */
+     await db('cookbooks').delete();
+
+     return {
+       success: true,
+       message: 'All cookbooks removed successfully'
+     }
+
+   } catch(e) {
+
+     return {
+       success: false,
+       message: 'There was an issue with the resource, please try again later'
+     }
+
+   }
+
+ };
+
+/*
  * Updates a users cookbook
  * @param {integer} cookbookId - The ID of the cookbook to be updated
  * @param {integer} userId - The ID of the user owning the cookbook
@@ -415,5 +443,6 @@ module.exports = {
   findById,
   findByName,
   findAllByName,
-  recipes
+  recipes,
+  removeAll,
 };
