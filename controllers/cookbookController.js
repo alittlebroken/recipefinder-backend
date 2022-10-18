@@ -2,6 +2,8 @@
 require('dotenv').config();
 const appLogger = require('../config/winston');
 const cookbookModel = require('../models/cookbookModel');
+const cookbookCategoriesModel = require('../models/cookbookCategoriesModel');
+const cookbookRecipesModel = require('../models/cookbookRecipesModel');
 
 /* Returns all cookbooks stored within the DB
  * @returns {array} A collection of cookbooks stored in the database
@@ -360,6 +362,353 @@ const recipes = async (req, res, next) => {
 
 };
 
+/* extract all recipes associated with a particular cookbook */
+const getCategories = async (req, res, next) => {
+
+  try{
+
+    /* Validate the request object values we need */
+    if(!req.params || req.params === undefined){
+      let err = new Error('Undefined request parameters');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      throw err;
+    }
+
+    let id = parseInt(req.params.id);
+
+    /* get the desired recipes */
+    let results = await cookbookCategoriesModel.findByCookbook(id);
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    if(!results || results.length < 1) {
+      res.status(404).json([]);
+    }
+
+
+    res.status(200).json(results);
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.getCategories - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
+const addRecipe = async (req, res, next) => {
+
+  try{
+
+    /* Validate the request object values we need */
+    if(!req.params || req.params === undefined){
+      let err = new Error('Undefined request parameters');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.body || req.body === undefined){
+      let err = new Error('Undefined request body');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.body.recipeId || req.body.recipeId === undefined){
+      let err = new Error('Undefined recipeId');
+      err.status = 400;
+      throw err;
+    }
+
+    let id = parseInt(req.params.id);
+    let recipeId = parseInt(req.body.recipeId);
+
+    /* get the desired recipes */
+    const data = {
+      cookbookId: id,
+      recipeId: recipeId
+    }
+
+    let results = await cookbookRecipesModel.create(data);
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    if(!results || results.length < 1) {
+      res.status(404).json([]);
+    }
+
+    res.status(200).json(results);
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.addRecipe - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
+const addCategory = async (req, res, next) => {
+
+  try{
+
+    /* Validate the request object values we need */
+    if(!req.params || req.params === undefined){
+      let err = new Error('Undefined request parameters');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.body || req.body === undefined){
+      let err = new Error('Undefined request body');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.body.categoryId || req.body.categoryId === undefined){
+      let err = new Error('Undefined categoryId');
+      err.status = 400;
+      throw err;
+    }
+
+    let id = parseInt(req.params.id);
+    let categoryId = parseInt(req.body.categoryId);
+
+    /* get the desired recipes */
+    const data = {
+      cookbookId: id,
+      categoryId: categoryId
+    }
+
+    let results = await cookbookCategoriesModel.create(data);
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    if(!results || results.length < 1) {
+      res.status(404).json([]);
+    }
+
+    res.status(200).json(results);
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.addCategory - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
+const removeRecipes = async (req, res, next) => {
+
+  try{
+
+    /* Validate the request object values we need */
+    if(!req.params || req.params === undefined){
+      let err = new Error('Undefined request parameters');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      throw err;
+    }
+
+    let id = parseInt(req.params.id);
+
+    /* Delete the cookbooks recipes */
+    let results = await cookbookRecipesModel.removeByCookbook(id);
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    if(!results || results.length < 1) {
+      res.status(404).json([]);
+    }
+
+    res.status(200).json(results);
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.removeRecipes - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
+const removeCategories = async (req, res, next) => {
+
+  try{
+
+    /* Validate the request object values we need */
+    if(!req.params || req.params === undefined){
+      let err = new Error('Undefined request parameters');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      throw err;
+    }
+
+    let id = parseInt(req.params.id);
+
+    /* Delete the cookbooks recipes */
+    let results = await cookbookCategoriesModel.removeByCookbook(id);
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    if(!results || results.length < 1) {
+      res.status(404).json([]);
+    }
+
+    res.status(200).json(results);
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.removeCategories - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
+const removeAll = async (req, res, next) => {
+
+  try{
+
+    /* Delete the cookbooks recipes */
+    let results = await cookbookModel.removeAll();
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: 'All cookbooks removed successfully'
+    });
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.removeAll - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
+const removeById = async (req, res, next) => {
+
+  try{
+
+    /* Validate the request object values we need */
+    if(!req.params || req.params === undefined){
+      let err = new Error('Undefined request parameters');
+      err.status = 400;
+      throw err;
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      throw err;
+    }
+
+    let id = parseInt(req.params.id);
+
+    /* Delete the cookbooks recipes */
+    let results = await cookbookModel.remove(id);
+
+    if(results.success === false){
+      let err = new Error(results.message);
+      err.status = 500;
+      throw err;
+    }
+
+    res.status(200).json(results);
+
+  } catch(e) {
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.removeById - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
 
 module.exports = {
   get,
@@ -368,5 +717,12 @@ module.exports = {
   create,
   update,
   remove,
-  recipes
+  recipes,
+  getCategories,
+  addRecipe,
+  addCategory,
+  removeRecipes,
+  removeCategories,
+  removeAll,
+  removeById
 };
