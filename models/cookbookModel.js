@@ -103,6 +103,44 @@ const remove = async cookbookId => {
 };
 
 /*
+ * Removes all cookbooks from the system
+ * @returns {object} Details on how successful the operation was and anyway
+ * supporting messages
+ */
+const removeAll = async () => {
+
+   try{
+
+     /* remove the cookbook */
+     await db('cookbooks').delete();
+
+     return {
+       success: true,
+       message: 'Cookbook successfully removed'
+     }
+
+   } catch(e) {
+
+     /* We wish to only pass back via the api our own errors, all others from
+        the DB etc get passed back as a generic message */
+     let message;
+
+     if(e.name === 'COOKBOOKMODEL_ERROR'){
+       message = e.message;
+     } else {
+       message = 'There was an issue with the resource, please try again later'
+     }
+
+     return {
+       success: false,
+       message: message
+     }
+
+   }
+
+ };
+
+/*
  * Updates a users cookbook
  * @param {integer} cookbookId - The ID of the cookbook to be updated
  * @param {integer} userId - The ID of the user owning the cookbook
@@ -415,5 +453,6 @@ module.exports = {
   findById,
   findByName,
   findAllByName,
-  recipes
+  recipes,
+  removeAll,
 };

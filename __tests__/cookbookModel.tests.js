@@ -826,6 +826,56 @@ describe('cookbookModel.findAllByName', () => {
 
 });
 
+describe('cookbookModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all cookbooks', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('cookbooks').response({
+      success: true,
+      message: 'Cookbooks successfully removed'
+    });
+
+    /** Execute the function */
+    const result = await cookbookModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('Cookbook successfully removed');
+
+  });
+
+  it('should dispay a generic error for all other error types', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('cookbooks').simulateError('lost connection to database');
+
+    /** Execute the function */
+    const result = await cookbookModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
+
+  });
+
+});
+
 xdescribe('cookbookModel.<method>', () => {
 
   /*
