@@ -56,11 +56,6 @@ app.use(morgan('combined', {
    app.use(morgan('combined'));
  }
 
- app.get('/', (req, res) => {
-   res.send('Boo!')
-   logger.logMessage('debug', 'Test API Route actiavted')
- })
-
 /*
  * Import our routes
  */
