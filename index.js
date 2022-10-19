@@ -60,11 +60,13 @@ app.use(morgan('combined', {
  * Import our routes
  */
 const cookbooksRoute = require('./routes/api/cookbooksRoute');
+const ingredientsRoute = require('./routes/api/ingredientsRoute');
 
 /*
  * Add the routes to the app
  */
 app.use('/cookbooks', cookbooksRoute);
+app.use('/ingredients', ingredientsRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
