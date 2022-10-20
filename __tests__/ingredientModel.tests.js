@@ -639,7 +639,7 @@ describe('ingredientModel.removeAll', () => {
     tracker.reset();
   })
 
-  it('should remove all ingredients', async () => {
+  it('should remove all ingredients and return how many were removed', async () => {
 
     /** Mock the DB responses */
     tracker.on.delete('ingredients').response(3);
@@ -653,17 +653,17 @@ describe('ingredientModel.removeAll', () => {
 
   });
 
-  it('should return an empty array if no ingredients to remove', async () => {
+  it('should return zero if no ingredients found to be removed', async () => {
 
     /** Mock the DB responses */
-    tracker.on.delete('ingredients').response([]);
+    tracker.on.delete('ingredients').response(0);
 
     /** Execute the function */
     const result = await ingredientModel.removeAll();
 
     /** Test the response back from the function */
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(0);
+    expect(typeof result).toBe('number');
+    expect(result).toBe(0);
 
   });
 
