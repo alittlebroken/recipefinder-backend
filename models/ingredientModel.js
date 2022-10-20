@@ -318,6 +318,37 @@ const findAllByName = async term => {
 
 };
 
+/* 
+ * Removes all ingredients from the DB
+ * @returns {object} Returns if the operation was successful or not 
+ * and any supporting messages
+ */
+const removeAll = async () => {
+
+  try{
+    /* Search the table for the specified term */
+    const results = await db('ingredients')
+     .delete('*');
+
+     if(!results || results < 1){
+       return 0;
+     } else {
+       return results;
+     }
+  } catch(e) {
+     /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+       let message;
+       message = 'There was a problem with the resource, please try again later';
+   
+       return {
+         success: false,
+         message: message
+       }
+  }
+
+};
+ 
 module.exports = {
   create,
   remove,
@@ -325,5 +356,6 @@ module.exports = {
   findOne,
   findAll,
   findById,
-  findAllByName
+  findAllByName,
+  removeAll
 }
