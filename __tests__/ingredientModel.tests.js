@@ -648,8 +648,9 @@ describe('ingredientModel.removeAll', () => {
     const result = await ingredientModel.removeAll();
 
     /* Check the data returned */
-    expect(typeof result).toBe('number');
-    expect(result).toBe(3);
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toBe(3);
 
   });
 
@@ -662,8 +663,9 @@ describe('ingredientModel.removeAll', () => {
     const result = await ingredientModel.removeAll();
 
     /** Test the response back from the function */
-    expect(typeof result).toBe('number');
-    expect(result).toBe(0);
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toBe(0);
 
   });
 

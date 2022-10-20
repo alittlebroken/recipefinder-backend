@@ -331,9 +331,9 @@ const removeAll = async () => {
      .delete('*');
 
      if(!results || results < 1){
-       return 0;
+       return { count: 0 };
      } else {
-       return results;
+       return { count: results };
      }
   } catch(e) {
      /* Check for library errors and if found swap them out for a generic
