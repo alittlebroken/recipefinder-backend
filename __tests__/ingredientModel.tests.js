@@ -623,3 +623,66 @@ describe('ingredientModel.findAllByName', () => {
   });
 
 });
+
+describe('ingredientModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all ingredients and return how many were removed', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('ingredients').response(3);
+
+    /** Execute the function */
+    const result = await ingredientModel.removeAll();
+
+    /* Check the data returned */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toBe(3);
+
+  });
+
+  it('should return zero if no ingredients found to be removed', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('ingredients').response(0);
+
+    /** Execute the function */
+    const result = await ingredientModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toBe(0);
+
+  });
+
+  it('should throw a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('ingredients').simulateError('Lost connection to the database');
+
+    /** Execute the function */
+    const result = await ingredientModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+ 
