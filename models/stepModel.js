@@ -120,7 +120,7 @@ const remove = async stepId => {
  * @returns {object} Returns wether the operation was a success and a message
  * associated with the success type of true or false
  */
-const removeAll = async recipeId => {
+const removeAllByRecipe = async recipeId => {
 
   try{
 
@@ -365,7 +365,7 @@ const findAll = async () => {
 module.exports = {
   create,
   remove,
-  removeAll,
+  removeAllByRecipe,
   update,
   findById,
   findByRecipeId,

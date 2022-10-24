@@ -181,7 +181,7 @@ describe('stepModel.remove', () => {
 
 });
 
-describe('stepModel.removeAll', () => {
+describe('stepModel.removeAllByRecipe', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -205,7 +205,7 @@ describe('stepModel.removeAll', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.removeAll(recipeId);
+    const result = await stepModel.removeAllByRecipe(recipeId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -223,7 +223,7 @@ describe('stepModel.removeAll', () => {
     const recipeId = 2;
 
     /** Execute the function */
-    const result = await stepModel.removeAll(recipeId);
+    const result = await stepModel.removeAllByRecipe(recipeId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -241,7 +241,7 @@ describe('stepModel.removeAll', () => {
     const recipeId = null;
 
     /** Execute the function */
-    const result = await stepModel.removeAll(recipeId);
+    const result = await stepModel.removeAllByRecipe(recipeId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -259,7 +259,7 @@ describe('stepModel.removeAll', () => {
     const recipeId = 1;
 
     /** Execute the function */
-    const result = await stepModel.removeAll(recipeId);
+    const result = await stepModel.removeAllByRecipe(recipeId);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
