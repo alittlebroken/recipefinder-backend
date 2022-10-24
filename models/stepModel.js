@@ -139,7 +139,7 @@ const removeAllByRecipe = async recipeId => {
      .where('recipeId', recipeId);
 
      if(!result || result.length < 1){
-       return 0;
+       return { count: 0};
      } else {
        return {
          success: true,

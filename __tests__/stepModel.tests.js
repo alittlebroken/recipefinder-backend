@@ -226,8 +226,9 @@ describe('stepModel.removeAllByRecipe', () => {
     const result = await stepModel.removeAllByRecipe(recipeId);
 
     /** Test the response back from the function */
-    expect(typeof result).toBe('number');
-    expect(result).toBe(0);
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
 
   });
 
