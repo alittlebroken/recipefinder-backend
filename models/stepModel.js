@@ -139,10 +139,7 @@ const removeAllByRecipe = async recipeId => {
      .where('recipeId', recipeId);
 
      if(!result || result.length < 1){
-       throw {
-         name: 'STEPMODEL_ERROR',
-         message: 'No data found for removal'
-       }
+       return 0;
      } else {
        return {
          success: true,

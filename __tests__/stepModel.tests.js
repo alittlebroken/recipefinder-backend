@@ -214,7 +214,7 @@ describe('stepModel.removeAllByRecipe', () => {
 
   });
 
-  it('should return an message if no records to delete', async () => {
+  it('should return 0 if no records to remove', async () => {
 
     /** Mock the DB responses */
     tracker.on.delete('steps').response(0);
@@ -226,9 +226,8 @@ describe('stepModel.removeAllByRecipe', () => {
     const result = await stepModel.removeAllByRecipe(recipeId);
 
     /** Test the response back from the function */
-    expect(typeof result).toBe('object');
-    expect(result.success).toBe(false);
-    expect(result.message).toEqual('No data found for removal');
+    expect(typeof result).toBe('number');
+    expect(result).toBe(0);
 
   });
 
