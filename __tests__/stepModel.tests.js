@@ -374,6 +374,28 @@ describe('stepModel.update', () => {
 
   });
 
+  it('should return status 404 if no records found to update', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('steps').response([]);
+
+    /** Set the data to pass into the models function */
+    const stepId = 1;
+    const recipeId = 1;
+    const stepNo = 1;
+    const stepContent = 'Preheat oven to 400 degrees celcius';
+
+    /** Execute the function */
+    const result = await stepModel.update(recipeId, stepId, stepNo, stepContent);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('No steps found to update');
+    
+
+  });
+
   it('should error if one or more required values are missing or incorrect', async () => {
 
     /** Mock the DB responses */

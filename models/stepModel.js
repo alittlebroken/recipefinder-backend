@@ -237,6 +237,13 @@ const update = async (stepId, recipeId, stepNo, stepContent) => {
      })
      .where('id', stepId);
 
+     if(!result || result.length < 1){
+      return {
+        success: false,
+        message: 'No steps found to update'
+      }
+     }
+
      return {
        success: true,
        message: 'Step updated successfully'
