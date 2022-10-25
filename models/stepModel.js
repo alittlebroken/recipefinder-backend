@@ -139,12 +139,51 @@ const removeAllByRecipe = async recipeId => {
      .where('recipeId', recipeId);
 
      if(!result || result.length < 1){
-       return { count: 0};
+       return { count: 0} ;
      } else {
        return {
          success: true,
          message: 'Step(s) successfully removed'
        };
+     }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'STEPMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+
+/*
+ * Will remove all steps stored in the database no matter which recipe they
+ * belong to
+*/
+const removeAll = async () => {
+
+  try{
+
+    /* remove all steps */
+    const result = await db('steps')
+     .delete();
+
+     if(!result || result.length < 1){
+       return { count: 0 } ;
+     } else { 
+       return { count: result };
      }
 
   } catch(e) {
@@ -363,6 +402,7 @@ module.exports = {
   create,
   remove,
   removeAllByRecipe,
+  removeAll,
   update,
   findById,
   findByRecipeId,

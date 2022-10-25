@@ -270,6 +270,74 @@ describe('stepModel.removeAllByRecipe', () => {
 
 });
 
+describe('stepModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all steps stored on the DB', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('steps').response(5);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await stepModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.count).toBe(5);
+    expect(typeof result.count).toBe('number');
+
+  });
+
+  it('should return 0 if no records to remove', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('steps').response(0);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await stepModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
+
+  });
+
+  it('should return a generic error to hide library errors', async () => {
+
+    /* Mock the DB responses */
+    tracker.on.delete('steps').simulateError('lost connection to database');
+
+    /* Set the data to pass into the models function */
+
+    /* Execute the function */
+    const result = await stepModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
 describe('stepModel.update', () => {
 
   /*
