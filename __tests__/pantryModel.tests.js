@@ -369,3 +369,175 @@ describe('pantryModel.remove', () => {
   });
 
 });
+
+describe('pantryModel.listAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return all pantries', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('pantries').response([
+      { id: 1, userId: 1, username: 'admin', numIngredients: 0},
+      { id: 2, userId: 2, username: 'twatkins', numIngredients: 2}
+    ]);
+
+    /** Set the data to pass into the models function */
+    
+    /** Execute the function */
+    const result = await pantryModel.listAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(2);
+    
+    expect(typeof result[0].id).toBe('number');
+    expect(typeof result[0].userId).toBe('number');
+    expect(typeof result[0].username).toBe('string');
+    expect(typeof result[0].numIngredients).toBe('number');
+
+    expect(typeof result[1].id).toBE('number');
+    expect(typeof result[1].userId).toBe('number');
+    expect(typeof result[1].username).toBe('string');
+    expect(typeof result[1].numIngredients).toBe('number');
+
+    expect(result[0].id).toEqual(1);
+    expect(result[0].userId).toEqual(1);
+    expect(result[0].username).toEqual('admin');
+    expect(result[0].numIngredients).toEqual(0);
+
+    expect(result[0].id).toEqual(2);
+    expect(result[0].userId).toEqual(2);
+    expect(result[0].username).toEqual('twatkins');
+    expect(result[0].numIngredients).toEqual(2);
+
+  });
+
+  it('should return an empty array if no records found', async () => {
+
+    /** Mock the DB responses if need be*/
+    tracker.on.select('pantries').response([]);
+
+    /** Set the data to pass into the models function */
+    
+    /** Execute the function */
+    const result = await pantryModel.listAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should throw a generic error for other issues', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('pantry_ingredients')
+      .simulateError('Lost connection to DB');
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await pantryModel.listAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later')
+
+  });
+
+});
+
+describe('pantryModel.list', () => {
+
+    /*
+     * Steps to run before and after this test suite
+     */
+    beforeEach(async () => {
+      /* Initialize the tracker of the various commands */
+      tracker = getTracker();
+    });
+  
+    afterEach(() => {
+      /* Reset the tracker */
+      tracker.reset();
+    })
+  
+    it('should return all pantries', async () => {
+  
+      /** Mock the DB responses */
+      tracker.on.select('pantries').response([
+        { id: 1, userId: 1, username: 'admin', numIngredients: 0},
+      ]);
+  
+      /** Set the data to pass into the models function */
+      const pantryId = 1;
+      
+      /** Execute the function */
+      const result = await pantryModel.list(pantryId);
+  
+      /** Test the response back from the function */
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(1);
+      
+      expect(typeof result[0].id).toBe('number');
+      expect(typeof result[0].userId).toBe('number');
+      expect(typeof result[0].username).toBe('string');
+      expect(typeof result[0].numIngredients).toBe('number');
+  
+      expect(result[0].id).toEqual(1);
+      expect(result[0].userId).toEqual(1);
+      expect(result[0].username).toEqual('admin');
+      expect(result[0].numIngredients).toEqual(0);
+  
+    });
+  
+    it('should return an empty array if no records found', async () => {
+  
+      /** Mock the DB responses if need be*/
+      tracker.on.select('pantries').response([]);
+  
+      /** Set the data to pass into the models function */
+      const pantryId = 10;
+      
+      /** Execute the function */
+      const result = await pantryModel.list(pantryId);
+  
+      /** Test the response back from the function */
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(0);
+  
+    });
+  
+    it('should throw a generic error for other issues', async () => {
+  
+      /** Mock the DB responses */
+      tracker.on.delete('pantry_ingredients')
+        .simulateError('Lost connection to DB');
+  
+      /** Set the data to pass into the models function */
+      const pantryId = 1;
+      
+      /** Execute the function */
+      const result = await pantryModel.list(pantryId);
+  
+      /** Test the response back from the function */
+      expect(typeof result).toBe('object');
+      expect(result.success).toBe(false);
+      expect(result.message).toEqual('There was a problem with the resource, please try again later')
+  
+    });
+
+});
