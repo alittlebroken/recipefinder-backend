@@ -120,7 +120,7 @@ const remove = async stepId => {
  * @returns {object} Returns wether the operation was a success and a message
  * associated with the success type of true or false
  */
-const removeAll = async recipeId => {
+const removeAllByRecipe = async recipeId => {
 
   try{
 
@@ -139,15 +139,51 @@ const removeAll = async recipeId => {
      .where('recipeId', recipeId);
 
      if(!result || result.length < 1){
-       throw {
-         name: 'STEPMODEL_ERROR',
-         message: 'No data found for removal'
-       }
+       return { count: 0} ;
      } else {
        return {
          success: true,
          message: 'Step(s) successfully removed'
        };
+     }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'STEPMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+
+/*
+ * Will remove all steps stored in the database no matter which recipe they
+ * belong to
+*/
+const removeAll = async () => {
+
+  try{
+
+    /* remove all steps */
+    const result = await db('steps')
+     .delete();
+
+     if(!result || result.length < 1){
+       return { count: 0 } ;
+     } else { 
+       return { count: result };
      }
 
   } catch(e) {
@@ -200,6 +236,13 @@ const update = async (stepId, recipeId, stepNo, stepContent) => {
        content: stepContent
      })
      .where('id', stepId);
+
+     if(!result || result.length < 1){
+      return {
+        success: false,
+        message: 'No steps found to update'
+      }
+     }
 
      return {
        success: true,
@@ -365,6 +408,7 @@ const findAll = async () => {
 module.exports = {
   create,
   remove,
+  removeAllByRecipe,
   removeAll,
   update,
   findById,
