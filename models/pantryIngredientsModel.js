@@ -6,7 +6,7 @@ const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
 
 /*
- * Creates a nre realtionship between a users pantry and an ingredient
+ * Creates a new realtionship between a users pantry and an ingredient
  * @param {object} Contains the values needed to be added
  * @returns {object} Contains if running this function was successful or not and
  * any supporting message
