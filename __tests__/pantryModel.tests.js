@@ -370,6 +370,76 @@ describe('pantryModel.remove', () => {
 
 });
 
+describe('pantryModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all pantries', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('pantries').response(6);
+
+    /** Set the data to pass into the models function */
+    
+    /** Execute the function */
+    const result = await pantryModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(6);
+
+  });
+
+  it('should return an error if no pantries to remove', async () => {
+
+    /** Mock the DB responses if need be*/
+    tracker.on.delete('pantries').response(0);
+
+    /** Set the data to pass into the models function */
+    
+    /** Execute the function */
+    const result = await pantryModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
+  });
+
+  it('should throw a generic error for other issues', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('pantries')
+      .simulateError('Lost connection to DB');
+
+    /** Set the data to pass into the models function */
+   
+    /** Execute the function */
+    const result = await pantryModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later')
+
+  });
+
+});
+
 describe('pantryModel.listAll', () => {
 
   /*
@@ -407,7 +477,7 @@ describe('pantryModel.listAll', () => {
     expect(typeof result[0].username).toBe('string');
     expect(typeof result[0].numIngredients).toBe('number');
 
-    expect(typeof result[1].id).toBE('number');
+    expect(typeof result[1].id).toBe('number');
     expect(typeof result[1].userId).toBe('number');
     expect(typeof result[1].username).toBe('string');
     expect(typeof result[1].numIngredients).toBe('number');
@@ -417,10 +487,10 @@ describe('pantryModel.listAll', () => {
     expect(result[0].username).toEqual('admin');
     expect(result[0].numIngredients).toEqual(0);
 
-    expect(result[0].id).toEqual(2);
-    expect(result[0].userId).toEqual(2);
-    expect(result[0].username).toEqual('twatkins');
-    expect(result[0].numIngredients).toEqual(2);
+    expect(result[1].id).toEqual(2);
+    expect(result[1].userId).toEqual(2);
+    expect(result[1].username).toEqual('twatkins');
+    expect(result[1].numIngredients).toEqual(2);
 
   });
 

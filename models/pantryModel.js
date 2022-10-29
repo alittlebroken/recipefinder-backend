@@ -169,6 +169,31 @@ const removeItem = async pantryItem => {
 
 };
 
+/*
+ * Removes all pantries
+ */
+const removeAll = async () => {
+
+  try {
+
+    /* Remove all pantries */
+    const result = await db('pantries').del();
+
+    return { count: result };
+
+  } catch(e) {
+    /* Determine if we display a generic error or one of our own messages */
+    let message = 'There was an issue with the resource, please try again later';
+  
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 const updateItem = async pantryItem => {
 
   try {
@@ -352,5 +377,6 @@ module.exports = {
   removeItem,
   updateItem,
   listAll,
-  list
+  list,
+  removeAll
 };
