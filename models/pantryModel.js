@@ -169,6 +169,31 @@ const removeItem = async pantryItem => {
 
 };
 
+/*
+ * Removes all pantries
+ */
+const removeAll = async () => {
+
+  try {
+
+    /* Remove all pantries */
+    const result = await db('pantries').del();
+
+    return { count: result };
+
+  } catch(e) {
+    /* Determine if we display a generic error or one of our own messages */
+    let message = 'There was an issue with the resource, please try again later';
+  
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 const updateItem = async pantryItem => {
 
   try {
@@ -231,9 +256,127 @@ const updateItem = async pantryItem => {
 
 };
 
+/* Returns a list of all pantries stored in the database
+ * @returns {array} A list of pantry objects
+ */
+const listAll = async () => {
+
+  try{
+
+    /* Get the list if pantries from the DB */
+    const results = await db('pantries as p')
+     .join('users as u', 'p.userId', '=', 'u.id')
+     .count('pi.pantryId as numIngredients')
+     .select(
+      'p.id as id',
+      'u.id as userId',
+      'u.username as username',
+      db('pantry_ingredients as pi')
+       .count('*')
+       .whereRaw('?? == ??', ['pi.pantryId', 'p.id'])
+       .as('numIngredients')
+     );
+
+     if(!results){
+      throw {
+        name: 'PANTRYMODEL_ERROR',
+        message: 'There was a problem with the resource, please try again later'
+      }
+     }
+
+     if(results.length < 1){
+      return [];
+     }
+
+     return results;
+
+  } catch(e) {
+    /* We only wish to have the errors specific to the model reported back others are caught as
+    a generic error */
+    let message;
+    
+    if(e.name === 'PANTRYMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later'
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
+/* Returns a list of a particular pantry
+ * @returns {array} A pantry object
+ */
+const list = async pantryId => {
+
+  try{
+
+    /* Validate the passed in value(s) */
+    if(!pantryId || pantryId === undefined || typeof pantryId !== 'number'){
+      throw {
+        name: 'PANTRYMODEL_ERROR',
+        message: 'Undefined pantryId'
+      }
+    }
+
+    /* Get the list if pantries from the DB */
+    const results = await db('pantries as p')
+     .join('users as u', 'p.userId', '=', 'u.id')
+     .count('pi.pantryId as numIngredients')
+     .select(
+      'p.id as id',
+      'u.id as userId',
+      'u.username as username',
+      db('pantry_ingredients as pi')
+       .count('*')
+       .whereRaw('?? == ??', ['pi.pantryId', 'p.id'])
+       .as('numIngredients')
+     )
+     .where({ pantryId: pantryId});
+
+     if(!results){
+      throw {
+        name: 'PANTRYMODEL_ERROR',
+        message: 'There was a problem with the resource, please try again later'
+      }
+     }
+
+     if(results.length < 1){
+      return [];
+     }
+
+     return results;
+
+  } catch(e) {
+    /* We only wish to have the errors specific to the model reported back others are caught as
+    a generic error */
+    let message;
+    
+    if(e.name === 'PANTRYMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later'
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
 module.exports = {
   create,
   addItem,
   removeItem,
-  updateItem
+  updateItem,
+  listAll,
+  list,
+  removeAll
 };
