@@ -137,6 +137,23 @@ describe('categoryModel.remove', () => {
 
   });
 
+  it('should return a count of zero if no categories removed', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const categoryId = 1;
+
+    /** Execute the function */
+    const result = await categoryModel.remove(categoryId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.count).toBe(0);
+    
+  });
+
   it('should should return a generic error to hide library errors', async () => {
 
     /** Mock the DB responses */

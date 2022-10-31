@@ -73,6 +73,12 @@ const remove = async categoryId => {
      .where('id', categoryId)
      .returning('id');
 
+     if(!result || result.length < 1){
+      return {
+        count: 0
+      }
+     }
+
       return {
         success: true,
         message: 'Category successfully removed'
