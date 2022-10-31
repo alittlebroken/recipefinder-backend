@@ -8,8 +8,9 @@ const router = express.Router();
 const categoriesController = require('../../controllers/categoriesController');
 
 router.get('/', categoriesController.list);
-//router.post('/', categoriesController.create);
-//router.delete('/', categoriesController.remove);
+router.post('/', categoriesController.create);
+router.delete('/', categoriesController.removeAll);
+//router.delete('/:id', categoriesController.remove);
 //router.put('/', categoriesController.update);
 
 module.exports = router;

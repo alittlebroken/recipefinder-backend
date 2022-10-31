@@ -153,6 +153,316 @@ describe('categoriesController.list', () => {
   
 });
 
+describe('categoriesController.create', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and create the category', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [{
+      id: 12
+    }]
+
+    // Set any variables needed to be passed to controllers and or models
+    const categoryName = 'Puddings';
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'Category successfully added';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post('/categories')
+      .send({
+        name: categoryName
+      });
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 400 if request body is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const categoryName = 'Drinks';
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request body';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await categoriesController.create(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if request body value name is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const categoryName = 'Snacks';
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined name';
+
+    /* Mock Express request and response */
+    const mockRequest = { body: {} };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await categoriesController.create(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 500 if resource encounters any other problem', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const categoryName = 'Treats';
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = modelReturnData.success;
+    const returnMessage = modelReturnData.message;
+
+    /* Mock Express request and response */
+    const mockRequest = { body: { name: categoryName }};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await categoriesController.create(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+});
+
+describe('categoriesController.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and remove all categories', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = { count: 12 };
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'removeAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'All categories removed successfully';
+
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete('/categories');
+
+    /* Test everything works as expected */
+    expect(response.status).toBe(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 404 if no categories found to remove', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = { count: 0 };
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'removeAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'No categories found to be removed';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await categoriesController.removeAll(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 500 if the resource encounters any other problems', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(categoryModel, 'removeAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = modelReturnData.success;
+    const returnMessage = modelReturnData.message;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await categoriesController.removeAll(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+});
+
 xdescribe('<model>Controller.<method>', () => {
 
     /*
