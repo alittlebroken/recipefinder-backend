@@ -64,6 +64,7 @@ const ingredientsRoute = require('./routes/api/ingredientsRoute');
 const stepsRoute = require('./routes/api/stepsRoute');
 const pantriesRoute = require('./routes/api/pantriesRoute');
 const categoriesRoute = require('./routes/api/categoriesRoute');
+const recipesRoute = require('./routes/api/recipesRoute');
 
 /*
  * Add the routes to the app
@@ -73,6 +74,7 @@ app.use('/ingredients', ingredientsRoute);
 app.use('/steps', stepsRoute);
 app.use('/pantries', pantriesRoute);
 app.use('/categories', categoriesRoute);
+app.use('/recipes', recipesRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
