@@ -153,6 +153,70 @@ const removeAll = async (req, res, next) => {
 };
 
 /* 
+ * Remove a singular occurance of a category
+ */
+const remove = async (req, res, next) => {
+
+    const moduleMethod = 'remove';
+
+    try{
+
+        /* Validate any req parameters */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        /* Remove the requested category */
+        let id = parseInt(req.params.id);
+        const result = await categoryModel.remove(id);
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        if(result.count < 1){
+            throw {
+                status: 404,
+                success: false,
+                message: 'No categories found to be removed'
+            }
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Category successfully removed'
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -176,5 +240,6 @@ const method = async (req, res, next) => {
 module.exports = {
     list,
     create,
-    removeAll
+    removeAll,
+    remove
 };
