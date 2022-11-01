@@ -166,6 +166,12 @@ const update = async (categoryId, name) => {
      })
      .where('id', categoryId).returning('id');
 
+     if(result.length < 1){
+      return {
+        count: 0
+      }
+     }
+
      return{
        success: true,
        message: 'Category successfully updated'

@@ -278,6 +278,25 @@ describe('categoryModel.update', () => {
 
   });
 
+  it('should return a count of zero if no records found to match', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const categoryId = 1;
+    const name = 'Dairy Free';
+
+    /** Execute the function */
+    const result = await categoryModel.update(categoryId, name);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
+
+  });
+
   it('should return an error if required arguments are missing or invalid', async () => {
 
     /** Mock the DB responses */
