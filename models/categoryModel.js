@@ -73,6 +73,12 @@ const remove = async categoryId => {
      .where('id', categoryId)
      .returning('id');
 
+     if(!result || result.length < 1){
+      return {
+        count: 0
+      }
+     }
+
       return {
         success: true,
         message: 'Category successfully removed'
@@ -99,6 +105,42 @@ const remove = async categoryId => {
 };
 
 /*
+ * Removes all categories from the database
+ * @returns {object} returns a count of records removed or zero if non have been
+ * or a error message if there was another problem
+ */
+const removeAll = async () => {
+
+  try{
+
+    /* Perform the desired action against the database and return the id of the
+       affected record
+     */
+    const result = await db('categories')
+     .delete();
+
+    if(result < 1){
+      return { count: 0 }
+    } else {
+      return { count: result }
+    }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message= 'There was a problem with the resource, please try again later';
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};                    
+
+/*
  * Updates an existing entry in the categories table
  * @param {number} categoryId - The unique identifier of the category affected
  * @param {string} name - The uodated name for the category
@@ -123,6 +165,12 @@ const update = async (categoryId, name) => {
        name: name
      })
      .where('id', categoryId).returning('id');
+
+     if(result.length < 1){
+      return {
+        count: 0
+      }
+     }
 
      return{
        success: true,
@@ -339,5 +387,6 @@ module.exports  = {
   findByName,
   findAll,
   findById,
-  findAllByName
+  findAllByName,
+  removeAll
 };

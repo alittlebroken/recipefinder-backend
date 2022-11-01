@@ -294,7 +294,7 @@ const removeAll = async (req, res, next) => {
 
         /* Attempt to remove the pantries */
         const result = await pantryModel.removeAll();
-        console.log(result)
+        
         if(result.success === false){
             throw {
                 status: 500,

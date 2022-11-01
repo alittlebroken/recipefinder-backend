@@ -137,6 +137,23 @@ describe('categoryModel.remove', () => {
 
   });
 
+  it('should return a count of zero if no categories removed', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const categoryId = 1;
+
+    /** Execute the function */
+    const result = await categoryModel.remove(categoryId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.count).toBe(0);
+    
+  });
+
   it('should should return a generic error to hide library errors', async () => {
 
     /** Mock the DB responses */
@@ -147,6 +164,73 @@ describe('categoryModel.remove', () => {
 
     /** Execute the function */
     const result = await categoryModel.remove(categoryId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
+describe('categoryModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all categories', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('categories').response(12);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await categoryModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(12);
+
+  });
+
+  it('should return a count of zero if no categories to remove', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('categories').response(0);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await categoryModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
+  });
+
+  it('should should return a generic error to hide library errors', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('categories').simulateError('Lost connection to database');
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await categoryModel.removeAll();
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -191,6 +275,25 @@ describe('categoryModel.update', () => {
     expect(typeof result).toBe('object');
     expect(result.success).toBe(true);
     expect(result.message).toEqual('Category successfully updated');
+
+  });
+
+  it('should return a count of zero if no records found to match', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('categories').response([]);
+
+    /** Set the data to pass into the models function */
+    const categoryId = 1;
+    const name = 'Dairy Free';
+
+    /** Execute the function */
+    const result = await categoryModel.update(categoryId, name);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
 
   });
 

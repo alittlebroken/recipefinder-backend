@@ -63,6 +63,7 @@ const cookbooksRoute = require('./routes/api/cookbooksRoute');
 const ingredientsRoute = require('./routes/api/ingredientsRoute');
 const stepsRoute = require('./routes/api/stepsRoute');
 const pantriesRoute = require('./routes/api/pantriesRoute');
+const categoriesRoute = require('./routes/api/categoriesRoute');
 
 /*
  * Add the routes to the app
@@ -71,6 +72,7 @@ app.use('/cookbooks', cookbooksRoute);
 app.use('/ingredients', ingredientsRoute);
 app.use('/steps', stepsRoute);
 app.use('/pantries', pantriesRoute);
+app.use('/categories', categoriesRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
