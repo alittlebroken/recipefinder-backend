@@ -9,6 +9,819 @@ const recipeCategoriesModel = require('../models/recipeCategoriesModel');
 const recipeIngredientsModel = require('../models/recipeIngredientsModel');
 const cookbookRecipesModel = require('../models/cookbookRecipesModel');
 const recipeModel = require('../models/recipeModel');
+const { levels } = require('logform');
+
+describe('recipesController.listAll', () => {
+
+    /*
+     * Steps to run before and after this test suite
+     */
+    beforeEach(async () => {
+  
+    });
+  
+    afterEach(() => {
+      jest.clearAllMocks();
+    })
+  
+    it('should return status 200 and a list if all recipes', async () => {
+  
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = [
+        {
+          recipeId: 1,
+          name: 'Gluten free flatbread',
+          description: 'Easy bake gluten free flatbread',
+          servings: 6,
+          calories_per_serving: 123,
+          prep_time: 15,
+          cook_time: 5,
+          rating: 25,
+          ingredients: [
+            { id: 1, name: 'Gluten free flour', amount: 150, amount_type: 'grams' },
+            { id: 2, name: 'Salt', amount: 0.25, amount_type: 'teaspoon' },
+            { id: 3, name: 'Warm water', amount: 100, amount_type: 'ml' },
+            { id: 4, name: 'Olive Oil', amount: 2, amount_type: 'tablespoons' }
+          ],
+          cookbooks: [
+            { id: 1, name: 'Gluten Free recipes' }
+          ],
+          steps: [
+            { id: 1, stepNo: 1, content: 'Put the flour and salt into a bowl and trickle on the water' },
+            { id: 2, stepNo: 2, content: 'Mix the flour and water misture together' },
+            { id: 3, stepNo: 3, content: 'Add the oil and knead the dough until it is soft' },
+            { id: 4, stepNo: 4, content: 'Knead the dough for 5 minutes' },
+            { id: 5, stepNo: 5, content: 'Leave the dough to stand for 30 minutes' },
+            { id: 6, stepNo: 6, content: 'Divide the dough into four small balls ( or six if your frying pan is smaller)' },
+            { id: 7, stepNo: 7, content: 'Roll each dough ball out with a rolling pin' },
+            { id: 8, stepNo: 8, content: 'Heat a frying pan and rub a little oil onto the surface of the pan' },
+            { id: 9, stepNo: 9, content: 'Cook each flatbread for 2 minutes each side. Keep the flatbreads warm, wrapped in foil or in a clean tea towel whilst you cook the others' },
+            { id: 10, stepNo: 10, content: 'For crisper flatbreads, run some oil on them and vut into strips or triangles and fry for a further five to ten minutes' },
+          ],
+          categories: [
+            { id: 1, name: 'Gluten free'},
+            { id: 2, name: 'Snacks' },
+            { id: 3, name: 'Breads' },
+          ]
+        }
+      ];
+  
+      // Set any variables needed to be passed to controllers and or models
+  
+      // Mock any needed third party modules
+      jest.spyOn(recipeModel, 'findAll').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 200;
+  
+      /* Mock Express request and response */
+      const mockRequest = {};
+      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+      const mockNext = jest.fn();
+  
+      /* Execute the function */
+      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+      const response = await request(app)
+        .get('/recipes');
+  
+      /* Test everything works as expected */
+      expect(response.status).toEqual(returnStatus);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body).toHaveLength(1);
+
+      expect(typeof response.body[0].recipeId).toBe('number');
+      expect(typeof response.body[0].name).toBe('string');
+      expect(typeof response.body[0].description).toBe('string');
+      expect(typeof response.body[0].servings).toBe('number');
+      expect(typeof response.body[0].calories_per_serving).toBe('number');
+      expect(typeof response.body[0].prep_time).toBe('number');
+      expect(typeof response.body[0].cook_time).toBe('number');
+      expect(typeof response.body[0].rating).toBe('number');
+
+      expect(Array.isArray(response.body[0].ingredients)).toBe(true);
+      expect(Array.isArray(response.body[0].steps)).toBe(true);
+      expect(Array.isArray(response.body[0].cookbooks)).toBe(true);
+      expect(Array.isArray(response.body[0].categories)).toBe(true);
+
+      expect(response.body[0].recipeId).toEqual(1);
+      expect(response.body[0].name).toEqual('Gluten free flatbread');
+      expect(response.body[0].description).toEqual('Easy bake gluten free flatbread');
+      expect(response.body[0].servings).toEqual(6);
+      expect(response.body[0].calories_per_serving).toEqual(123);
+      expect(response.body[0].prep_time).toEqual(15);
+      expect(response.body[0].cook_time).toEqual(5);
+      expect(response.body[0].rating).toEqual(25);
+
+      expect(response.body[0].ingredients[0].id).toEqual(1);
+      expect(response.body[0].ingredients[0].name).toEqual('Gluten free flour');
+      expect(response.body[0].ingredients[0].amount).toEqual(150);
+      expect(response.body[0].ingredients[0].amount_type).toEqual('grams');
+
+      expect(response.body[0].ingredients[1].id).toEqual(2);
+      expect(response.body[0].ingredients[1].name).toEqual('Salt');
+      expect(response.body[0].ingredients[1].amount).toEqual(0.25);
+      expect(response.body[0].ingredients[1].amount_type).toEqual('teaspoon');
+
+      expect(response.body[0].ingredients[2].id).toEqual(3);
+      expect(response.body[0].ingredients[2].name).toEqual('Warm water');
+      expect(response.body[0].ingredients[2].amount).toEqual(100);
+      expect(response.body[0].ingredients[2].amount_type).toEqual('ml');
+
+      expect(response.body[0].ingredients[3].id).toEqual(4);
+      expect(response.body[0].ingredients[3].name).toEqual('Olive Oil');
+      expect(response.body[0].ingredients[3].amount).toEqual(2);
+      expect(response.body[0].ingredients[3].amount_type).toEqual('tablespoons');
+
+      expect(response.body[0].cookbooks[0].id).toEqual(1);
+      expect(response.body[0].cookbooks[0].name).toEqual('Gluten Free recipes');
+      
+      expect(response.body[0].steps[0].id).toEqual(1);
+      expect(response.body[0].steps[0].stepNo).toEqual(1);
+      expect(response.body[0].steps[0].content).toEqual('Put the flour and salt into a bowl and trickle on the water');
+
+      expect(response.body[0].steps[1].id).toEqual(2);
+      expect(response.body[0].steps[1].stepNo).toEqual(2);
+      expect(response.body[0].steps[1].content).toEqual('Mix the flour and water misture together');
+
+      expect(response.body[0].steps[2].id).toEqual(3);
+      expect(response.body[0].steps[2].stepNo).toEqual(3);
+      expect(response.body[0].steps[2].content).toEqual('Add the oil and knead the dough until it is soft');
+
+      expect(response.body[0].steps[3].id).toEqual(4);
+      expect(response.body[0].steps[3].stepNo).toEqual(4);
+      expect(response.body[0].steps[3].content).toEqual('Knead the dough for 5 minutes');
+
+      expect(response.body[0].steps[4].id).toEqual(5);
+      expect(response.body[0].steps[4].stepNo).toEqual(5);
+      expect(response.body[0].steps[4].content).toEqual('Leave the dough to stand for 30 minutes');
+
+      expect(response.body[0].steps[5].id).toEqual(6);
+      expect(response.body[0].steps[5].stepNo).toEqual(6);
+      expect(response.body[0].steps[5].content).toEqual('Divide the dough into four small balls ( or six if your frying pan is smaller)');
+
+      expect(response.body[0].steps[6].id).toEqual(7);
+      expect(response.body[0].steps[6].stepNo).toEqual(7);
+      expect(response.body[0].steps[6].content).toEqual('Roll each dough ball out with a rolling pin');
+
+      expect(response.body[0].steps[7].id).toEqual(8);
+      expect(response.body[0].steps[7].stepNo).toEqual(8);
+      expect(response.body[0].steps[7].content).toEqual('Heat a frying pan and rub a little oil onto the surface of the pan');
+
+      expect(response.body[0].steps[8].id).toEqual(9);
+      expect(response.body[0].steps[8].stepNo).toEqual(9);
+      expect(response.body[0].steps[8].content).toEqual('Cook each flatbread for 2 minutes each side. Keep the flatbreads warm, wrapped in foil or in a clean tea towel whilst you cook the others');
+
+      expect(response.body[0].steps[9].id).toEqual(10);
+      expect(response.body[0].steps[9].stepNo).toEqual(10);
+      expect(response.body[0].steps[9].content).toEqual('For crisper flatbreads, run some oil on them and vut into strips or triangles and fry for a further five to ten minutes');
+
+      expect(response.body[0].categories[0].id).toEqual(1);
+      expect(response.body[0].categories[0].name).toEqual('Gluten free');
+
+      expect(response.body[0].categories[1].id).toEqual(2);
+      expect(response.body[0].categories[1].name).toEqual('Snacks');
+
+      expect(response.body[0].categories[2].id).toEqual(3);
+      expect(response.body[0].categories[2].name).toEqual('Breads');
+
+    });
+
+    it('should return status 404 if no recipes to list', async () => {
+  
+        // Set Mocked data that models and controllers should return
+        const modelReturnData = [];
+    
+        // Set any variables needed to be passed to controllers and or models
+    
+        // Mock any needed third party modules
+        jest.spyOn(recipeModel, 'findAll').mockImplementation(() => {
+          return modelReturnData;
+        });
+    
+        // Set here the expected return values for the test
+        const returnStatus = 404;
+        const returnSuccess = false;
+        const returnMessage = 'There are currently no recipes';
+
+        /* Mock Express request and response */
+        const mockRequest = {};
+        const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+        const mockNext = jest.fn();
+    
+        /* Execute the function */
+        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+        await recipesController.listAll(mockRequest, mockResponse, mockNext);
+    
+        /* Test everything works as expected */
+        expect(mockNext).toHaveBeenCalled();
+        expect(mockNext).toHaveBeenCalledWith({
+          status: returnStatus,
+          success: returnSuccess,
+          message: returnMessage
+        });
+    
+      });
+
+      it('should return status 500 if the resource encounters any other problem', async () => {
+  
+        // Set Mocked data that models and controllers should return
+        const modelReturnData = {
+          success: false,
+          message: 'There was a problem with the resource, please try again later'
+        };
+    
+        // Set any variables needed to be passed to controllers and or models
+    
+        // Mock any needed third party modules
+        jest.spyOn(recipeModel, 'findAll').mockImplementation(() => {
+          return modelReturnData;
+        });
+    
+        // Set here the expected return values for the test
+        const returnStatus = 500;
+        const returnSuccess = modelReturnData.success;
+        const returnMessage = modelReturnData.message;
+    
+        /* Mock Express request and response */
+        const mockRequest = {};
+        const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+        const mockNext = jest.fn();
+    
+        /* Execute the function */
+        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+        await recipesController.listAll(mockRequest, mockResponse, mockNext);
+    
+        /* Test everything works as expected */
+        expect(mockNext).toHaveBeenCalled();
+        expect(mockNext).toHaveBeenCalledWith({
+          status: returnStatus,
+          success: returnSuccess,
+          message: returnMessage
+        });
+    
+      });
+  
+});
+
+describe('recipesController.list', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and the requested recipe', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [
+      {
+        recipeId: 1,
+        name: 'Gluten free flatbread',
+        description: 'Easy bake gluten free flatbread',
+        servings: 6,
+        calories_per_serving: 123,
+        prep_time: 15,
+        cook_time: 5,
+        rating: 25,
+        ingredients: [
+          { id: 1, name: 'Gluten free flour', amount: 150, amount_type: 'grams' },
+          { id: 2, name: 'Salt', amount: 0.25, amount_type: 'teaspoon' },
+          { id: 3, name: 'Warm water', amount: 100, amount_type: 'ml' },
+          { id: 4, name: 'Olive Oil', amount: 2, amount_type: 'tablespoons' }
+        ],
+        cookbooks: [
+          { id: 1, name: 'Gluten Free recipes' }
+        ],
+        steps: [
+          { id: 1, stepNo: 1, content: 'Put the flour and salt into a bowl and trickle on the water' },
+          { id: 2, stepNo: 2, content: 'Mix the flour and water misture together' },
+          { id: 3, stepNo: 3, content: 'Add the oil and knead the dough until it is soft' },
+          { id: 4, stepNo: 4, content: 'Knead the dough for 5 minutes' },
+          { id: 5, stepNo: 5, content: 'Leave the dough to stand for 30 minutes' },
+          { id: 6, stepNo: 6, content: 'Divide the dough into four small balls ( or six if your frying pan is smaller)' },
+          { id: 7, stepNo: 7, content: 'Roll each dough ball out with a rolling pin' },
+          { id: 8, stepNo: 8, content: 'Heat a frying pan and rub a little oil onto the surface of the pan' },
+          { id: 9, stepNo: 9, content: 'Cook each flatbread for 2 minutes each side. Keep the flatbreads warm, wrapped in foil or in a clean tea towel whilst you cook the others' },
+          { id: 10, stepNo: 10, content: 'For crisper flatbreads, run some oil on them and vut into strips or triangles and fry for a further five to ten minutes' },
+        ],
+        categories: [
+          { id: 1, name: 'Gluten free'},
+          { id: 2, name: 'Snacks' },
+          { id: 3, name: 'Breads' },
+        ]
+      }
+    ];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'findByRecipe').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .get(`/recipes/${recipeId}`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toHaveLength(1);
+
+    expect(typeof response.body[0].recipeId).toBe('number');
+    expect(typeof response.body[0].name).toBe('string');
+    expect(typeof response.body[0].description).toBe('string');
+    expect(typeof response.body[0].servings).toBe('number');
+    expect(typeof response.body[0].calories_per_serving).toBe('number');
+    expect(typeof response.body[0].prep_time).toBe('number');
+    expect(typeof response.body[0].cook_time).toBe('number');
+    expect(typeof response.body[0].rating).toBe('number');
+
+    expect(Array.isArray(response.body[0].ingredients)).toBe(true);
+    expect(Array.isArray(response.body[0].steps)).toBe(true);
+    expect(Array.isArray(response.body[0].cookbooks)).toBe(true);
+    expect(Array.isArray(response.body[0].categories)).toBe(true);
+
+    expect(response.body[0].recipeId).toEqual(1);
+    expect(response.body[0].name).toEqual('Gluten free flatbread');
+    expect(response.body[0].description).toEqual('Easy bake gluten free flatbread');
+    expect(response.body[0].servings).toEqual(6);
+    expect(response.body[0].calories_per_serving).toEqual(123);
+    expect(response.body[0].prep_time).toEqual(15);
+    expect(response.body[0].cook_time).toEqual(5);
+    expect(response.body[0].rating).toEqual(25);
+
+    expect(response.body[0].ingredients[0].id).toEqual(1);
+    expect(response.body[0].ingredients[0].name).toEqual('Gluten free flour');
+    expect(response.body[0].ingredients[0].amount).toEqual(150);
+    expect(response.body[0].ingredients[0].amount_type).toEqual('grams');
+
+    expect(response.body[0].ingredients[1].id).toEqual(2);
+    expect(response.body[0].ingredients[1].name).toEqual('Salt');
+    expect(response.body[0].ingredients[1].amount).toEqual(0.25);
+    expect(response.body[0].ingredients[1].amount_type).toEqual('teaspoon');
+
+    expect(response.body[0].ingredients[2].id).toEqual(3);
+    expect(response.body[0].ingredients[2].name).toEqual('Warm water');
+    expect(response.body[0].ingredients[2].amount).toEqual(100);
+    expect(response.body[0].ingredients[2].amount_type).toEqual('ml');
+
+    expect(response.body[0].ingredients[3].id).toEqual(4);
+    expect(response.body[0].ingredients[3].name).toEqual('Olive Oil');
+    expect(response.body[0].ingredients[3].amount).toEqual(2);
+    expect(response.body[0].ingredients[3].amount_type).toEqual('tablespoons');
+
+    expect(response.body[0].cookbooks[0].id).toEqual(1);
+    expect(response.body[0].cookbooks[0].name).toEqual('Gluten Free recipes');
+    
+    expect(response.body[0].steps[0].id).toEqual(1);
+    expect(response.body[0].steps[0].stepNo).toEqual(1);
+    expect(response.body[0].steps[0].content).toEqual('Put the flour and salt into a bowl and trickle on the water');
+
+    expect(response.body[0].steps[1].id).toEqual(2);
+    expect(response.body[0].steps[1].stepNo).toEqual(2);
+    expect(response.body[0].steps[1].content).toEqual('Mix the flour and water misture together');
+
+    expect(response.body[0].steps[2].id).toEqual(3);
+    expect(response.body[0].steps[2].stepNo).toEqual(3);
+    expect(response.body[0].steps[2].content).toEqual('Add the oil and knead the dough until it is soft');
+
+    expect(response.body[0].steps[3].id).toEqual(4);
+    expect(response.body[0].steps[3].stepNo).toEqual(4);
+    expect(response.body[0].steps[3].content).toEqual('Knead the dough for 5 minutes');
+
+    expect(response.body[0].steps[4].id).toEqual(5);
+    expect(response.body[0].steps[4].stepNo).toEqual(5);
+    expect(response.body[0].steps[4].content).toEqual('Leave the dough to stand for 30 minutes');
+
+    expect(response.body[0].steps[5].id).toEqual(6);
+    expect(response.body[0].steps[5].stepNo).toEqual(6);
+    expect(response.body[0].steps[5].content).toEqual('Divide the dough into four small balls ( or six if your frying pan is smaller)');
+
+    expect(response.body[0].steps[6].id).toEqual(7);
+    expect(response.body[0].steps[6].stepNo).toEqual(7);
+    expect(response.body[0].steps[6].content).toEqual('Roll each dough ball out with a rolling pin');
+
+    expect(response.body[0].steps[7].id).toEqual(8);
+    expect(response.body[0].steps[7].stepNo).toEqual(8);
+    expect(response.body[0].steps[7].content).toEqual('Heat a frying pan and rub a little oil onto the surface of the pan');
+
+    expect(response.body[0].steps[8].id).toEqual(9);
+    expect(response.body[0].steps[8].stepNo).toEqual(9);
+    expect(response.body[0].steps[8].content).toEqual('Cook each flatbread for 2 minutes each side. Keep the flatbreads warm, wrapped in foil or in a clean tea towel whilst you cook the others');
+
+    expect(response.body[0].steps[9].id).toEqual(10);
+    expect(response.body[0].steps[9].stepNo).toEqual(10);
+    expect(response.body[0].steps[9].content).toEqual('For crisper flatbreads, run some oil on them and vut into strips or triangles and fry for a further five to ten minutes');
+
+    expect(response.body[0].categories[0].id).toEqual(1);
+    expect(response.body[0].categories[0].name).toEqual('Gluten free');
+
+    expect(response.body[0].categories[1].id).toEqual(2);
+    expect(response.body[0].categories[1].name).toEqual('Snacks');
+
+    expect(response.body[0].categories[2].id).toEqual(3);
+    expect(response.body[0].categories[2].name).toEqual('Breads');
+
+  });
+
+  it('should return status 400 if request parameters are undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'findByRecipe').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request parameter';
+
+    /* Mock Express request and response */
+    const mockRequest = { };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.list(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if request parameter id is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'findByRecipe').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined id';
+
+    /* Mock Express request and response */
+    const mockRequest = { params: { } };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.list(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 404 if no recipes to list', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = [];
+  
+      // Set any variables needed to be passed to controllers and or models
+      const recipeId = 20034;
+
+      // Mock any needed third party modules
+      jest.spyOn(recipeModel, 'findByRecipe').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 404;
+      const returnSuccess = false;
+      const returnMessage = 'No recipe found matching supplied id';
+
+      /* Mock Express request and response */
+      const mockRequest = { params: { id: recipeId } };
+      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+      const mockNext = jest.fn();
+  
+      /* Execute the function */
+      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+      await recipesController.list(mockRequest, mockResponse, mockNext);
+  
+      /* Test everything works as expected */
+      expect(mockNext).toHaveBeenCalled();
+      expect(mockNext).toHaveBeenCalledWith({
+        status: returnStatus,
+        success: returnSuccess,
+        message: returnMessage
+      });
+  
+    });
+
+    it('should return status 500 if the resource encounters any other problem', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = {
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      };
+  
+      // Set any variables needed to be passed to controllers and or models
+      const recipeId = 1;
+
+      // Mock any needed third party modules
+      jest.spyOn(recipeModel, 'findByRecipe').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 500;
+      const returnSuccess = modelReturnData.success;
+      const returnMessage = modelReturnData.message;
+  
+      /* Mock Express request and response */
+      const mockRequest = { params: { id: recipeId } };
+      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+      const mockNext = jest.fn();
+  
+      /* Execute the function */
+      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+      await recipesController.list(mockRequest, mockResponse, mockNext);
+  
+      /* Test everything works as expected */
+      expect(mockNext).toHaveBeenCalled();
+      expect(mockNext).toHaveBeenCalledWith({
+        status: returnStatus,
+        success: returnSuccess,
+        message: returnMessage
+      });
+  
+    });
+
+});
+
+describe('recipesController.listRecipeIngredients', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and the recipes ingredients', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [
+      { id: 1, name: 'Gluten free flour', amount: 250, amount_type: 'grams' },
+      { id: 2, name: 'eggs', amount: 2, amount_type: 'large'}
+    ];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnLength = 2;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .get(`/recipes/${recipeId}/ingredients`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toHaveLength(returnLength);
+
+    expect(typeof response.body[0].id).toBe('number');
+    expect(typeof response.body[0].name).toBe('string');
+    expect(typeof response.body[0].amount).toBe('number');
+    expect(typeof response.body[0].amount_type).toBe('string');
+
+    expect(response.body[0].id).toEqual(1);
+    expect(response.body[0].name).toEqual('Gluten free flour');
+    expect(response.body[0].amount).toEqual(250);
+    expect(response.body[0].amount_type).toEqual('grams');
+
+    expect(typeof response.body[1].id).toBe('number');
+    expect(typeof response.body[1].name).toBe('string');
+    expect(typeof response.body[1].amount).toBe('number');
+    expect(typeof response.body[1].amount_type).toBe('string');
+
+    expect(response.body[1].id).toEqual(2);
+    expect(response.body[1].name).toEqual('eggs');
+    expect(response.body[1].amount).toEqual(2);
+    expect(response.body[1].amount_type).toEqual('large');
+
+  });
+
+  it('should return status 404 if no ingredients found for the recipe', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 12345;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'Recipe currently has no ingredients';
+
+    /* Mock Express request and response */
+    const mockRequest = { params: { id: recipeId } };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if request parameters are undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel,'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request parameters';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if request parameter id is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined id';
+
+    /* Mock Express request and response */
+    const mockRequest = { params: {} };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 500 if the resource encounters another problem', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 12;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = modelReturnData.success;
+    const returnMessage = modelReturnData.message;
+
+    /* Mock Express request and response */
+    const mockRequest = { params: { id: recipeId } };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+});
+
 
 xdescribe('<model>Controller.<method>', () => {
 
