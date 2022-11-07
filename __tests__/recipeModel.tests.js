@@ -935,6 +935,185 @@ describe('recipeModel.find', () => {
 
 });
 
+describe('recipeModel.findAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should find one or more recipes by name', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').responseOnce([{
+      id: 1,
+      userId: 1,
+      name: 'Gooey chocolate cake',
+      description: 'Sumptious and gooey chocolate cake. Perfect for an after dinner treat',
+      servings: 4,
+      calories_per_serving: 235,
+      prep_time: 60,
+      cook_time: 15,
+      rating: 1236
+    }]);
+
+    tracker.on.select('recipe_ingredients').responseOnce([{
+      id: 1,
+      name: 'Eggs',
+      amount: 6,
+      amount_type: 'Large'
+    }]);
+
+    tracker.on.select('cookbook_recipes').responseOnce([{
+      id: 1,
+      name: 'Vegan treats',
+      image: null
+    }]);
+
+    tracker.on.select('steps').responseOnce([{
+      id: 1,
+      stepNo: 1,
+      content: 'Preheat oven to 200 degrees centigrade'
+    }]);
+
+    tracker.on.select('recipe_categories').responseOnce([{
+      id: 1,
+      name: 'Vegan'
+    }]);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await recipeModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toBe(1);
+
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toBe(1);
+
+    expect(typeof result[0].name).toBe('string');
+    expect(result[0].name).toEqual('Gooey chocolate cake');
+
+    expect(typeof result[0].description).toBe('string');
+    expect(result[0].description).toEqual('Sumptious and gooey chocolate cake. Perfect for an after dinner treat');
+
+    expect(typeof result[0].servings).toBe('number');
+    expect(result[0].servings).toBe(4);
+
+    expect(typeof result[0].calories_per_serving).toBe('number');
+    expect(result[0].calories_per_serving).toBe(235);
+
+    expect(typeof result[0].prep_time).toBe('number');
+    expect(result[0].prep_time).toBe(60);
+
+    expect(typeof result[0].cook_time).toBe('number');
+    expect(result[0].cook_time).toBe(15);
+
+    expect(typeof result[0].rating).toBe('number');
+    expect(result[0].rating).toBe(1236);
+
+    expect(Array.isArray(result[0].ingredients)).toBe(true);
+    expect(result[0].ingredients).toHaveLength(1);
+
+    expect(typeof result[0].ingredients[0].id).toBe('number');
+    expect(result[0].ingredients[0].id).toBe(1);
+
+    expect(typeof result[0].ingredients[0].name).toBe('string');
+    expect(result[0].ingredients[0].name).toBe('Eggs');
+
+    expect(typeof result[0].ingredients[0].amount).toBe('number');
+    expect(result[0].ingredients[0].amount).toBe(6);
+
+    expect(typeof result[0].ingredients[0].amount_type).toBe('string');
+    expect(result[0].ingredients[0].amount_type).toBe('Large');
+
+    expect(Array.isArray(result[0].cookbooks)).toBe(true);
+    expect(result[0].cookbooks).toHaveLength(1);
+
+    expect(typeof result[0].cookbooks[0].id).toBe('number');
+    expect(result[0].cookbooks[0].id).toBe(1);
+
+    expect(typeof result[0].cookbooks[0].name).toBe('string');
+    expect(result[0].cookbooks[0].name).toBe('Vegan treats');
+
+    expect(Array.isArray(result[0].steps)).toBe(true);
+    expect(result[0].steps).toHaveLength(1);
+
+    expect(typeof result[0].steps[0].id).toBe('number');
+    expect(result[0].steps[0].id).toBe(1);
+
+    expect(typeof result[0].steps[0].stepNo).toBe('number');
+    expect(result[0].steps[0].stepNo).toBe(1);
+
+    expect(typeof result[0].steps[0].content).toBe('string');
+    expect(result[0].steps[0].content).toBe('Preheat oven to 200 degrees centigrade');
+
+    expect(Array.isArray(result[0].categories)).toBe(true);
+    expect(result[0].categories).toHaveLength(1);
+
+    expect(typeof result[0].categories[0].id).toBe('number');
+    expect(result[0].categories[0].id).toBe(1);
+
+    expect(typeof result[0].categories[0].name).toBe('string');
+    expect(result[0].categories[0].name).toBe('Vegan');
+
+    expect(tracker.history.select).toHaveLength(5);
+
+  });
+
+
+  it('should return an empty array if no recipes found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').responseOnce([]);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await recipeModel.findAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+  it('should return a generic error if any libraries have issues for security', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').simulateError('lost connection to the database');
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await recipeModel.findAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+});
+
 describe('recipeModel.findByRecipe', () => {
 
   /*

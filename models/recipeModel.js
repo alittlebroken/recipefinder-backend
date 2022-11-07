@@ -434,6 +434,101 @@ const find = async terms => {
 
 };
 
+/* Returns all recipes held in the database
+ * @returns {object} Contains the recipes and all it's related data like steps,
+ * ingredients etc
+ */
+const findAll = async () => {
+
+  try{
+
+    /* Gather the required data from the database, use a transaction for this
+     * to keep it all nice and tidy ( IMHO )
+    */
+    return await db.transaction( async trx => {
+
+      let recipes = [];
+
+      /* Find all the recipes which match first */
+      const results = await trx('recipes')
+       .select(
+         'id as recipeId',
+         'name',
+         'description',
+         'servings',
+         'calories_per_serving',
+         'prep_time',
+         'cook_time',
+         'rating'
+       ).transacting(trx);
+
+       /* Loop through all recipes found and gather the supporting data */
+       if(results && results.length > 0)
+       {
+
+         for( let result of results) {
+         //results.forEach( async result => {
+
+          let ingredientResults = await trx('recipe_ingredients as ri')
+            .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
+            .select(
+              'i.id as id',
+              'i.name as name',
+              'ri.amount as amount',
+              'ri.amount_type as amount_type'
+            )
+            .where('ri.recipeId', result.id).transacting(trx);
+
+          let cookbookResults = await trx('cookbook_recipes as cr')
+           .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
+           .select('c.id as id', 'c.name as name')
+           .where('cr.recipeId', result.id).transacting(trx);
+
+          let stepResults = await trx('steps')
+           .select('id', 'stepNo', 'content')
+           .where('recipeId', result.id).transacting(trx);
+
+          let categoryResults = await trx('recipe_categories as rc')
+           .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
+           .select('cat.id as id', 'cat.name as name')
+           .where('rc.recipeId', result.id).transacting(trx);
+
+          let recipe = {
+            ...result,
+            ingredients: [...ingredientResults],
+            cookbooks: [...cookbookResults],
+            steps: [...stepResults],
+            categories: [...categoryResults]
+          };
+
+          recipes.push(recipe);
+
+         };
+
+       } else {
+         return [];
+       }
+
+       return recipes;
+
+    });
+
+
+  } catch(e) {
+
+        /* Check for library errors and if found swap them out for a generic
+           one to send back over the API for security */
+        let message = 'There was a problem with the resource, please try again later';
+
+        return {
+          success: false,
+          message: message
+        }
+
+  }
+
+};
+
 /* Return the recipe matching the passed in recipe ID
  * @param {number} id - The ID of the record you are intersted in
  * @returns {array} Contains the specified recipe if founf otherwise it returns
@@ -768,6 +863,7 @@ module.exports = {
   remove,
   update,
   find,
+  findAll,
   findByRecipe,
   findByIngredients,
   findByCategory
