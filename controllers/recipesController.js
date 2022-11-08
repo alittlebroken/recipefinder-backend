@@ -7,6 +7,7 @@ const recipeCategoriesModel = require('../models/recipeCategoriesModel');
 const recipeIngredientsModel = require('../models/recipeIngredientsModel');
 const cookbookRecipesModel = require('../models/cookbookRecipesModel');
 const recipeModel = require('../models/recipeModel');
+const stepModel = require('../models/stepModel');
 
 const moduleName = 'recipesController';
 
@@ -173,6 +174,66 @@ const listRecipeIngredients = async (req, res, next) => {
 };
 
 /* 
+ * fReturns all steps for a particular recipe
+ */
+const listRecipeSteps = async (req, res, next) => {
+
+    const moduleMethod = 'listRecipeSteps';
+
+    try{
+
+        /* Validate request body and parameters */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        /* Gather the steps from the DB */
+        let id = parseInt(req.params.id);
+        const results = await stepModel.findByRecipeId(id);
+
+        if(!results || results.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        if(results.length < 1){
+            throw {
+                status: 404,
+                success: false,
+                message: 'This recipe currently has no steps'
+            }
+        }
+
+        res.status(200).json(results);
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -196,5 +257,6 @@ const method = async (req, res, next) => {
 module.exports = {
    listAll,
    list,
-   listRecipeIngredients
+   listRecipeIngredients,
+   listRecipeSteps
 };

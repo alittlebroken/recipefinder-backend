@@ -9,7 +9,7 @@ const recipeCategoriesModel = require('../models/recipeCategoriesModel');
 const recipeIngredientsModel = require('../models/recipeIngredientsModel');
 const cookbookRecipesModel = require('../models/cookbookRecipesModel');
 const recipeModel = require('../models/recipeModel');
-const { levels } = require('logform');
+const stepModel = require('../models/stepModel');
 
 describe('recipesController.listAll', () => {
 
@@ -822,6 +822,229 @@ describe('recipesController.listRecipeIngredients', () => {
 
 });
 
+describe('recipesController.listRecipeSteps', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and return all steps for a recipe', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [
+      { id: 1, recipeId: 1, stepNo: 1, content: 'Place flour and salt into a bowl' },
+      { id: 2, recipeId: 1, stepNo: 2, content: 'Slowly pour the warm water into the bowl'},
+    ];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .get(`/recipes/${recipeId}/steps`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(200);
+    
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toHaveLength(2);
+
+    expect(typeof response.body[0].recipeId).toBe('number');
+    expect(typeof response.body[0].id).toBe('number');
+    expect(typeof response.body[0].stepNo).toBe('number');
+    expect(typeof response.body[0].content).toBe('string');
+
+    expect(typeof response.body[1].recipeId).toBe('number');
+    expect(typeof response.body[1].id).toBe('number');
+    expect(typeof response.body[1].stepNo).toBe('number');
+    expect(typeof response.body[1].content).toBe('string');
+
+    expect(response.body[0].id).toEqual(1);
+    expect(response.body[0].recipeId).toEqual(1);
+    expect(response.body[0].stepNo).toEqual(1);
+    expect(response.body[0].content).toEqual('Place flour and salt into a bowl');
+
+    expect(response.body[1].id).toEqual(2);
+    expect(response.body[1].recipeId).toEqual(1);
+    expect(response.body[1].stepNo).toEqual(2);
+    expect(response.body[1].content).toEqual('Slowly pour the warm water into the bowl');
+
+
+  });
+
+  it('should return status 404 if no steps found for a recipe', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'This recipe currently has no steps';
+
+    /* Mock Express request and response */
+    const mockRequest = { params: { id: recipeId }};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeSteps(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if request parameters are undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request parameters';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeSteps(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if request parameter id is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined id';
+
+    /* Mock Express request and response */
+    const mockRequest = { params: {} };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeSteps(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 500 if the resource encounters another problem', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    let recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'findByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = modelReturnData.success;
+    const returnMessage = modelReturnData.message;
+
+    /* Mock Express request and response */
+    const mockRequest = { params: { id: recipeId } };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.listRecipeSteps(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+});
 
 xdescribe('<model>Controller.<method>', () => {
 
