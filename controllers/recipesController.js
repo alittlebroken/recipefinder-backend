@@ -234,6 +234,66 @@ const listRecipeSteps = async (req, res, next) => {
 };
 
 /* 
+ * Retrieve all categories assigned to a recipe
+ */
+const listRecipeCategories = async (req, res, next) => {
+
+    const moduleMethod = 'listRecipeCategories';
+
+    try{
+
+        /* Validate request body & parameters */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters' 
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        /* Get the data from the DB */
+        let id = parseInt(req.params.id);
+        const results = await recipeCategoriesModel.findByRecipe(id);
+
+        if(!results || results.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        if(results.length < 1){
+            throw {
+                status: 404,
+                success: false,
+                message: 'This recipe currently has no categories'
+            }
+        }
+
+        res.status(200).json(results);
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -258,5 +318,6 @@ module.exports = {
    listAll,
    list,
    listRecipeIngredients,
-   listRecipeSteps
+   listRecipeSteps,
+   listRecipeCategories
 };
