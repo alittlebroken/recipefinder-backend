@@ -294,6 +294,231 @@ const listRecipeCategories = async (req, res, next) => {
 };
 
 /* 
+ * Add a new recipe and it's associated data
+ */
+const create = async (req, res, next) => {
+
+    const moduleMethod = 'create';
+
+    try{
+
+        /* Validate the Request parameters and body values */
+        if(!req.body || req.body === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request body'
+            }
+        }
+
+        if(!req.body.recipe || req.body.recipe === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe'
+            }
+        }
+
+        if(typeof req.body.recipe !== 'object'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe'
+            }
+        }
+
+        if(!req.body.recipe.userId || req.body.recipe.userId === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined userId'
+            }
+        }
+
+        if(typeof req.body.recipe.userId !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for userId'
+            };
+        }
+
+        if(!req.body.recipe.name || req.body.recipe.name === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined name'
+            }
+        }
+
+        if(typeof req.body.recipe.name !== 'string'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for name'
+            };
+        }
+
+        if(!req.body.recipe.servings || req.body.recipe.servings === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined servings'
+            }
+        }
+
+        if(typeof req.body.recipe.servings !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for servings'
+            };
+        }
+
+        if(!req.body.recipe.calories_per_serving || req.body.recipe.calories_per_serving === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined calories_per_serving'
+            }
+        }
+
+        if(typeof req.body.recipe.calories_per_serving !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for calories_per_serving'
+            };
+        }
+
+        if(!req.body.recipe.prep_time || req.body.recipe.prep_time === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined prep_time'
+            }
+        }
+
+        if(typeof req.body.recipe.prep_time !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for prep_time'
+            };
+        }
+
+        if(!req.body.recipe.cook_time || req.body.recipe.cook_time === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined cook_time'
+            }
+        }
+
+        if(typeof req.body.recipe.cook_time !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for cook_time'
+            };
+        }
+
+        if(!req.body.steps || req.body.steps === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined steps'
+            };
+        }
+
+        if(Array.isArray(req.body.steps) !== true){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for steps'
+            }
+        }
+
+        if(!req.body.ingredients || req.body.ingredients === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredients'
+            };
+        }
+
+        if(Array.isArray(req.body.ingredients) !== true){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredients'
+            }
+        }
+
+        if(!req.body.cookbookId || req.body.cookbookId === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined cookbookId'
+            }
+        }
+
+        if(typeof req.body.cookbookId !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for cookbookId'
+            };
+        }
+
+        if(!req.body.categories || req.body.categories === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined categories'
+            };
+        }
+
+        if(Array.isArray(req.body.categories) === false){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for categories'
+            }
+        }
+
+        /* Add the recipe and supporting data to the database */
+        let recipe = req.body.recipe;
+        let steps = req.body.steps;
+        let ingredients = req.body.ingredients;
+        let cookbookId = req.body.cookbookId;
+        let categories = req.body.categories;
+
+        const result = await recipeModel.create(recipe, steps, ingredients, cookbookId, categories);
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        res.status(200).json(result);
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -319,5 +544,6 @@ module.exports = {
    list,
    listRecipeIngredients,
    listRecipeSteps,
-   listRecipeCategories
+   listRecipeCategories,
+   create
 };
