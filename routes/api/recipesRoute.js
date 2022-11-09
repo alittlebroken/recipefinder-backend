@@ -13,7 +13,7 @@ router.get('/:id/ingredients', recipesController.listRecipeIngredients);
 router.get('/:id/steps', recipesController.listRecipeSteps);
 router.get('/:id/categories', recipesController.listRecipeCategories);
 router.post('/', recipesController.create);
-//router.post('/:id/ingredients', recipesController.addRecipeIngredients);
+router.post('/:id/ingredients', recipesController.addRecipeIngredients);
 //router.post('/:id/steps', recipesController.addRecipeSteps);
 //router.post('/:id/categories', recipesController.addRecipeCategories);
 //router.delete('/', recipesController.removeAll);

@@ -1258,7 +1258,6 @@ describe('recipesController.listRecipeCategories', () => {
 
 });
 
-
 describe('recipesController.create', () => {
 
   /*
@@ -2970,6 +2969,555 @@ describe('recipesController.create', () => {
       success: returnSuccess,
       message: returnMessage
     });
+
+  });
+
+});
+
+describe('recipesController.addRecipeIngredients', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and add the ingredient to the recipe', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'Ingredient successfully added to recipe'
+    }
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+    const ingredientId = 1;
+    const amount = 200;
+    const amount_type = 'grams';
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'Ingredient successfully added to recipe';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post(`/recipes/${recipeId}/ingredients`)
+      .send({
+        ingredientId: ingredientId,
+        amount: amount,
+        amount_type: amount_type
+      });
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 400 if the request body is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+    const ingredientId = 1;
+    const amount = 200;
+    const amount_type = 'grams';
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request body';
+
+    /* Mock Express request and response */
+    const mockRequest = {
+      params: {
+        id: recipeId
+      }
+    };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if the request parameters is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+    const ingredientId = 1;
+    const amount = 200;
+    const amount_type = 'grams';
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request parameters';
+
+    /* Mock Express request and response */
+    const mockRequest = {
+       body: {
+         ingredientId: ingredientId,
+         amount: amount,
+         amount_type: amount_type
+       }
+     };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if the request parameter value recipeId is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+    const ingredientId = 1;
+    const amount = 200;
+    const amount_type = 'grams';
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined id';
+
+    /* Mock Express request and response */
+    const mockRequest = {
+      params: {
+       },
+      body: {
+        ingredientId: ingredientId,
+        amount: amount,
+        amount_type: amount_type
+      }
+    };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if the request body ingredientId is undefined', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = [];
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 400;
+     const returnSuccess = false;
+     const returnMessage = 'Undefined ingredientId';
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+      params: {
+        id: recipeId
+       },
+       body: {
+         amount: amount,
+         amount_type: amount_type
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
+
+  });
+
+  it('should return status 400 if the request body value ingredientId is of the wrong format', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = [];
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 400;
+     const returnSuccess = false;
+     const returnMessage = 'Wrong format for ingredientId';
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+      params: {
+        id: recipeId
+       },
+       body: {
+         ingredientId: 'one',
+         amount: amount,
+         amount_type: amount_type
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
+
+  });
+
+  it('should return status 400 if the request body value amount is undefined', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = [];
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 400;
+     const returnSuccess = false;
+     const returnMessage = 'Undefined amount';
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+      params: {
+        id: recipeId
+       },
+       body: {
+         ingredientId: ingredientId,
+         amount_type: amount_type
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
+
+  });
+
+  it('should return status 400 if the request body value amount is of the wrong format', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = [];
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 400;
+     const returnSuccess = false;
+     const returnMessage = 'Wrong format for amount';
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+      params: {
+        id: recipeId
+       },
+       body: {
+         ingredientId: ingredientId,
+         amount: 'two hundred',
+         amount_type: amount_type
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
+
+  });
+
+  it('should return status 400 if the request body value amount_type is undefined', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = [];
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 400;
+     const returnSuccess = false;
+     const returnMessage = 'Undefined amount_type';
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+      params: {
+        id: recipeId
+       },
+       body: {
+         ingredientId: ingredientId,
+         amount: amount
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
+
+  });
+
+  it('should return status 400 if the request body value amount_type is of the wrong format', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = [];
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 400;
+     const returnSuccess = false;
+     const returnMessage = 'Wrong format for amount_type';
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+      params: {
+        id: recipeId
+       },
+       body: {
+         ingredientId: ingredientId,
+         amount: amount,
+         amount_type: 2345
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
+
+  });
+
+  it('should return status 500 if the resource encounters any other problems', async () => {
+
+     // Set Mocked data that models and controllers should return
+     const modelReturnData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+     };
+
+     // Set any variables needed to be passed to controllers and or models
+     const recipeId = 1;
+     const ingredientId = 1;
+     const amount = 200;
+     const amount_type = 'grams';
+ 
+     // Mock any needed third party modules
+     jest.spyOn(recipeIngredientsModel, 'create').mockImplementation(() => {
+       return modelReturnData;
+     });
+ 
+     // Set here the expected return values for the test
+     const returnStatus = 500;
+     const returnSuccess = modelReturnData.success;
+     const returnMessage = modelReturnData.message;
+ 
+     /* Mock Express request and response */
+     const mockRequest = {
+       params: {
+        id: recipeId
+       },
+       body: {
+         ingredientId: ingredientId,
+         amount: amount,
+         amount_type: amount_type
+       }
+     };
+     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+     const mockNext = jest.fn();
+ 
+     /* Execute the function */
+     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+     await recipesController.addRecipeIngredients(mockRequest, mockResponse, mockNext);
+ 
+     /* Test everything works as expected */
+     expect(mockNext).toHaveBeenCalled();
+     expect(mockNext).toHaveBeenCalledWith({
+       status: returnStatus,
+       success: returnSuccess,
+       message: returnMessage
+     });
 
   });
 

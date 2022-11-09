@@ -519,6 +519,124 @@ const create = async (req, res, next) => {
 };
 
 /* 
+ * Adds an ingredient to a recipe
+ */
+const addRecipeIngredients = async (req, res, next) => {
+
+    const moduleMethod = 'addRecipeIngredients';
+
+    try{
+
+        /* Validate the request values */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        if(!req.body || req.body === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request body'
+            }
+        }
+
+        if(!req.body.ingredientId || req.body.ingredientId === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredientId'
+            }
+        }
+
+        if(typeof req.body.ingredientId !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredientId'
+            }
+        }
+
+        if(!req.body.amount || req.body.amount === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined amount'
+            }
+        }
+
+        if(typeof req.body.amount !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for amount'
+            }
+        }
+
+        if(!req.body.amount_type || req.body.amount_type === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined amount_type'
+            }
+        }
+        
+        if(typeof req.body.amount_type !== 'string'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for amount_type'
+            }
+        }
+
+        /* Add the ingredient to the recipe */
+        let payload = {
+            recipeId: parseInt(req.params.id),
+            ingredientId: parseInt(req.body.ingredientId),
+            amount: parseInt(req.body.amount),
+            amount_type: req.body.amount_type
+        };
+
+        const result = await recipeIngredientsModel.create(payload);
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Ingredient successfully added to recipe'
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -545,5 +663,6 @@ module.exports = {
    listRecipeIngredients,
    listRecipeSteps,
    listRecipeCategories,
-   create
+   create,
+   addRecipeIngredients
 };
