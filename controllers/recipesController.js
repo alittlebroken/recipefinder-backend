@@ -718,7 +718,10 @@ const addRecipeSteps = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(result);
+        res.status(200).json({
+            success: true,
+            message: 'Step has been successfully added to the recipe'
+        });
 
     } catch(e) {
         /* Log out the issue(s) */
