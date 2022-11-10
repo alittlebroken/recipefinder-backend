@@ -8,6 +8,7 @@ const recipeIngredientsModel = require('../models/recipeIngredientsModel');
 const cookbookRecipesModel = require('../models/cookbookRecipesModel');
 const recipeModel = require('../models/recipeModel');
 const stepModel = require('../models/stepModel');
+const { deserializeUser } = require('passport');
 
 const moduleName = 'recipesController';
 
@@ -732,6 +733,79 @@ const addRecipeSteps = async (req, res, next) => {
 };
 
 /* 
+ * Associates a category with a recipe
+ */
+const addRecipeCategories = async (req, res, next) => {
+
+    const moduleMethod = 'addRecipeCategories';
+
+    try{
+
+        /* Validate the request parameters and body */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw{
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        if(!req.body || req.body === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request body'
+            }
+        }
+
+        if(!req.body.categoryId || req.body.categoryId === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined categoryId'
+            }
+        }
+
+        /* Add the association between the category and recipe */
+        let id = parseInt(req.params.id);
+        let categoryId = parseInt(req.body.categoryId);
+
+        const result = await recipeCategoriesModel.create({
+            recipeId: id,
+            categoryId
+        });
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        res.status(200).json(result);
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -760,5 +834,6 @@ module.exports = {
    listRecipeCategories,
    create,
    addRecipeIngredients,
-   addRecipeSteps
+   addRecipeSteps,
+   addRecipeCategories,
 };
