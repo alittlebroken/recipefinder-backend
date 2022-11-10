@@ -637,6 +637,101 @@ const addRecipeIngredients = async (req, res, next) => {
 };
 
 /* 
+ * add a new step to a recipe
+ */
+const addRecipeSteps = async (req, res, next) => {
+
+    const moduleMethod = 'addRecipeSteps';
+
+    try{
+
+        /* Validate the request parameter and body variables */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        if(!req.body || req.body === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request body'
+            }
+        }
+
+        if(!req.body.stepNo || req.body.stepNo === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined stepNo'
+            }
+        }
+
+        if(typeof req.body.stepNo !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for stepNo'
+            }
+        }
+
+        if(!req.body.stepContent || req.body.stepContent === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined stepContent'
+            }
+        }
+
+        if(typeof req.body.stepContent !== 'string'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for stepContent'
+            }
+        }
+
+        /* Add the record to the database */
+        let recipeId = parseInt(req.params.id);
+        let stepNo = parseInt(req.body.stepNo);
+        let content = req.body.stepContent;
+
+        const result = await stepModel.create(recipeId, stepNo, content);
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        res.status(200).json(result);
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -664,5 +759,6 @@ module.exports = {
    listRecipeSteps,
    listRecipeCategories,
    create,
-   addRecipeIngredients
+   addRecipeIngredients,
+   addRecipeSteps
 };
