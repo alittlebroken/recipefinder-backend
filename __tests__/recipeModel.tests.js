@@ -2123,3 +2123,77 @@ xdescribe('<model>Model.<method>', () => {
   });
 
 });
+
+describe('recipeModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all the recipes stored in the database', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('recipes').responseOnce(15);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await recipeModel.removeAll();
+    
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('All recipes successfully removed');
+    expect(tracker.history.delete).toHaveLength(1);
+
+  });
+
+  it('should return an empty array if there are no records to remove', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('recipe_categories').responseOnce(0);
+    tracker.on.delete('cookbook_recipes').responseOnce(0);
+    tracker.on.delete('recipe_ingredients').responseOnce(0);
+    tracker.on.delete('steps').responseOnce(0);
+    tracker.on.delete('recipes').responseOnce(0);
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await recipeModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result));
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should return a generic error if any libraries have issues for security', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('recipe_categories')
+      .simulateError('lost connection to database');
+
+    /** Set the data to pass into the models function */
+    const recipeId = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.removeAll();
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});

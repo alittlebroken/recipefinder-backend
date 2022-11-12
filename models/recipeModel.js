@@ -225,6 +225,53 @@ const remove  = async recipeId => {
 
 };
 
+/* Remove all recipes
+ * @returns {any} A count of how many records were deleted or an
+ * empty array if no records to delete
+ */
+const removeAll  = async () => {
+
+  try{
+
+      /* Delete the data in the reverse order it was created */
+      return await db.transaction( async trx => {
+
+        const recipeCount = await db('recipes')
+         .delete()
+         .transacting(trx);
+
+        if(recipeCount > 0){
+          return {
+            success: true,
+            message: 'All recipes successfully removed'
+          }
+        } else {
+          return []
+        }
+
+      });
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    
+    if(e.name === 'RECIPEMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 /* Using the supplied values within an object update the specified record within
  * the database.
  * @param {object} recipe - JS Object holiding the updates to the recipe
@@ -866,5 +913,6 @@ module.exports = {
   findAll,
   findByRecipe,
   findByIngredients,
-  findByCategory
+  findByCategory,
+  removeAll
 };
