@@ -809,6 +809,52 @@ const addRecipeCategories = async (req, res, next) => {
 };
 
 /* 
+ * removes all recipes from the database
+ */
+const removeAll = async (req, res, next) => {
+
+    const moduleMethod = 'removeAll';
+
+    try{
+
+        /* Remove any and or all recipes */
+        const result = await recipeModel.removeAll();
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        if(result < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No recipes found to be removed'
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'All recipes removed successfully'
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -839,4 +885,5 @@ module.exports = {
    addRecipeIngredients,
    addRecipeSteps,
    addRecipeCategories,
+   removeAll,
 };

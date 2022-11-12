@@ -16,7 +16,7 @@ router.post('/', recipesController.create);
 router.post('/:id/ingredients', recipesController.addRecipeIngredients);
 router.post('/:id/steps', recipesController.addRecipeSteps);
 router.post('/:id/categories', recipesController.addRecipeCategories);
-//router.delete('/', recipesController.removeAll);
+router.delete('/', recipesController.removeAll);
 //router.delete('/:id', recipesController.remove);
 //router.delete('/:id/ingredients', recipesController.removeRecipeIngredients);
 //router.delete('/:id/steps', recipesController.removeRecipeSteps);
