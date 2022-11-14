@@ -4388,7 +4388,7 @@ describe('recipesController.remove', () => {
     jest.clearAllMocks();
   })
 
-  xit('should return status 200 and remove the specified recipe', async () => {
+  it('should return status 200 and remove the specified recipe', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = {
@@ -4469,7 +4469,7 @@ describe('recipesController.remove', () => {
     expect(response.body.message).toEqual(returnMessage);
   });
 
-  xit('should return status 400 if request params are undefined', async () => {
+  it('should return status 400 if request params are undefined', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = [];
@@ -4506,7 +4506,7 @@ describe('recipesController.remove', () => {
 
   });
 
-  xit('should return status 400 if request parameter id is undefined', async () => {
+  it('should return status 400 if request parameter id is undefined', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = [];
@@ -4545,7 +4545,7 @@ describe('recipesController.remove', () => {
 
   });
 
-  xit('should return status 500 if the resource encunters any other problems', async () => {
+  it('should return status 500 if the resource encunters any other problems', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = {
@@ -4578,6 +4578,226 @@ describe('recipesController.remove', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     await recipesController.remove(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+});
+
+describe('recipesController.removeRecipeIngredients', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('should return status 200 and removes a recipes ingredients', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'Recipe ingredient successfully removed'
+    }
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'removeAllByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'All ingredients have been removed from the recipe'
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete(`/recipes/${recipeId}/ingredients`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 404 if a recipe has no ingredients to remove', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'removeAllByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'The recipe has no ingredients to remove';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete(`/recipes/${recipeId}/ingredients`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 400 if the request parameters are undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'removeAllByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined request parameters';
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.removeRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 400 if the request parameter id is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'removeAllByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined id';
+
+    /* Mock Express request and response */
+    const mockRequest = {
+      params: {
+        
+      }
+    };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.removeRecipeIngredients(mockRequest, mockResponse, mockNext);
+
+    /* Test everything works as expected */
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockNext).toHaveBeenCalledWith({
+      status: returnStatus,
+      success: returnSuccess,
+      message: returnMessage
+    });
+
+  });
+
+  it('should return status 500 if the resource encounters any other problems', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeIngredientsModel, 'removeAllByRecipeId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = modelReturnData.success;
+    const returnMessage = modelReturnData.message;
+
+    /* Mock Express request and response */
+    const mockRequest = {
+      params: {
+        id: recipeId
+      }
+    };
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    await recipesController.removeRecipeIngredients(mockRequest, mockResponse, mockNext);
 
     /* Test everything works as expected */
     expect(mockNext).toHaveBeenCalled();

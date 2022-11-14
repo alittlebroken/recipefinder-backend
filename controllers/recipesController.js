@@ -921,6 +921,70 @@ const remove = async (req, res, next) => {
 };
 
 /* 
+ * remove all ingredients for a recipe
+ */
+const removeRecipeIngredients = async (req, res, next) => {
+
+    const moduleMethod = 'removeRecipeIngredients';
+
+    try{
+
+        /* Validate the request paraaters and body  */
+    if(!req.params || req.params === undefined){
+        throw {
+            status: 400,
+            success: false,
+            message: 'Undefined request parameters'
+        }
+    }
+
+    if(!req.params.id || req.params.id === undefined){
+        throw {
+            status: 400,
+            success: false,
+            message: 'Undefined id'
+        }
+    }
+
+    /* Remove the ingredients */
+    let id = parseInt(req.params.id);
+    const result = await recipeIngredientsModel.removeAllByRecipeId(id);
+
+    if(!result || result.success === false){
+        throw {
+            status: 500,
+            success: false,
+            message: 'There was a problem with the resource, please try again later'
+        }
+    }
+
+    if(result.length < 1){
+        res.status(404).json({
+            status: 404,
+            success: false,
+            message: 'The recipe has no ingredients to remove'
+        })
+    } else {
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'All ingredients have been removed from the recipe'
+        });
+    }
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -952,5 +1016,6 @@ module.exports = {
    addRecipeSteps,
    addRecipeCategories,
    removeAll,
-   remove
+   remove,
+   removeRecipeIngredients
 };
