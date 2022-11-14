@@ -98,8 +98,8 @@ app.use((error, req, res, next) => {
   logger.logMessage('error', message)
 
   res.status(statusCode).json({
-    status: false,
-    code: statusCode,
+    success: false,
+    status: statusCode,
     message: message
   });
 
