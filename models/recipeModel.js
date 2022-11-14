@@ -194,8 +194,12 @@ const remove  = async recipeId => {
         await db('steps')
          .delete().where('recipeId', recipeId).transacting(trx);
 
-        await db('recipes')
+        const recipeCount = await db('recipes')
          .delete().where('id', recipeId).transacting(trx);
+
+        if(recipeCount < 1){
+          return [];
+        }
 
         return {
           success: true,
@@ -209,7 +213,7 @@ const remove  = async recipeId => {
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
-
+    
     if(e.name === 'RECIPEMODEL_ERROR'){
       message = e.message;
     } else {
