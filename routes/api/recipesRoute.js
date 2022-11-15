@@ -20,7 +20,7 @@ router.delete('/', recipesController.removeAll);
 router.delete('/:id', recipesController.remove);
 router.delete('/:id/ingredients', recipesController.removeRecipeIngredients);
 router.delete('/:id/steps', recipesController.removeRecipeSteps);
-//router.delete('/:id/categories', recipesController.removeRecipeCategories);
+router.delete('/:id/categories', recipesController.removeRecipeCategories);
 //router.put('/:id', recipesController.update);
 
 /* Future API expansion
