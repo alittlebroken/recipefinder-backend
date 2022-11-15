@@ -985,6 +985,69 @@ const removeRecipeIngredients = async (req, res, next) => {
 };
 
 /* 
+ * remove all steps for a recipe
+ */
+const removeRecipeSteps = async (req, res, next) => {
+
+    const moduleMethod = 'removeRecipeSteps';
+
+    try{
+
+        /* Validate request parameters and body */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        /* Remove the steps from the recipe */
+        let id = parseInt(req.params.id);
+        const result = await stepModel.removeAllByRecipe(id);
+        
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        if(result.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'The recipe has no steps to remove'
+            })
+        } else {
+            res.status(200).json({
+                status: 200,
+                success: true,
+                message: 'Steps successfully removed from recipe'
+            });
+        }
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -1017,5 +1080,6 @@ module.exports = {
    addRecipeCategories,
    removeAll,
    remove,
-   removeRecipeIngredients
+   removeRecipeIngredients,
+   removeRecipeSteps
 };
