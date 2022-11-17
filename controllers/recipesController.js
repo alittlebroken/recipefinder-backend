@@ -1113,6 +1113,199 @@ const removeRecipeCategories = async (req, res, next) => {
 };
 
 /* 
+ * Updates the specified recipe within the database
+ */
+const update = async (req, res, next) => {
+
+    const moduleMethod = 'update';
+
+    try{
+
+        /* Validate request parameters and body */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.id || req.params.id === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined id'
+            }
+        }
+
+        if(!req.body || req.body === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request body'
+            }
+        }
+
+        if(!req.body.name || req.body.name === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined name'
+            }
+        }
+
+        if(typeof req.body.name !== 'string'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for name'
+            }
+        }
+
+        if(!req.body.userId || req.body.name === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined userId'
+            }
+        }
+
+        if(typeof req.body.userId !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for userId'
+            }
+        }
+
+        if(!req.body.servings || req.body.servings === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined servings'
+            }
+        }
+
+        if(typeof req.body.servings !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for servings'
+            }
+        }
+
+        if(!req.body.calories_per_serving || req.body.calories_per_serving === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined calories_per_serving'
+            }
+        }
+
+        if(typeof req.body.calories_per_serving !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for calories_per_serving'
+            }
+        }
+
+        if(!req.body.prep_time || req.body.prep_time === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined prep_time'
+            }
+        }
+
+        if(typeof req.body.prep_time !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for prep_time'
+            }
+        }
+
+        if(!req.body.cook_time || req.body.cook_time === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined cook_time'
+            }
+        }
+
+        if(typeof req.body.cook_time !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for cook_time'
+            }
+        }
+
+        if(!req.body.rating || req.body.rating === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined rating'
+            }
+        }
+
+        if(typeof req.body.rating !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for rating'
+            }
+        }
+
+        /* Actually update the desired record now */
+        const result = await recipeModel.update({
+            id: parseInt(req.params.id),
+            name: req.body.name,
+            userId: parseInt(req.body.userId),
+            servings: parseInt(req.body.parseInt),
+            calories_per_serving: parseInt(req.body.calories_per_serving),
+            prep_time: parseInt(req.body.prep_time),
+            cook_time: parseInt(req.body.cook_time),
+            rating: parseInt(req.body.rating)
+        });
+
+        if(!result || result.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        if(result.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No recipe found to update'
+            });
+        } else {
+            res.status(200).json({
+                status: 200,
+                success: true,
+                message: 'Recipe successfully updated' 
+            });
+        }
+        
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -1147,5 +1340,6 @@ module.exports = {
    remove,
    removeRecipeIngredients,
    removeRecipeSteps,
-   removeRecipeCategories
+   removeRecipeCategories,
+   update
 };
