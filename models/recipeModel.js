@@ -194,8 +194,12 @@ const remove  = async recipeId => {
         await db('steps')
          .delete().where('recipeId', recipeId).transacting(trx);
 
-        await db('recipes')
+        const recipeCount = await db('recipes')
          .delete().where('id', recipeId).transacting(trx);
+
+        if(recipeCount < 1){
+          return [];
+        }
 
         return {
           success: true,
@@ -209,7 +213,54 @@ const remove  = async recipeId => {
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
+    
+    if(e.name === 'RECIPEMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
 
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
+/* Remove all recipes
+ * @returns {any} A count of how many records were deleted or an
+ * empty array if no records to delete
+ */
+const removeAll  = async () => {
+
+  try{
+
+      /* Delete the data in the reverse order it was created */
+      return await db.transaction( async trx => {
+
+        const recipeCount = await db('recipes')
+         .delete()
+         .transacting(trx);
+
+        if(recipeCount > 0){
+          return {
+            success: true,
+            message: 'All recipes successfully removed'
+          }
+        } else {
+          return []
+        }
+
+      });
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    
     if(e.name === 'RECIPEMODEL_ERROR'){
       message = e.message;
     } else {
@@ -424,6 +475,101 @@ const find = async terms => {
         } else {
           message = 'There was a problem with the resource, please try again later';
         }
+
+        return {
+          success: false,
+          message: message
+        }
+
+  }
+
+};
+
+/* Returns all recipes held in the database
+ * @returns {object} Contains the recipes and all it's related data like steps,
+ * ingredients etc
+ */
+const findAll = async () => {
+
+  try{
+
+    /* Gather the required data from the database, use a transaction for this
+     * to keep it all nice and tidy ( IMHO )
+    */
+    return await db.transaction( async trx => {
+
+      let recipes = [];
+
+      /* Find all the recipes which match first */
+      const results = await trx('recipes')
+       .select(
+         'id as recipeId',
+         'name',
+         'description',
+         'servings',
+         'calories_per_serving',
+         'prep_time',
+         'cook_time',
+         'rating'
+       ).transacting(trx);
+
+       /* Loop through all recipes found and gather the supporting data */
+       if(results && results.length > 0)
+       {
+
+         for( let result of results) {
+         //results.forEach( async result => {
+
+          let ingredientResults = await trx('recipe_ingredients as ri')
+            .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
+            .select(
+              'i.id as id',
+              'i.name as name',
+              'ri.amount as amount',
+              'ri.amount_type as amount_type'
+            )
+            .where('ri.recipeId', result.id).transacting(trx);
+
+          let cookbookResults = await trx('cookbook_recipes as cr')
+           .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
+           .select('c.id as id', 'c.name as name')
+           .where('cr.recipeId', result.id).transacting(trx);
+
+          let stepResults = await trx('steps')
+           .select('id', 'stepNo', 'content')
+           .where('recipeId', result.id).transacting(trx);
+
+          let categoryResults = await trx('recipe_categories as rc')
+           .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
+           .select('cat.id as id', 'cat.name as name')
+           .where('rc.recipeId', result.id).transacting(trx);
+
+          let recipe = {
+            ...result,
+            ingredients: [...ingredientResults],
+            cookbooks: [...cookbookResults],
+            steps: [...stepResults],
+            categories: [...categoryResults]
+          };
+
+          recipes.push(recipe);
+
+         };
+
+       } else {
+         return [];
+       }
+
+       return recipes;
+
+    });
+
+
+  } catch(e) {
+
+        /* Check for library errors and if found swap them out for a generic
+           one to send back over the API for security */
+        let message = 'There was a problem with the resource, please try again later';
 
         return {
           success: false,
@@ -768,7 +914,9 @@ module.exports = {
   remove,
   update,
   find,
+  findAll,
   findByRecipe,
   findByIngredients,
-  findByCategory
+  findByCategory,
+  removeAll
 };
