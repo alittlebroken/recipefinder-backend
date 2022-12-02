@@ -47,5 +47,12 @@
     "dotenv": "^16.0.1",
     "jest": "^28.1.2",
     "knex-mock-client": "^1.8.4"
+  },
+  "jest": {
+    "verbose": true,
+    "silent": false,
+    "setupFilesAfterEnv": [
+      "./.jest/setEnvVars.js"
+    ]
   }
 }
