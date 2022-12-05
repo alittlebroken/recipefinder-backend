@@ -83,11 +83,11 @@ passport.use(
       if(result){
         return done(null, user);
       } else {
-        return done(null, false, { message: 'Unable to reguster user'});
+        return done(null, false, { message: 'Unable to register user'});
       }
 
     } catch(e) {
-      let error = new Error('There was an issue regustering the user');
+      let error = new Error('There was an issue registering the user');
       return done(error);
     }
 
