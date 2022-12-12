@@ -67,24 +67,33 @@ passport.use(
 );
 
 
+
+
 /*
  * Sets a handler for registering a new user into the system
  */
 passport.use(
   /* Set the handlers indetifier */
   'register',
+  new localStrategy(
+    {
+        usernameField: 'email',
+        passwordField: 'password'
+    }, 
   /* Main callback function */
   async (email, password, done) => {
 
     /* Register the user via the userModel */
     try {
-
+      
       const result = userModel.insert(email,password, email);
       if(result){
+        
         return done(null, user);
       } else {
         return done(null, false, { message: 'Unable to register user'});
       }
+      
 
     } catch(e) {
       let error = new Error('There was an issue registering the user');
@@ -92,7 +101,8 @@ passport.use(
     }
 
   }
-)
+));
+
 
 
 /* Handler for verifying a JWT token */
