@@ -157,6 +157,138 @@ const loginUser = async (req, res, next) => {
 };
 
 /* 
+ * Registers a new user to the system
+ */
+const createUser = async (req, res, next) => {
+
+    const moduleMethod = 'createUser';
+
+    try{
+
+        /* Validate request headers, body and parameters */
+        let validationResult;
+
+        if(!req.body.username || req.body.username === undefined){
+            validationResult = {
+                status: 400,
+                success: false,
+                message: 'Undefined username'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        if(typeof req.body.username !== 'string'){
+            validationResult = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for username'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        if(!req.body.password || req.body.password === undefined){
+            validationResult = {
+                status: 400,
+                success: false,
+                message: 'Undefined password'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        if(typeof req.body.password !== 'string'){
+            validationResult = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for password'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        if(!req.body.email || req.body.email === undefined){
+            validationResult = {
+                status: 400,
+                success: false,
+                message: 'Undefined email'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        if(typeof req.body.email !== 'string'){
+            validationResult = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for email'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        if(!req.get('secret_token')){
+            validationResult = {
+                status: 401,
+                success: false,
+                message: 'Undefined secret_token'
+            }
+        }
+        if(validationResult) return next(validationResult);
+ 
+        if(req.get('secret_token') && req.get('secret_token') !== process.env.JWT_TOKEN_SECRET){
+            validationResult = {
+                status: 401,
+                success: false,
+                message: 'Incorrect secret_token'
+            }
+        }
+        if(validationResult) return next(validationResult);
+
+        /* Now get passport to register the user */
+        await passport.authenticate('register', { session: false }, async (err, user, info) => {
+
+            /* Keep track of the passport errors when registering */
+            let passportError;
+
+            if(err || !user){
+
+                if(info?.message === 'Unable to register user'){
+                    passportError = {
+                        status: 400,
+                        success: false,
+                        message: 'Unable to register the desired user'
+                    }
+                } else {
+                    passportError = {
+                        status: 500,
+                        success: false,
+                        message: 'There was a problem with the resource, please try again later'
+                    }
+                }
+
+            }
+
+            if(passportError) return next(passportError)
+
+            res.json({
+                status: 200,
+                message: 'Signup successful',
+                success: true,
+                user: user
+            })
+
+        })(req,res,next);
+        
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -179,4 +311,5 @@ const method = async (req, res, next) => {
 
 module.exports = {
     loginUser,
+    createUser
 };
