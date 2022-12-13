@@ -66,6 +66,7 @@ const pantriesRoute = require('./routes/api/pantriesRoute');
 const categoriesRoute = require('./routes/api/categoriesRoute');
 const recipesRoute = require('./routes/api/recipesRoute');
 const authRoute = require('./routes/api/authRoute');
+const searchRoute = require('./routes/api/searchRoute');
 
 /*
  * Add the routes to the app
@@ -77,6 +78,7 @@ app.use('/pantries', pantriesRoute);
 app.use('/categories', categoriesRoute);
 app.use('/recipes', recipesRoute);
 app.use(authRoute);
+app.use('/search', searchRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
