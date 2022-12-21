@@ -92,11 +92,16 @@ app.use((error, req, res, next) => {
 
   let statusCode = 500;
   let message = 'A problem has been encountered please check and try again';
+  let results;
 
   if(error){
       statusCode = error.status;
       message = error.message;
+
+      /* Some messages we also send extra information that we need to also include */
+      error.results ? results = error.results : [];
   }
+
 
   /* Log the error */
   logger.logMessage('error', message)
@@ -104,7 +109,8 @@ app.use((error, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     status: statusCode,
-    message: message
+    message: message,
+    results: results
   });
 
 });
