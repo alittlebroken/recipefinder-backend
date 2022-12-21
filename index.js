@@ -66,6 +66,7 @@ const pantriesRoute = require('./routes/api/pantriesRoute');
 const categoriesRoute = require('./routes/api/categoriesRoute');
 const recipesRoute = require('./routes/api/recipesRoute');
 const authRoute = require('./routes/api/authRoute');
+const searchRoute = require('./routes/api/searchRoute');
 
 /*
  * Add the routes to the app
@@ -77,6 +78,7 @@ app.use('/pantries', pantriesRoute);
 app.use('/categories', categoriesRoute);
 app.use('/recipes', recipesRoute);
 app.use(authRoute);
+app.use('/search', searchRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
@@ -90,11 +92,16 @@ app.use((error, req, res, next) => {
 
   let statusCode = 500;
   let message = 'A problem has been encountered please check and try again';
+  let results;
 
   if(error){
       statusCode = error.status;
       message = error.message;
+
+      /* Some messages we also send extra information that we need to also include */
+      error.results ? results = error.results : [];
   }
+
 
   /* Log the error */
   logger.logMessage('error', message)
@@ -102,7 +109,8 @@ app.use((error, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     status: statusCode,
-    message: message
+    message: message,
+    results: results
   });
 
 });
