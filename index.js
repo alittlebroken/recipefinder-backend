@@ -67,6 +67,7 @@ const categoriesRoute = require('./routes/api/categoriesRoute');
 const recipesRoute = require('./routes/api/recipesRoute');
 const authRoute = require('./routes/api/authRoute');
 const searchRoute = require('./routes/api/searchRoute');
+const usersRoute = require('./routes/api/userRoute');
 
 /*
  * Add the routes to the app
@@ -79,6 +80,7 @@ app.use('/categories', categoriesRoute);
 app.use('/recipes', recipesRoute);
 app.use(authRoute);
 app.use('/search', searchRoute);
+app.use('/users', usersRoute);
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {
