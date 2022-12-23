@@ -58,6 +58,69 @@ const listAll = async (req, res, next) => {
 };
 
 /* 
+ * Retrieve a particular users Information
+ */
+const listUser = async (req, res, next) => {
+
+    const moduleMethod = 'listUser';
+
+    try{
+
+        /* Validate request parameters, headers and body if required */
+        let id = req.params.id;
+        
+        if(id === 'undefined' || !id || id === null){
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            });
+        }
+
+        /* All appears correct in the request parameters, now actually extract the
+         * record from the database */
+        const results = await userModel.findById(parseInt(id));
+
+        /* Process any results and then send the expected output back */
+        if(!results || results.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No user found matching that id',
+                results: []
+            });
+        }
+
+        if(results.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: '',
+            results: results
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -79,5 +142,6 @@ const method = async (req, res, next) => {
 };
 
 module.exports = {
-    listAll
+    listAll,
+    listUser
 };
