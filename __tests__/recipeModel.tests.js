@@ -2197,3 +2197,124 @@ describe('recipeModel.removeAll', () => {
   });
 
 });
+
+describe('recipeModel.findByUserId', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should find one or more recipes by userId', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').responseOnce([{
+      id: 1,
+      userId: 1,
+      name: 'Gooey chocolate cake',
+      description: 'Sumptious and gooey chocolate cake. Perfect for an after dinner treat',
+      servings: 4,
+      calories_per_serving: 235,
+      prep_time: 60,
+      cook_time: 15,
+      rating: 1236
+    }]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.findByUserId(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    expect(typeof result[0].id).toBe('number');
+    expect(typeof result[0].userId).toBe('number');
+    expect(typeof result[0].name).toBe('string');
+    expect(typeof result[0].description).toBe('string');
+    expect(typeof result[0].servings).toBe('number');
+    expect(typeof result[0].calories_per_serving).toBe('number');
+    expect(typeof result[0].prep_time).toBe('number');
+    expect(typeof result[0].cook_time).toBe('number');
+    expect(typeof result[0].rating).toBe('number');
+
+    expect(result[0].id).toEqual(1);
+    expect(result[0].userId).toEqual(1);
+    expect(result[0].name).toEqual('Gooey chocolate cake');
+    expect(result[0].description).toEqual('Sumptious and gooey chocolate cake. Perfect for an after dinner treat');
+    expect(result[0].servings).toEqual(4);
+    expect(result[0].calories_per_serving).toEqual(235);
+    expect(result[0].prep_time).toEqual(60);
+    expect(result[0].cook_time).toEqual(15);
+    expect(result[0].rating).toEqual(1236);
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+
+  it('should return an empty array if no recipes found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').responseOnce([]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.findByUserId(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+  it('should return an error if required values are missing or incorrect', async () => {
+
+    /** Set the data to pass into the models function */
+    const id = null;
+
+    /** Execute the function */
+    const result = await recipeModel.findByUserId(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return a generic error if any libraries have issues for security', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('recipes').simulateError('lost connection to the database');
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await recipeModel.findByUserId(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+    expect(tracker.history.select).toHaveLength(1);
+
+  });
+
+});

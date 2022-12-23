@@ -909,6 +909,76 @@ const findByCategory = async terms => {
 
 };
 
+/* Return the recipes for a particular user
+ * @param {number} id - The ID of the user whose recipes you are interested in
+ * @returns {array} Contains the specified recipes if found otherwise it returns
+ * an empty array
+ */
+const findByUserId = async id => {
+
+  try {
+
+    /* Validate the passed in arguments */
+    if(!validation.validator(id, 'number')){
+      throw {
+        name: 'RECIPEMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    }
+
+    let finalRecipe = [];
+
+    /* Gather the required data from the database */
+    const result = await db('recipes')
+     .select('*')
+     .where('userId', id);
+
+    /* Only if we have found a recipe should we then go ahead and retrieve from
+       the database all the supporting data like steps and categories */
+    if(result && result.length > 0){
+
+      /* build the recipe object we wish to return */
+      finalRecipe.push(
+        {
+          id: result[0].id,
+          userId: result[0].userId,
+          name: result[0].name,
+          description: result[0].description,
+          servings: result[0].servings,
+          calories_per_serving: result[0].calories_per_serving,
+          prep_time: result[0].prep_time,
+          cook_time: result[0].cook_time,
+          rating: result[0].rating,
+        }
+      );
+      return finalRecipe;
+
+    } else {
+      return [];
+    }
+
+
+  } catch(e) {
+
+        /* Check for library errors and if found swap them out for a generic
+           one to send back over the API for security */
+        let message;
+
+        if(e.name === 'RECIPEMODEL_ERROR'){
+          message = e.message;
+        } else {
+          message = 'There was a problem with the resource, please try again later';
+        }
+
+        return {
+          success: false,
+          message: message
+        }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
@@ -918,5 +988,6 @@ module.exports = {
   findByRecipe,
   findByIngredients,
   findByCategory,
-  removeAll
+  removeAll,
+  findByUserId
 };
