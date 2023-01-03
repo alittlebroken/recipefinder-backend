@@ -10,10 +10,10 @@ const userController = require('../../controllers/usersController');
 router.get('/', userController.listAll);
 router.get('/:id', userController.listUser);
 router.get('/:id/recipes', userController.listUserRecipes);
-//router.get('/:id/cookbooks, userController.listUserCookbooks);
-//router.get('/:id/pantry', userController.listUserPantry);
+router.get('/:id/cookbooks', userController.listUserCookbooks);
+router.get('/:id/pantry', userController.listUserPantry);
 
-//router.post('/', userController.createUser);
+router.post('/', userController.createUser);
 //router.post('/:id/recipes', userController.createUserRecipe);
 //router.post('/:id/pantry', userController.addUserPantry);
 

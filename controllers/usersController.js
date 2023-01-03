@@ -5,7 +5,9 @@ const appLogger = require('../config/winston');
 const passport = require('passport');
 const moduleName = 'userController';
 const userModel = require('../models/userModel');
+const cookbookModel = require('../models/cookbookModel');
 const recipeModel = require('../models/recipeModel');
+const pantryIngredients = require('../models/pantryIngredientsModel');
 
 /* 
  * Retrieve a list of all users in the system
@@ -185,6 +187,237 @@ const listUserRecipes = async (req, res, next) => {
 };
 
 /* 
+ * list a users cookbooks
+ */
+const listUserCookbooks = async (req, res, next) => {
+
+    const moduleMethod = 'listUserCookbooks';
+
+    try{
+
+        /* Validate any passed in data */
+        let id = req.params.id;
+
+        if(!id || id === 'undefined' || id == null){
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            });
+        }
+
+        /* Gather the results from the DB */
+        const results = await cookbookModel.findByUserId(id);
+
+        /* Check the resaults if any and send back the appropriate response */
+        if(results.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'The user currently has no cookbooks',
+                results: []
+            });
+        }
+
+        if(!results || results.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            });
+        }
+
+        /* Everything is OK, so send back the results */
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: '',
+            results: results
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * List a users ingredients from their pantry
+ */
+const listUserPantry = async (req, res, next) => {
+
+    const moduleMethod = 'listUserPantry';
+
+    try{
+
+        /* Validate any passed in data */
+        let id = req.params.id;
+
+        if(!id || id === 'undefined' || id == null){
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            });
+        }
+
+        /* Gather the results from the DB */
+        const results = await pantryIngredients.findByUser(id);
+
+        /* Check the resaults if any and send back the appropriate response */
+        if(results.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'The user currently has no pantry ingredients',
+                results: []
+            });
+        }
+
+        if(!results || results.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            });
+        }
+
+        /* Everything is OK, so send back the results */
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: '',
+            results: results
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * Creates a new user
+ */
+const createUser = async (req, res, next) => {
+
+    const moduleMethod = 'createUser';
+
+    try{
+
+        /* Validate any passed in variables */
+        let validationErrors;
+
+        if(!req.body.username || req.body.username === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                results: [],
+                message: 'Undefined username'
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.username !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                results: [],
+                message: 'Wrong format for username'
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.email || req.body.email === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                results: [],
+                message: 'Undefined email'
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.email !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                results: [],
+                message: 'Wrong format for email'
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.password || req.body.password === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                results: [],
+                message: 'Undefined password'
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.password !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                results: [],
+                message: 'Wrong format for password'
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Add the user to the DB */
+        const result = await userModel.insert(req.body.username, req.body.email, req.body.password);
+
+        if(!result || result.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            });
+        }
+
+        /* No issues found send back the details of the newly created user */
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: '',
+            results: result
+        })
+
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -208,5 +441,8 @@ const method = async (req, res, next) => {
 module.exports = {
     listAll,
     listUser,
-    listUserRecipes
+    listUserRecipes,
+    listUserCookbooks,
+    listUserPantry,
+    createUser
 };
