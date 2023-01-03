@@ -1076,6 +1076,126 @@ describe('pantryIngredientsModel.findByIngredient', () => {
 
 });
 
+describe('pantryIngredientsModel.findByUser', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('returns all entries matching supplied user id', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('pantry_ingredients').response([{
+      id: 1,
+      pantryId: 1,
+      ingredientId: 1,
+      userId: 3,
+      username: 'Newt Scaremonger',
+      ingredientId: 2,
+      ingredientName: 'Dragon fruit',
+      amount: 6,
+      amount_type: 'large'
+    }]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await pantryIngredientsModel.findByUser(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    expect(typeof result[0].id).toBe('number');
+    expect(result[0].id).toBe(1);
+
+    expect(typeof result[0].pantryId).toBe('number');
+    expect(result[0].pantryId).toBe(1);
+
+    expect(typeof result[0].userId).toBe('number');
+    expect(result[0].userId).toBe(3);
+
+    expect(typeof result[0].username).toBe('string');
+    expect(result[0].username).toBe('Newt Scaremonger');
+
+    expect(typeof result[0].ingredientName).toBe('string');
+    expect(result[0].ingredientName).toBe('Dragon fruit');
+
+    expect(typeof result[0].ingredientId).toBe('number');
+    expect(result[0].ingredientId).toBe(2);
+
+    expect(typeof result[0].amount).toBe('number');
+    expect(result[0].amount).toBe(6);
+
+    expect(typeof result[0].amount_type).toBe('string');
+    expect(result[0].amount_type).toBe('large');
+
+  });
+
+  it('returns an empty array if no records found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('pantry_ingredients').response([]);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await pantryIngredientsModel.findByUser(id);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('returns an error if required value id is missing or incorrect', async () => {
+
+    /** Mock the DB responses */
+
+    /** Set the data to pass into the models function */
+    const id = null;
+
+    /** Execute the function */
+    const result = await pantryIngredientsModel.findByUser(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+  });
+
+  it('returns a generic error if third party library produces an error', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('pantry_ingredients').simulateError(messageHelper.ERROR_SIMULATE);
+
+    /** Set the data to pass into the models function */
+    const id = 1;
+
+    /** Execute the function */
+    const result = await pantryIngredientsModel.findByUser(id);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+
+  });
+
+});
+
 xdescribe('<model>Model.<method>', () => {
 
   /*

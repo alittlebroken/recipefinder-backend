@@ -510,6 +510,65 @@ const findByIngredient = async id => {
 
 };
 
+/*
+ * returns all entries for a specific user
+ * @param {id} The id of the user whos pantry we are looking at
+ * @returns {array} array of objects containing relationship data between a
+ * users pantry and ingredients
+*/
+const findByUser = async id => {
+
+  try{
+
+    /* Validate the passed in data */
+    if(!validation.validator(id, 'number')){
+      throw {
+        name: 'PANTRYINGREDIENTSMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    };
+
+    /* Update the data */
+    const result = await db('pantry_ingredients as pi')
+     .join('users as u', 'pi.userId', '=', 'u.id')
+     .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .select(
+       'pi.id as id',
+       'pi.pantryId as pantryId',
+       'i.id as ingredientId',
+       'u.id as userId',
+       'u.username as username',
+       'i.name as ingredientName',
+       'pi.amount as amount',
+       'pi.amount_type as amount_type'
+     )
+     .where('pi.userId', id);
+
+     if(result && result.length > 0){
+       return result;
+     } else {
+       return [];
+     }
+
+  } catch(e) {
+    /* Check the error name, we only want to specify our own error messages
+       everything else can be represented by a generic message */
+    let message;
+
+    if(e.name === 'PANTRYINGREDIENTSMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = messageHelper.ERROR_GENERIC_RESOURCE;
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
 module.exports = {
   create,
   update,
@@ -519,5 +578,6 @@ module.exports = {
   removeByIngredient,
   findAll,
   findByPantry,
-  findByIngredient
+  findByIngredient,
+  findByUser
 };
