@@ -876,6 +876,121 @@ describe('cookbookModel.removeAll', () => {
 
 });
 
+describe('cookbookModel.findByUserId', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should return the desired users cookbooks', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([
+      {
+        id: 1,
+        userId: 3,
+        name: 'Gluten free bread recipes',
+        description: 'Collection of bread recipes made with gluten free flour',
+        image: 'gluten_free.jpg'
+      }
+    ]);
+
+    /** Set the data to pass into the models function */
+    const userId = 3;
+
+    /** Execute the function */
+    const result = await cookbookModel.findByUserId(userId);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+
+    expect(typeof result[0].id).toBe('number');
+    expect(typeof result[0].userId).toBe('number');
+    expect(typeof result[0].name).toBe('string');
+    expect(typeof result[0].description).toBe('string');
+    expect(typeof result[0].image).toBe('string');
+
+    expect(result[0].id).toEqual(1);
+    expect(result[0].userId).toEqual(userId);
+    expect(result[0].name).toEqual('Gluten free bread recipes');
+    expect(result[0].description).toEqual('Collection of bread recipes made with gluten free flour');
+    expect(result[0].image).toEqual('gluten_free.jpg');
+
+  });
+
+  it('should return an empty array if no records found', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([]);
+
+    /** Set the data to pass into the models function */
+    const userId = 3243;
+
+    /** Execute the function */
+    const result = await cookbookModel.findByUserId(userId);
+
+    /** Test the response back from the function */
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
+
+  });
+
+  it('should return an error if the user ID is missing', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').response([]);
+
+    /** Set the data to pass into the models function */
+    let userId;
+
+    /** Execute the function */
+    const result = await cookbookModel.findByUserId(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.success).toBe('boolean');
+    expect(typeof result.message).toBe('string');
+
+    expect(result.success).toEqual(false);
+    expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should return an error if the resource encountered a problem', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.select('cookbooks').simulateError('lost connection to database');
+
+    /** Set the data to pass into the models function */
+    let userId = 12;
+
+    /** Execute the function */
+    const result = await cookbookModel.findByUserId(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.success).toBe('boolean');
+    expect(typeof result.message).toBe('string');
+
+    expect(result.success).toEqual(false);
+    expect(result.message).toEqual('There was a problem with the resource, please try again later');
+
+  });
+
+});
+
 xdescribe('cookbookModel.<method>', () => {
 
   /*

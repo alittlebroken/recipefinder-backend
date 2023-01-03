@@ -435,6 +435,55 @@ const recipes = async cookbookId => {
 
 };
 
+/*
+ * Find all cookbooks that beloiing to a particular user
+ * @param {integer} id - ID of the user owing the cookbooks we are interested in
+ * @returns {array} A list of cookbooks owned by the user
+ */
+const findByUserId = async id => {
+
+  try {
+
+    /* Validate the passed in values */
+    if(!id || typeof id !== 'number'){
+      throw {
+        name: 'COOKBOOKMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    }
+
+    /* gather the data from the database */
+    const result = await db('cookbooks')
+     .where('id', id)
+     .select('*');
+
+    if(!result || result.length === 0){
+      return [];
+    }
+
+    return result;
+
+  } catch(e) {
+
+    /* Non custom messages should be returned as a generic message to the front
+       end */
+    let message;
+
+    if(e.name === 'COOKBOOKMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
@@ -445,4 +494,5 @@ module.exports = {
   findAllByName,
   recipes,
   removeAll,
+  findByUserId
 };
