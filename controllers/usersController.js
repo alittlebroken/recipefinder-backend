@@ -8,6 +8,7 @@ const userModel = require('../models/userModel');
 const cookbookModel = require('../models/cookbookModel');
 const recipeModel = require('../models/recipeModel');
 const pantryIngredients = require('../models/pantryIngredientsModel');
+const { emptyQuery } = require('pg-protocol/dist/messages');
 
 /* 
  * Retrieve a list of all users in the system
@@ -418,6 +419,280 @@ const createUser = async (req, res, next) => {
 };
 
 /* 
+ * Adds a new recipe for a user
+ */
+const createUserRecipe = async (req, res, next) => {
+
+    const moduleMethod = 'createUserRecipe';
+
+    try{
+
+        /* Validate any request params and or body variables */
+        let validationErrors;
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe || req.body.recipe === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe !== 'object'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe.userId || req.body.recipe.userId === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe.userId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe.name || req.body.recipe.name === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe name',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe.name  !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe name',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe.servings || req.body.recipe.servings === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe servings',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe.servings !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe servings',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe.calories_per_serving || req.body.recipe.calories_per_serving === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe calories_per_serving',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe.calories_per_serving !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe calories_per_serving',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe.prep_time || req.body.recipe.prep_time === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe prep_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe.prep_time !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe prep_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.recipe.cook_time || req.body.recipe.cook_time === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe cook_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.recipe.cook_time !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe cook_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.steps || req.body.steps === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined steps',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(Array.isArray(req.body.steps) !== true){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for steps',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.ingredients || req.body.ingredients === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredients',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(Array.isArray(req.body.ingredients) !== true){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredients',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.cookbookId || req.body.cookbookId === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined cookbookId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.cookbookId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for cookbookId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.categories || req.body.categories === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined categories',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(Array.isArray(req.body.categories) !== true){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for categories',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Validation must have passed at this point so lets just insert 
+            the record */
+        const result = await recipeModel.create(req.body.recipe, req.body.steps, req.body.ingredients, req.body.cookbookId, req.body.categories);
+
+        if(result.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            });
+        }
+
+        /* Send back any results */
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Recipe successfully added',
+            results: []
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -444,5 +719,6 @@ module.exports = {
     listUserRecipes,
     listUserCookbooks,
     listUserPantry,
-    createUser
+    createUser,
+    createUserRecipe
 };
