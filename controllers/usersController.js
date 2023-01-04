@@ -693,6 +693,134 @@ const createUserRecipe = async (req, res, next) => {
 };
 
 /* 
+ * Add an ingredient to the users pantry
+ */
+const addUserPantry = async (req, res, next) => {
+
+    const moduleMethod = 'addUserPantry';
+
+    try{
+
+        /* Validate any request parameters and or body varibales */
+        let validationErrors;
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.ingredientId || req.body.ingredientId === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredientId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.ingredientId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredientId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.amount || req.body.amount === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined amount',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.amount !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for amount',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.amount_type || req.body.amount_type === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined amount_type',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.amount_type !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for amount_type',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Validation is ok, so lets get the users pantry and then add
+           the ingredient to the desired pantry */
+        const pantryResult = await pantryIngredients.findByUser(req.params.id);
+        if(!pantryResult || pantryResult.length < 1 || pantryResult.success === false){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Unable to find pantry for user',
+                results: []
+            })
+        }
+
+        const results = await pantryIngredients.create({
+            pantryId: pantryResult.pantryId,
+            ingredientId: req.body.ingredientId,
+            amount: req.body.amount,
+            amount_type: req.body.amount_type
+        });
+
+        if(results.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        /* All is OK at this point so lets return the users success */
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Record successfully created',
+            results: []
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -720,5 +848,6 @@ module.exports = {
     listUserCookbooks,
     listUserPantry,
     createUser,
-    createUserRecipe
+    createUserRecipe,
+    addUserPantry
 };
