@@ -821,6 +821,53 @@ const addUserPantry = async (req, res, next) => {
 };
 
 /* 
+ * Remove all user accounts
+ */
+const removeAllUsers = async (req, res, next) => {
+
+    const moduleMethod = 'removeAllUsers';
+
+    try{
+
+        /* Execute the model to remove all users */
+        const result = await userModel.removeAll();
+        
+        if(result.success === false && result.message === 'There was an issue with the resource, please try again later'){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        } else if(result.success === false && result.message === 'No customer accounts have been removed'){
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'No customer accounts have been removed',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'All customer accounts successfully removed',
+            results: []
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -849,5 +896,6 @@ module.exports = {
     listUserPantry,
     createUser,
     createUserRecipe,
-    addUserPantry
+    addUserPantry,
+    removeAllUsers
 };
