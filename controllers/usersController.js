@@ -923,6 +923,70 @@ const removeUser = async (req, res, next) => {
 };
 
 /* 
+ * Delete all the recipes assigned to a specific user
+ */
+const removeUserRecipes = async (req, res, next) => {
+
+    const moduleMethod = 'removeUserRecipes';
+
+    try{
+
+        /* Validate any passed in values */
+        let validationErrors;
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* remove the recipes for the user */
+        const result = await recipeModel.removeAllByUser(req.params.id);
+
+        if(result.success === false){
+            switch(result.message){
+                case "The user has no recipes to remove":
+                    res.status(404).json({
+                        status: 404,
+                        success: false,
+                        message: result.message,
+                        results: []
+                    });
+                    break;
+                default:
+                    res.status(500).json({
+                        status: 500,
+                        success: false,
+                        message: 'There was a problem with the resource, please try again later',
+                        results: []
+                    });
+                    break;
+            }
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'All recipes successfully removed for specified user',
+            results: []
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -953,5 +1017,6 @@ module.exports = {
     createUserRecipe,
     addUserPantry,
     removeAllUsers,
-    removeUser
+    removeUser,
+    removeUserRecipes
 };
