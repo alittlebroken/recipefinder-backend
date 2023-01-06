@@ -4109,7 +4109,7 @@ describe('userController.removeAllUsers', () => {
 
 });
 
-xdescribe('userController.removeUser', () => {
+describe('userController.removeUser', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -4122,38 +4122,28 @@ xdescribe('userController.removeUser', () => {
     jest.clearAllMocks();
   })
 
-  xit('should return status ', async () => {
+  it('should return status 200 and removed the specified user', async () => {
 
     // Set Mocked data that models and controllers should return
-    const modelReturnData = [
-      {
-        id: 1, 
-        userId: 1, 
-        name: 'Vegan pancakes',
-        description: 'American style pancakes made with all vegan ingredients',
-        servings: 4,
-        calories_per_serving: 250,
-        prep_time: 15,
-        cook_time: 5,
-        rating: 10002
-      }
-
-    ];
+    const modelReturnData = {
+      success: true,
+      message: 'The record was deleted successfully'
+    };
 
     // Set any variables needed to be passed to controllers and or models
     const userId = 1;
 
     // Mock any needed third party modules
-    jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
+    jest.spyOn(userModel, 'remove').mockImplementation(() => {
       return modelReturnData;
     });
 
     // Set here the expected return values for the test
     const returnStatus = 200;
     const returnSuccess = true;
-    const returnMessage = '';
-    const returnResults = modelReturnData;
-    const returnResultsLength = 1;
+    const returnMessage = modelReturnData.message;
+    const returnResults = [];
+    const returnResultsLength = 0;
 
     /* Mock Express request and response */
     const mockRequest = {};
@@ -4163,7 +4153,102 @@ xdescribe('userController.removeUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .delete(`/users/${userId}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if userId is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'remove').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 500 if there is another problem with the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was an issue with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'remove').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = false;
+    const returnMessage = 'There was a problem with the resource, please try again later';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);

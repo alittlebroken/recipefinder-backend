@@ -867,6 +867,61 @@ const removeAllUsers = async (req, res, next) => {
 
 };
 
+
+/* 
+ * Remove a particular user from the system
+ */
+const removeUser = async (req, res, next) => {
+
+    const moduleMethod = 'removeUser';
+
+    try{
+
+        /* Validate any passed in parameters */
+        let validationErrors;
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Remove the user */
+        const result = await userModel.remove(req.params.id);
+
+        console.log(result)
+
+        if(result?.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'The record was deleted successfully',
+            results: []
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
 /* 
  * function template
  */
@@ -897,5 +952,6 @@ module.exports = {
     createUser,
     createUserRecipe,
     addUserPantry,
-    removeAllUsers
+    removeAllUsers,
+    removeUser
 };
