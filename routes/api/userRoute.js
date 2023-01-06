@@ -21,7 +21,7 @@ router.delete('/', userController.removeAllUsers);
 router.delete('/:id', userController.removeUser);
 router.delete('/:id/recipes', userController.removeUserRecipes);
 router.delete('/:id/cookbooks', userController.removeUserCookbooks);
-//router.delete('/:id/pantry', userController.removeUserPantry);
+router.delete('/:id/pantry', userController.removeUserPantry);
 
 //router.put('/:id', userController.updateUser);
 //router.put('/:id/recipes', userController.updateUserRecipe);

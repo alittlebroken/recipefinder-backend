@@ -371,6 +371,40 @@ const list = async pantryId => {
 
 };
 
+/*
+ * Removes all pantries associated with a particluar user
+ */
+const removeAllByUser = async id => {
+
+  try {
+
+    /* Validate passed in parameters */
+    if(!id || id === undefined){
+      return {
+        success: false,
+        message: 'Undefined userId',
+        count: 0
+      }
+    }
+
+    /* Remove all pantries */
+    const result = await db('pantries').del();
+
+    return { count: result };
+
+  } catch(e) {
+    /* Determine if we display a generic error or one of our own messages */
+    let message = 'There was an issue with the resource, please try again later';
+  
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   addItem,
@@ -378,5 +412,6 @@ module.exports = {
   updateItem,
   listAll,
   list,
-  removeAll
+  removeAll,
+  removeAllByUser
 };

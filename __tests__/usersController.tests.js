@@ -9,6 +9,7 @@ const userModel = require('../models/userModel');
 const recipeModel = require('../models/recipeModel');
 const cookbookModel = require('../models/cookbookModel');
 const pantryIngredients = require('../models/pantryIngredientsModel');
+const pantryModel = require('../models/pantryModel');
 const userController = require('../controllers/usersController');
 
 const passport = require('passport');
@@ -4635,7 +4636,7 @@ describe('userController.removeUserCookbooks', () => {
 
 });
 
-xdescribe('userController.removeUserPantry', () => {
+describe('userController.removeUserPantry', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -4648,38 +4649,27 @@ xdescribe('userController.removeUserPantry', () => {
     jest.clearAllMocks();
   })
 
-  xit('should return status ', async () => {
+  it('should return status 200 and remove the pantries associated with the specified user', async () => {
 
     // Set Mocked data that models and controllers should return
-    const modelReturnData = [
-      {
-        id: 1, 
-        userId: 1, 
-        name: 'Vegan pancakes',
-        description: 'American style pancakes made with all vegan ingredients',
-        servings: 4,
-        calories_per_serving: 250,
-        prep_time: 15,
-        cook_time: 5,
-        rating: 10002
-      }
-
-    ];
+    const modelReturnData = {
+      count: 1
+    };
 
     // Set any variables needed to be passed to controllers and or models
     const userId = 1;
 
     // Mock any needed third party modules
-    jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
+    jest.spyOn(pantryModel, 'removeAllByUser').mockImplementation(() => {
       return modelReturnData;
     });
 
     // Set here the expected return values for the test
     const returnStatus = 200;
     const returnSuccess = true;
-    const returnMessage = '';
-    const returnResults = modelReturnData;
-    const returnResultsLength = 1;
+    const returnMessage = 'The users pantries have been removed successfully';
+    const returnResults = [];
+    const returnResultsLength = 0;
 
     /* Mock Express request and response */
     const mockRequest = {};
@@ -4689,7 +4679,105 @@ xdescribe('userController.removeUserPantry', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .delete(`/users/${userId}/pantry`);
+
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if userId is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+
+    // Mock any needed third party modules
+    jest.spyOn(pantryModel, 'removeAllByUser').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}/pantry`);
+
+    console.log(res.body)
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 500 if the resorce encounters any other problems', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was an issue with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(pantryModel, 'removeAllByUser').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = false;
+    const returnMessage = 'There was a problem with the resource, please try again later';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}/pantry`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
