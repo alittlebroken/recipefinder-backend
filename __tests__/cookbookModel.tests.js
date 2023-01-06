@@ -991,6 +991,80 @@ describe('cookbookModel.findByUserId', () => {
 
 });
 
+describe('cookbookModel.removeAllByUser', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all cookbooks for a particular userId', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('cookbooks').response({
+      success: true,
+      message: 'Cookbooks successfully removed'
+    });
+
+    /* Set any values to pass to method to be tested */
+    const userId = 1;
+
+    /** Execute the function */
+    const result = await cookbookModel.removeAllByUser(userId);
+    
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('All cookbooks removed successfully');
+
+  });
+
+  it('should return an error if the userId is undefined', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('cookbooks').response([]);
+
+    /* Set any values to pass to method to be tested */
+    let userId;
+
+    /** Execute the function */
+    const result = await cookbookModel.removeAllByUser(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('Undefined userId');
+
+  });
+
+  it('should dispay a generic error for all other error types', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('cookbooks').simulateError('lost connection to database');
+
+    /* Set any values to pass to method to be tested */
+    const userId = 1;
+
+    /** Execute the function */
+    const result = await cookbookModel.removeAllByUser(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later');
+
+  });
+
+});
+
 xdescribe('cookbookModel.<method>', () => {
 
   /*

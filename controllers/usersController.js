@@ -892,8 +892,6 @@ const removeUser = async (req, res, next) => {
         /* Remove the user */
         const result = await userModel.remove(req.params.id);
 
-        console.log(result)
-
         if(result?.success === false){
             res.status(500).json({
                 status: 500,
@@ -987,6 +985,58 @@ const removeUserRecipes = async (req, res, next) => {
 };
 
 /* 
+ * Remove all of a users cookbooks
+ */
+const removeUserCookbooks = async (req, res, next) => {
+
+    const moduleMethod = 'removeUserCookbooks';
+
+    try{
+
+        /* validate any passed in data that is needed */
+        let validationErrors;
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* remove the users cookbooks now validation has succeeded */
+        const result = await cookbookModel.removeAllByUser(req.params.id);
+
+        if(!result || result.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'All cookbooks successfully removed for the specifed user',
+            results: []
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -1018,5 +1068,6 @@ module.exports = {
     addUserPantry,
     removeAllUsers,
     removeUser,
-    removeUserRecipes
+    removeUserRecipes,
+    removeUserCookbooks
 };

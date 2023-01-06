@@ -1,5 +1,6 @@
 /* Packages needed */
 require('dotenv').config();
+const { off } = require('..');
 const db = require('../database');
 
 /**
@@ -484,6 +485,42 @@ const findByUserId = async id => {
 
 };
 
+/*
+ * Removes all cookbooks for a particuler user
+ * @returns {object} Details on how successful the operation was and anyway
+ * supporting messages
+ */
+const removeAllByUser = async id => {
+
+  try{
+
+    /* Validate the passed in values */
+    if(!id || id === undefined){
+      return {
+        success: false,
+        message: 'Undefined userId'
+      }
+    }
+
+    /* remove the cookbook */
+    await db('cookbooks').delete();
+
+    return {
+      success: true,
+      message: 'All cookbooks removed successfully'
+    }
+
+  } catch(e) {
+
+    return {
+      success: false,
+      message: 'There was an issue with the resource, please try again later'
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
@@ -494,5 +531,6 @@ module.exports = {
   findAllByName,
   recipes,
   removeAll,
-  findByUserId
+  findByUserId,
+  removeAllByUser
 };
