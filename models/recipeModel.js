@@ -979,6 +979,65 @@ const findByUserId = async id => {
 
 };
 
+/* Remove all recipes owned by a particular user id
+ * @returns {any} A count of how many records were deleted or an
+ * empty array if no records to delete
+ */
+const removeAllByUser  = async id => {
+
+  try{
+
+      /* Delete the data in the reverse order it was created */
+
+      if(!id || id === undefined){
+        return {
+          success: false,
+          message: 'Undefined userId'
+        }
+      }
+
+      return await db.transaction( async trx => {
+
+        const recipeCount = await db('recipes')
+         .delete()
+         .where('userid', id)
+         .transacting(trx);
+
+        if(recipeCount > 0){
+          return {
+            success: true,
+            message: 'All recipes successfully removed'
+          }
+        } else {
+          return {
+            success: false,
+            message: 'The user has no recipes to remove'
+          }
+        }
+
+      });
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    
+    if(e.name === 'RECIPEMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
@@ -989,5 +1048,6 @@ module.exports = {
   findByIngredients,
   findByCategory,
   removeAll,
-  findByUserId
+  findByUserId,
+  removeAllByUser
 };
