@@ -459,7 +459,11 @@ describe('recipeModel.update', () => {
   it('should update the recipe', async () => {
 
     /** Mock the DB responses */
-    tracker.on.update('recipes').response([{id: 1}]);
+    tracker.on.update('recipes').responseOnce([{id: 1}]);
+    tracker.on.update('steps').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_ingredients').responseOnce([{id: 1}]);
+    tracker.on.update('cookbook_recipes').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_categories').responseOnce([{id: 1}]);
 
     /** Set the data to pass into the models function */
     const updates = {
@@ -471,7 +475,19 @@ describe('recipeModel.update', () => {
       calories_per_serving: 25,
       prep_time: 10,
       cook_time: 1,
-      rating: 1
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
     }
 
     /** Execute the function */
@@ -482,16 +498,17 @@ describe('recipeModel.update', () => {
     expect(result.success).toBe(true);
     expect(result.message).toEqual('Recipe successfully updated');
 
+    /* ensure that each update statement was called */
+    expect(tracker.history.update).toHaveLength(5);
+
   });
 
   it('should return an error if update.id is missing or incorrect', async () => {
 
-    /** Mock the DB responses */
-    tracker.on.update('recipes').response([{id: 1}]);
-
+    /** Set the data to pass into the models function */
     /** Set the data to pass into the models function */
     const updates = {
-      id: null,
+      
       name: 'Vegan mystery chow',
       description: 'Some stuff we found in the garden thrown into a pot',
       userId: 1,
@@ -499,7 +516,19 @@ describe('recipeModel.update', () => {
       calories_per_serving: 25,
       prep_time: 10,
       cook_time: 1,
-      rating: 1
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
     }
 
     /** Execute the function */
@@ -510,24 +539,34 @@ describe('recipeModel.update', () => {
     expect(result.success).toBe(false);
     expect(result.message).toEqual('One or more required values are missing or incorrect');
 
+
   });
 
   it('should return an error if update.name is missing or incorrect', async () => {
 
-    /** Mock the DB responses */
-    tracker.on.update('recipes').response([{id: 1}]);
-
     /** Set the data to pass into the models function */
     const updates = {
       id: 1,
-      name: 12,
+      name: 1,
       description: 'Some stuff we found in the garden thrown into a pot',
       userId: 1,
       servings: 12,
       calories_per_serving: 25,
       prep_time: 10,
       cook_time: 1,
-      rating: 1
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
     }
 
     /** Execute the function */
@@ -542,20 +581,29 @@ describe('recipeModel.update', () => {
 
   it('should return an error if update.userId is missing or incorrect', async () => {
 
-    /** Mock the DB responses */
-    tracker.on.update('recipes').response([{id: 1}]);
-
     /** Set the data to pass into the models function */
     const updates = {
       id: 1,
       name: 'Vegan mystery chow',
       description: 'Some stuff we found in the garden thrown into a pot',
-      userId: 'one',
+      
       servings: 12,
       calories_per_serving: 25,
       prep_time: 10,
       cook_time: 1,
-      rating: 1
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
     }
 
     /** Execute the function */
@@ -570,8 +618,6 @@ describe('recipeModel.update', () => {
 
   it('should return an error if update.servings is missing or incorrect', async () => {
 
-    /** Mock the DB responses */
-    tracker.on.update('recipes').response([{id: 1}]);
 
     /** Set the data to pass into the models function */
     const updates = {
@@ -579,11 +625,23 @@ describe('recipeModel.update', () => {
       name: 'Vegan mystery chow',
       description: 'Some stuff we found in the garden thrown into a pot',
       userId: 1,
-      servings: [12],
+      
       calories_per_serving: 25,
       prep_time: 10,
       cook_time: 1,
-      rating: 1
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
     }
 
     /** Execute the function */
@@ -598,8 +656,6 @@ describe('recipeModel.update', () => {
 
   it('should return an error if update.calories_per_serving is missing or incorrect', async () => {
 
-      /** Mock the DB responses */
-      tracker.on.update('recipes').response([{id: 1}]);
 
       /** Set the data to pass into the models function */
       const updates = {
@@ -608,11 +664,22 @@ describe('recipeModel.update', () => {
         description: 'Some stuff we found in the garden thrown into a pot',
         userId: 1,
         servings: 12,
-        calories_per_serving: { amount: 25},
         prep_time: 10,
         cook_time: 1,
-        rating: 1
-  }
+        rating: 1,
+        steps: [
+          { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+        ],
+        ingredients: [
+          { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+        ],
+        cookbooks: [
+          { id: 1, cookbookId: 1, recipeId: 1}
+        ],
+        categories: [
+          { id: 1, recipeId: 1, categoryId: 1}
+        ],
+      }
 
   /** Execute the function */
   const result = await recipeModel.update(updates);
@@ -626,8 +693,7 @@ describe('recipeModel.update', () => {
 
   it('should return an error if update.prep_time is missing or incorrect', async () => {
 
-      /** Mock the DB responses */
-      tracker.on.update('recipes').response([{id: 1}]);
+     
 
       /** Set the data to pass into the models function */
       const updates = {
@@ -637,10 +703,22 @@ describe('recipeModel.update', () => {
         userId: 1,
         servings: 12,
         calories_per_serving: 25,
-        prep_time: 'Stephen',
+        
         cook_time: 1,
-        rating: 1
-  }
+        rating: 1,
+        steps: [
+          { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+        ],
+        ingredients: [
+          { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+        ],
+        cookbooks: [
+          { id: 1, cookbookId: 1, recipeId: 1}
+        ],
+        categories: [
+          { id: 1, recipeId: 1, categoryId: 1}
+        ],
+      }
 
   /** Execute the function */
   const result = await recipeModel.update(updates);
@@ -654,8 +732,6 @@ describe('recipeModel.update', () => {
 
   it('should return an error if update.cook_time is missing or incorrect', async () => {
 
-      /** Mock the DB responses */
-      tracker.on.update('recipes').response([{id: 1}]);
 
       /** Set the data to pass into the models function */
       const updates = {
@@ -666,9 +742,20 @@ describe('recipeModel.update', () => {
         servings: 12,
         calories_per_serving: 25,
         prep_time: 10,
-        cook_time: null,
-        rating: 1
-  }
+        rating: 1,
+        steps: [
+          { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+        ],
+        ingredients: [
+          { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+        ],
+        cookbooks: [
+          { id: 1, cookbookId: 1, recipeId: 1}
+        ],
+        categories: [
+          { id: 1, recipeId: 1, categoryId: 1}
+        ],
+      }
 
   /** Execute the function */
   const result = await recipeModel.update(updates);
@@ -682,21 +769,28 @@ describe('recipeModel.update', () => {
 
   it('should return an error if update.rating is missing or incorrect', async () => {
 
-      /** Mock the DB responses */
-      tracker.on.update('recipes').response([{id: 1}]);
-
-      /** Set the data to pass into the models function */
-      const updates = {
-        id: 1,
-        name: 'Vegan mystery chow',
-        description: 'Some stuff we found in the garden thrown into a pot',
-        userId: 1,
-        servings: 12,
-        calories_per_serving: 25,
-        prep_time: 10,
-        cook_time: 1,
-        rating: null
-      }
+    const updates = {
+      id: 1,
+      name: 'Vegan mystery chow',
+      description: 'Some stuff we found in the garden thrown into a pot',
+      userId: 1,
+      servings: 12,
+      calories_per_serving: 25,
+      prep_time: 10,
+      cook_time: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
 
       /** Execute the function */
       const result = await recipeModel.update(updates);
@@ -705,6 +799,184 @@ describe('recipeModel.update', () => {
       expect(typeof result).toBe('object');
       expect(result.success).toBe(false);
       expect(result.message).toEqual('One or more required values are missing or incorrect');
+
+  });
+
+  it('should still update the recipe even if recipe.steps is undefined', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('recipes').responseOnce([{id: 1}]);
+    //tracker.on.update('steps').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_ingredients').responseOnce([{id: 1}]);
+    tracker.on.update('cookbook_recipes').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_categories').responseOnce([{id: 1}]);
+
+    /** Set the data to pass into the models function */
+    const updates = {
+      id: 1,
+      name: 'Vegan mystery chow',
+      description: 'Some stuff we found in the garden thrown into a pot',
+      userId: 1,
+      servings: 12,
+      calories_per_serving: 25,
+      prep_time: 10,
+      cook_time: 1,
+      rating: 1,
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    /** Execute the function */
+    const result = await recipeModel.update(updates);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('Recipe successfully updated');
+
+    /* ensure that each update statement was called */
+    expect(tracker.history.update).toHaveLength(4);
+
+  });
+
+  it('should still update the recipe even if recipe.ingredients is undefined', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('recipes').responseOnce([{id: 1}]);
+    tracker.on.update('steps').responseOnce([{id: 1}]);
+    //tracker.on.update('recipe_ingredients').responseOnce([{id: 1}]);
+    tracker.on.update('cookbook_recipes').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_categories').responseOnce([{id: 1}]);
+
+    /** Set the data to pass into the models function */
+    const updates = {
+      id: 1,
+      name: 'Vegan mystery chow',
+      description: 'Some stuff we found in the garden thrown into a pot',
+      userId: 1,
+      servings: 12,
+      calories_per_serving: 25,
+      prep_time: 10,
+      cook_time: 1,
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    /** Execute the function */
+    const result = await recipeModel.update(updates);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('Recipe successfully updated');
+
+    /* ensure that each update statement was called */
+    expect(tracker.history.update).toHaveLength(4);
+
+  });
+
+  it('should still update the recipe even if recipe.cookbooks is undefined', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('recipes').responseOnce([{id: 1}]);
+    tracker.on.update('steps').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_ingredients').responseOnce([{id: 1}]);
+    //tracker.on.update('cookbook_recipes').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_categories').responseOnce([{id: 1}]);
+
+    /** Set the data to pass into the models function */
+    const updates = {
+      id: 1,
+      name: 'Vegan mystery chow',
+      description: 'Some stuff we found in the garden thrown into a pot',
+      userId: 1,
+      servings: 12,
+      calories_per_serving: 25,
+      prep_time: 10,
+      cook_time: 1,
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    /** Execute the function */
+    const result = await recipeModel.update(updates);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('Recipe successfully updated');
+
+    /* ensure that each update statement was called */
+    expect(tracker.history.update).toHaveLength(4);
+
+  });
+
+  it('should still update the recipe even if recipe.categories is undefined', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.update('recipes').responseOnce([{id: 1}]);
+    tracker.on.update('steps').responseOnce([{id: 1}]);
+    tracker.on.update('recipe_ingredients').responseOnce([{id: 1}]);
+    tracker.on.update('cookbook_recipes').responseOnce([{id: 1}]);
+    //tracker.on.update('recipe_categories').responseOnce([{id: 1}]);
+
+    /** Set the data to pass into the models function */
+    const updates = {
+      id: 1,
+      name: 'Vegan mystery chow',
+      description: 'Some stuff we found in the garden thrown into a pot',
+      userId: 1,
+      servings: 12,
+      calories_per_serving: 25,
+      prep_time: 10,
+      cook_time: 1,
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      
+    }
+
+    /** Execute the function */
+    const result = await recipeModel.update(updates);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual('Recipe successfully updated');
+
+    /* ensure that each update statement was called */
+    expect(tracker.history.update).toHaveLength(4);
 
   });
 
@@ -723,7 +995,19 @@ describe('recipeModel.update', () => {
       calories_per_serving: 25,
       prep_time: 10,
       cook_time: 1,
-      rating: 1
+      rating: 1,
+      steps: [
+        { id: 1, recipeId: 1, stepNo: 1, content: 'Chop vegatbles into 1 inch cubes'}
+      ],
+      ingredients: [
+        { id: 1, recipeId: 1, ingredientId: 1, amount: 80, amount_type: 'grams' },
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
     }
 
     /** Execute the function */
@@ -2090,35 +2374,6 @@ describe('recipeModel.findByCategory', () => {
     expect(results.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
 
     expect(tracker.history.select).toHaveLength(1);
-
-  });
-
-});
-
-xdescribe('<model>Model.<method>', () => {
-
-  /*
-   * Steps to run before and after this test suite
-   */
-  beforeEach(async () => {
-    /* Initialize the tracker of the various commands */
-    tracker = getTracker();
-  });
-
-  afterEach(() => {
-    /* Reset the tracker */
-    tracker.reset();
-  })
-
-  xit('should ...', async () => {
-
-    /** Mock the DB responses */
-
-    /** Set the data to pass into the models function */
-
-    /** Execute the function */
-
-    /** Test the response back from the function */
 
   });
 

@@ -343,14 +343,67 @@ const update = async recipe => {
       }
     }
 
-    /* Update the stored database entry now all is OK */
+    /* Update the specifed record with the new values passed in */
+    return await db.transaction( async trx => {
+
+      /* Add the recipe and return the ID to use later */
+      await db('recipes')
+        .update({
+          id: recipe.id,
+          userId: recipe.userId,
+          name: recipe.name,
+          description: recipe.description,
+          servings: recipe.servings,
+          calories_per_serving: recipe.calories_per_serving,
+          prep_time: recipe.prep_time,
+          cook_time: recipe.cook_time,
+          rating: recipe.rating
+        })
+        .where('id', recipe.id);
+      
+        if(recipe?.steps){
+          await db('steps')
+          .update(recipe.steps)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+
+        if(recipe?.ingredients){
+          await db('recipe_ingredients')
+          .update(recipe.ingredients)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+        
+        if(recipe?.cookbooks){
+          await db('cookbook_recipes')
+          .update(recipe.cookbooks)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+        
+        if(recipe?.categories){
+          await db('recipe_categories')
+          .update(recipe.categories)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+        
+        return {
+          success: true,
+          message: 'Recipe successfully updated'
+        }
+
+    });
+
+    /* Update the stored database entry now all is OK
     const result = await db('recipes')
      .update(recipe).where('id', recipe.id);
 
     return {
       success: true,
       message: 'Recipe successfully updated'
-    }
+    } */
 
   } catch(e) {
 
