@@ -1090,6 +1090,177 @@ const removeUserPantry = async (req, res, next) => {
 };
 
 /* 
+ * Update user details
+ */
+const updateUser = async (req, res, next) => {
+
+    const moduleMethod = 'updateUser';
+
+    try{
+
+        /* Validate passed in variables */
+        let validationErrors;
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.username || req.body.username === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined username',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.username !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for username',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.email || req.body.email === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined email',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.email !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for email',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.roles || req.body.roles === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined roles',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!Array.isArray(req.body.roles)){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for roles',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.forename || req.body.forename === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined forename',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.forename !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for forename',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.surname || req.body.surname === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined surname',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.surname !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for surname',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Now update the specified user */
+        const result  = await userModel.update(
+            req.params.id,
+            req.body.username,
+            req.body.email,
+            req.body.roles,
+            req.body.forename,
+            req.body.surname
+        );
+
+        if(result.success === false){
+            switch(result.message){
+                case "No records matched supplied data":
+                    res.status(404).json({
+                        status: 404,
+                        success: false,
+                        message: 'No user found matching the specified id',
+                        results: []
+                    });
+                    break;
+                default:
+                    res.status(500).json({
+                        status: 500,
+                        success: false,
+                        message: 'There was a problem with the resource, please try again later',
+                        results: []
+                    });
+                    break;
+            }
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: '',
+            results: result
+        });
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -1123,5 +1294,6 @@ module.exports = {
     removeUser,
     removeUserRecipes,
     removeUserCookbooks,
-    removeUserPantry
+    removeUserPantry,
+    updateUser
 };
