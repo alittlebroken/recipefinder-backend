@@ -1521,6 +1521,145 @@ const updateUserRecipe = async (req, res, next) => {
 /* 
  * function template
  */
+const updateUserCookbook = async (req, res, next) => {
+
+    const moduleMethod = 'updateUserCookbook';
+
+    try{
+
+        /* Validate any passed in variables */
+        let validationErrors;
+
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.cookbookId || req.body.cookbookId === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined cookbook id',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.cookbookId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for cookbook id',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.name || req.body.name === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined name',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.name !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for name',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.description || req.body.description === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined description',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.description !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for description',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.image || req.body.image === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined image',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.image !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for image',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Now we can safely update the cookbook for the specified user */
+        const result = await cookbookModel.update(
+            req.body.cookbookId,
+            req.params.userId,
+            req.body.name,
+            req.body.description,
+            req.body.image
+        );
+
+        if(!result || result.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Cookbook successfully updated',
+            results: []
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * function template
+ */
 const method = async (req, res, next) => {
 
     const moduleMethod = '';
@@ -1554,5 +1693,6 @@ module.exports = {
     removeUserCookbooks,
     removeUserPantry,
     updateUser,
-    updateUserRecipe
+    updateUserRecipe,
+    updateUserCookbook
 };
