@@ -4728,7 +4728,6 @@ describe('userController.removeUserPantry', () => {
     const res = await request(app)
       .delete(`/users/${userId}/pantry`);
 
-    console.log(res.body)
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5640,7 +5639,7 @@ describe('userController.updateUser', () => {
 });
 
 
-xdescribe('userController.updateUserRecipe', () => {
+describe('userController.updateUserRecipe', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -5653,38 +5652,55 @@ xdescribe('userController.updateUserRecipe', () => {
     jest.clearAllMocks();
   })
 
-  xit('should return status ', async () => {
+  it('should return status 200 and update the users recipe', async () => {
 
     // Set Mocked data that models and controllers should return
-    const modelReturnData = [
-      {
-        id: 1, 
-        userId: 1, 
-        name: 'Vegan pancakes',
-        description: 'American style pancakes made with all vegan ingredients',
-        servings: 4,
-        calories_per_serving: 250,
-        prep_time: 15,
-        cook_time: 5,
-        rating: 10002
-      }
-
-    ];
+    const modelReturnData = {
+      success: true,
+      message: 'recipe succesfully updated'
+    };
 
     // Set any variables needed to be passed to controllers and or models
     const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
 
     // Mock any needed third party modules
-    jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
       return modelReturnData;
     });
 
     // Set here the expected return values for the test
     const returnStatus = 200;
     const returnSuccess = true;
-    const returnMessage = '';
-    const returnResults = modelReturnData;
-    const returnResultsLength = 1;
+    const returnMessage = 'Recipe successfully updated';
+    const returnResults = [];
+    const returnResultsLength = 0;
 
     /* Mock Express request and response */
     const mockRequest = {};
@@ -5694,7 +5710,1771 @@ xdescribe('userController.updateUserRecipe', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if the userId is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+  
+  it('should return status 400 if recipeId is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipeId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipeId is of the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 'Seventy',
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipeId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe userId is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipe userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe userId is of the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 'Twelve',
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipe userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe name is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipe name';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe name is of the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 78,
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipe name';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+  
+  it('should return status 400 if recipe servings is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipe servings';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe servings is in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 'eleven',
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipe servings';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe calories_per_serving is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipe calories_per_serving';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe calories_per_serving is in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: '65748',
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipe calories_per_serving';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe prep_time is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipe prep_time';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe prep_time is in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: '3',
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipe prep_time';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe cook_time is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined recipe cook_time';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if recipe cook_time is in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: '10'
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for recipe cook_time';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 200 and update even if steps are undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'recipe succesfully updated'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'Recipe successfully updated';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if steps are in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: 'All steps should be here',
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for steps';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 200 and update even if ingredients are undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'recipe succesfully updated'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'Recipe successfully updated';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if ingredients are in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: 12,
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for ingredients';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 200 and update even if cookbooks is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'recipe succesfully updated'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'Recipe successfully updated';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if cookbooks are in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: 'Top 100 meals of 2024',
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for cookbooks';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 200 and update even if categories is undefined', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'recipe succesfully updated'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'Recipe successfully updated';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 400 if categories is in the wrong format', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: 'Bready Puddings'
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for categories';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 500 if the resource encounters any other problems', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was an issue with the resource, please try again later'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = false;
+    const returnMessage = 'There was a problem with the resource, please try again later';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);

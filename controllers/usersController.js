@@ -1261,6 +1261,264 @@ const updateUser = async (req, res, next) => {
 };
 
 /* 
+ * Update a users specified recipe
+ */
+const updateUserRecipe = async (req, res, next) => {
+
+    const moduleMethod = 'updateUserRecipe';
+
+    try{
+
+        /* Perform validation of passed in values */
+        let validationErrors;
+
+        let {
+            recipe,
+            steps,
+            ingredients,
+            cookbooks,
+            categories
+        } = req.body;
+
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.recipeId || recipe.recipeId === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipeId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.recipeId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipeId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.userId || recipe.userId === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.userId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.name|| recipe.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe name',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.name !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe name',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.servings || recipe.servings === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe servings',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.servings !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe servings',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.calories_per_serving || recipe.calories_per_serving === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe calories_per_serving',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.calories_per_serving !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe calories_per_serving',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.prep_time || recipe.prep_time === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe prep_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.prep_time !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe prep_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!recipe.cook_time || recipe.cook_time === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined recipe cook_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof recipe.cook_time !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for recipe cook_time',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(steps){
+            if(!Array.isArray(steps)){
+                validationErrors = {
+                    status: 400,
+                    success: false,
+                    message: 'Wrong format for steps',
+                    results: []
+                }
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(ingredients){
+            if(!Array.isArray(ingredients)){
+                validationErrors = {
+                    status: 400,
+                    success: false,
+                    message: 'Wrong format for ingredients',
+                    results: []
+                }
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(cookbooks){
+            if(!Array.isArray(cookbooks)){
+                validationErrors = {
+                    status: 400,
+                    success: false,
+                    message: 'Wrong format for cookbooks',
+                    results: []
+                }
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(categories){
+            if(!Array.isArray(categories)){
+                validationErrors = {
+                    status: 400,
+                    success: false,
+                    message: 'Wrong format for categories',
+                    results: []
+                }
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Update the data within the database */
+        const result = await recipeModel.update(
+            {
+                recipe,
+                steps,
+                ingredients,
+                cookbooks,
+                categories
+            }
+        )
+
+        if(!result || result.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Recipe successfully updated',
+            results: []
+        })
+
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -1295,5 +1553,6 @@ module.exports = {
     removeUserRecipes,
     removeUserCookbooks,
     removeUserPantry,
-    updateUser
+    updateUser,
+    updateUserRecipe
 };
