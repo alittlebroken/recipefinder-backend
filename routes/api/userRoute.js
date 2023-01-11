@@ -26,7 +26,7 @@ router.delete('/:id/pantry', userController.removeUserPantry);
 router.put('/:id', userController.updateUser);
 router.put('/:id/recipes', userController.updateUserRecipe);
 router.put('/:id/cookbooks', userController.updateUserCookbook);
-//router.put('/:id/pantry', userController.updateUserPantry);
+router.put('/:id/pantry', userController.updateUserPantry);
 
 /* Future expansion 
 router.get('/:id/comments', userController.listUserComments);

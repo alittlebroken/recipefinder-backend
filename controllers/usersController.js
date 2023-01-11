@@ -1658,6 +1658,165 @@ const updateUserCookbook = async (req, res, next) => {
 };
 
 /* 
+ * Updates a specific ingredient in a users pantry
+ */
+const updateUserPantry = async (req, res, next) => {
+
+    const moduleMethod = 'updateUserPantry';
+
+    try{
+
+        /* Validate any passed in values */
+        let validationErrors;
+
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined userId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.id || req.body.id === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined record id',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.id !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for record id',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.pantryId || req.body.pantryId === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined pantryId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.pantryId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for pantryId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.ingredientId || req.body.ingredientId === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredientId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.ingredientId !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredientId',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.amount || req.body.amount === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined amount',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.amount !== 'number'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for amount',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(!req.body.amount_type || req.body.amount_type === 'undefined'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Undefined amount_type',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        if(typeof req.body.amount_type !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for amount_type',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors);
+
+        /* Validation all ok now, so updated the appropriate record */
+        const result = await pantryIngredients.update({
+            id: req.body.id,
+            pantryId: req.body.pantryId,
+            ingredientId: req.body.ingredientid,
+            amount: req.body.amount,
+            amount_type: req.body.amount_type
+        });
+
+        if(!result || result.success === false){
+            res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Pantry item successfully updated',
+            results: []
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -1694,5 +1853,6 @@ module.exports = {
     removeUserPantry,
     updateUser,
     updateUserRecipe,
-    updateUserCookbook
+    updateUserCookbook,
+    updateUserPantry
 };
