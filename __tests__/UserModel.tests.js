@@ -877,6 +877,85 @@ describe('userModel.verifyToken', () => {
 
 });
 
+describe('userModel.removeAll', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all users', async () => {
+
+    /* Mock the DB repsonses */
+    tracker.on.delete('users').response(12);
+    tracker.on.select('users').response([]);
+
+    /* Set data to pass to function */
+
+    /* Set the expected response value(s) */
+    const expectedResponseMessage = 'All customer accounts successfully removed';
+    
+    /* Execute the function */
+    const result = await userModel.removeAll();
+
+    /* Test the response */
+    expect(result instanceof Object).toBe(true);
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual(expectedResponseMessage);
+
+  });
+
+  it('should return an error if no users were removed', async () => {
+
+    /* Mock the DB repsonses */
+    tracker.on.delete('users').response(0);
+    tracker.on.select('users').response([
+      { id: 1, username: 'twatkins', email: 'twatkins@pluse.net', forename: 'Terry', surname: 'Watkins'}
+    ]);
+
+    /* Set data to pass to function */
+
+    /* Set the expected response value(s) */
+    const expectedResponseMessage = 'No customer accounts have been removed';
+    
+    /* Execute the function */
+    const result = await userModel.removeAll();
+
+    /* Test the response */
+    expect(result instanceof Object).toBe(true);
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual(expectedResponseMessage);
+
+  })
+
+  it('should error when other issues occur', async () => {
+
+    /* Mock the DBs response */
+    tracker.on.delete('users').simulateError('Connection lost to the database');
+
+    /* Set the data being passed to the function */
+    const responseMessage = 'There was an issue with the resource, please try again later';
+
+    /* Execute the function */
+    const result = await userModel.removeAll();
+
+    /* Test the response */
+    expect(result instanceof Object).toBe(true);
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual(responseMessage);
+
+  });
+
+});
+
 xdescribe('<model>Model.<method>', () => {
 
   /*

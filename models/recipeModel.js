@@ -343,14 +343,67 @@ const update = async recipe => {
       }
     }
 
-    /* Update the stored database entry now all is OK */
+    /* Update the specifed record with the new values passed in */
+    return await db.transaction( async trx => {
+
+      /* Add the recipe and return the ID to use later */
+      await db('recipes')
+        .update({
+          id: recipe.id,
+          userId: recipe.userId,
+          name: recipe.name,
+          description: recipe.description,
+          servings: recipe.servings,
+          calories_per_serving: recipe.calories_per_serving,
+          prep_time: recipe.prep_time,
+          cook_time: recipe.cook_time,
+          rating: recipe.rating
+        })
+        .where('id', recipe.id);
+      
+        if(recipe?.steps){
+          await db('steps')
+          .update(recipe.steps)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+
+        if(recipe?.ingredients){
+          await db('recipe_ingredients')
+          .update(recipe.ingredients)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+        
+        if(recipe?.cookbooks){
+          await db('cookbook_recipes')
+          .update(recipe.cookbooks)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+        
+        if(recipe?.categories){
+          await db('recipe_categories')
+          .update(recipe.categories)
+          .where('recipeId', recipe.id)
+          .transacting(trx);
+        }
+        
+        return {
+          success: true,
+          message: 'Recipe successfully updated'
+        }
+
+    });
+
+    /* Update the stored database entry now all is OK
     const result = await db('recipes')
      .update(recipe).where('id', recipe.id);
 
     return {
       success: true,
       message: 'Recipe successfully updated'
-    }
+    } */
 
   } catch(e) {
 
@@ -909,6 +962,135 @@ const findByCategory = async terms => {
 
 };
 
+/* Return the recipes for a particular user
+ * @param {number} id - The ID of the user whose recipes you are interested in
+ * @returns {array} Contains the specified recipes if found otherwise it returns
+ * an empty array
+ */
+const findByUserId = async id => {
+
+  try {
+
+    /* Validate the passed in arguments */
+    if(!validation.validator(id, 'number')){
+      throw {
+        name: 'RECIPEMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    }
+
+    let finalRecipe = [];
+
+    /* Gather the required data from the database */
+    const result = await db('recipes')
+     .select('*')
+     .where('userId', id);
+
+    /* Only if we have found a recipe should we then go ahead and retrieve from
+       the database all the supporting data like steps and categories */
+    if(result && result.length > 0){
+
+      /* build the recipe object we wish to return */
+      finalRecipe.push(
+        {
+          id: result[0].id,
+          userId: result[0].userId,
+          name: result[0].name,
+          description: result[0].description,
+          servings: result[0].servings,
+          calories_per_serving: result[0].calories_per_serving,
+          prep_time: result[0].prep_time,
+          cook_time: result[0].cook_time,
+          rating: result[0].rating,
+        }
+      );
+      return finalRecipe;
+
+    } else {
+      return [];
+    }
+
+
+  } catch(e) {
+
+        /* Check for library errors and if found swap them out for a generic
+           one to send back over the API for security */
+        let message;
+
+        if(e.name === 'RECIPEMODEL_ERROR'){
+          message = e.message;
+        } else {
+          message = 'There was a problem with the resource, please try again later';
+        }
+
+        return {
+          success: false,
+          message: message
+        }
+
+  }
+
+};
+
+/* Remove all recipes owned by a particular user id
+ * @returns {any} A count of how many records were deleted or an
+ * empty array if no records to delete
+ */
+const removeAllByUser  = async id => {
+
+  try{
+
+      /* Delete the data in the reverse order it was created */
+
+      if(!id || id === undefined){
+        return {
+          success: false,
+          message: 'Undefined userId'
+        }
+      }
+
+      return await db.transaction( async trx => {
+
+        const recipeCount = await db('recipes')
+         .delete()
+         .where('userid', id)
+         .transacting(trx);
+
+        if(recipeCount > 0){
+          return {
+            success: true,
+            message: 'All recipes successfully removed'
+          }
+        } else {
+          return {
+            success: false,
+            message: 'The user has no recipes to remove'
+          }
+        }
+
+      });
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    
+    if(e.name === 'RECIPEMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
@@ -918,5 +1100,7 @@ module.exports = {
   findByRecipe,
   findByIngredients,
   findByCategory,
-  removeAll
+  removeAll,
+  findByUserId,
+  removeAllByUser
 };

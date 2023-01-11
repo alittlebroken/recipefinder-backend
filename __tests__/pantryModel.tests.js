@@ -611,3 +611,101 @@ describe('pantryModel.list', () => {
     });
 
 });
+
+describe('pantryModel.removeAllByUserId', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove all pantries for a specified user', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('pantries').response(1);
+
+    /** Set the data to pass into the models function */
+    const userId = 1;
+    
+    /** Execute the function */
+    const result = await pantryModel.removeAllByUser(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(1);
+
+  });
+
+  it('should throw an error if the userId is undefined', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('pantries').response(0);
+
+    /** Set the data to pass into the models function */
+    let userId;
+    
+    /** Execute the function */
+    const result = await pantryModel.removeAllByUser(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
+
+    expect(typeof result.success).toBe('boolean');
+    expect(result.success).toEqual(false);
+
+    expect(typeof result.message).toBe('string');
+    expect(result.message).toEqual('Undefined userId');
+
+  });
+
+  it('should return an error if no pantries to remove', async () => {
+
+    /** Mock the DB responses if need be*/
+    tracker.on.delete('pantries').response(0);
+
+    /** Set the data to pass into the models function */
+    const userId = 1;
+    
+    /** Execute the function */
+    const result = await pantryModel.removeAllByUser(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+
+    expect(typeof result.count).toBe('number');
+    expect(result.count).toEqual(0);
+  });
+
+  it('should throw a generic error for other issues', async () => {
+
+    /** Mock the DB responses */
+    tracker.on.delete('pantries')
+      .simulateError('Lost connection to DB');
+
+    /** Set the data to pass into the models function */
+    const userId = 1;
+   
+    /** Execute the function */
+    const result = await pantryModel.removeAllByUser(userId);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual('There was an issue with the resource, please try again later')
+
+  });
+
+});

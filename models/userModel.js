@@ -263,6 +263,51 @@ const remove = async id => {
 };
 
 /**
+ * Remove all users from the system
+ * @returns {object} Contains details of the removal like was it successful
+ * and how many records were deleted
+ */
+const removeAll = async () => {
+
+  try{
+
+    /* Remove the user */
+    await db('users').del().whereNot('username', 'admin');
+
+    /* Check the user was deleted */
+    const userCheck = await db('users')
+     .select('*')
+     .whereNot('username', 'admin');
+
+    if(userCheck?.length < 1){
+      return {
+        success: true,
+        message: 'All customer accounts successfully removed'
+      }
+    } else {
+      return {
+        success: false,
+        message: 'No customer accounts have been removed'
+      }
+    }
+
+  } catch(e) {
+    let message;
+    if(e.name === 'USERMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was an issue with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+};
+
+/**
  * Has a users password for storing in the database
  * @param {string} password - The users password we wish to hash
  */
@@ -446,5 +491,6 @@ module.exports = {
   verify,
   findAll,
   generateToken,
-  verifyToken
+  verifyToken,
+  removeAll
 }
