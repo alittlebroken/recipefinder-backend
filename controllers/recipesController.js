@@ -72,7 +72,7 @@ const list = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -132,7 +132,7 @@ const listRecipeIngredients = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -192,7 +192,7 @@ const listRecipeSteps = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -252,7 +252,7 @@ const listRecipeCategories = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -537,7 +537,7 @@ const addRecipeIngredients = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -655,7 +655,7 @@ const addRecipeSteps = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -753,7 +753,7 @@ const addRecipeCategories = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw{
                 status: 400,
                 success: false,
@@ -872,7 +872,7 @@ const remove = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -938,7 +938,7 @@ const removeRecipeIngredients = async (req, res, next) => {
         }
     }
 
-    if(!req.params.id || req.params.id === undefined){
+    if(!req.params.id || req.params.id === 'undefined'){
         throw {
             status: 400,
             success: false,
@@ -1002,7 +1002,7 @@ const removeRecipeSteps = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -1066,7 +1066,7 @@ const removeRecipeCategories = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -1130,7 +1130,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
