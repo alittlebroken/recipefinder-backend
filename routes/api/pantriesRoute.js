@@ -4,15 +4,16 @@ const appLogger = require('../../config/winston');
 
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
 const pantriesController = require('../../controllers/pantriesController');
 
-router.get('/', pantriesController.listAll);
-router.get('/:id', pantriesController.list);
-router.post('/', pantriesController.create);
-router.post('/:pantryId', pantriesController.add);
-router.delete('/', pantriesController.removeAll);
-router.delete('/:pantryId', pantriesController.removeItems);
-router.put('/:id', pantriesController.update);
+router.get('/', passport.authenticate('jwt', { session: false }), pantriesController.listAll);
+router.get('/:id', passport.authenticate('jwt', { session: false }), pantriesController.list);
+router.post('/', passport.authenticate('jwt', { session: false }), pantriesController.create);
+router.post('/:pantryId', passport.authenticate('jwt', { session: false }), pantriesController.add);
+router.delete('/', passport.authenticate('jwt', { session: false }), pantriesController.removeAll);
+router.delete('/:pantryId', passport.authenticate('jwt', { session: false }), pantriesController.removeItems);
+router.put('/:id', passport.authenticate('jwt', { session: false }), pantriesController.update);
 
 module.exports = router;
