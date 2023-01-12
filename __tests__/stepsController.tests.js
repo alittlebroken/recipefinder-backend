@@ -6,7 +6,7 @@ const app = require('../index.js');
 
 const stepsController = require('../controllers/stepsController');
 const stepModel = require('../models/stepModel');
-const { findAll } = require('../models/userModel');
+const userModel = require('../models/userModel');
 
 describe('stepsController.find', () => {
 
@@ -14,7 +14,14 @@ describe('stepsController.find', () => {
      * Steps to run before and after this test suite
      */
     beforeEach(async () => {
-  
+      user = {
+        id: 1,
+        email: 'admin@localhost',
+        forename: 'Site',
+        surname: 'Administrator',
+        roles: ['Admin']
+    }
+      authToken = await userModel.generateToken({user});
     });
   
     afterEach(() => {
@@ -51,12 +58,50 @@ describe('stepsController.find', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-       .get('/steps/');
+       .get('/steps/')
+       .set('Authorization', `Bearer ${authToken}`);
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body).toHaveLength(1);
+  
+    });
+
+    it('should return status 401 if a non logged in user tries to access this resource', async () => {
+  
+      // Set Mocked data that models and controllers should return
+        const modelReturnData = [
+            {
+                id: 1,
+                recipeId: 12,
+                stepNo: 1,
+                content: 'Mix dry ingredients together into a bowl'
+            }
+        ];
+
+      // Set any variables needed to be passed to controllers and or models
+  
+      // Mock any needed third party modules
+      jest.spyOn(stepModel, 'findAll').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+  
+      /* Mock Express request and response */
+      const mockRequest = {};
+      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+      const mockNext = jest.fn();
+  
+      /* Execute the function */
+      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+      const response = await request(app)
+       .get('/steps/');
+
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
   
     });
 
@@ -83,16 +128,20 @@ describe('stepsController.find', () => {
         const mockNext = jest.fn();
 
         /* Execute the function */
-        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-        await stepsController.find(mockRequest, mockResponse, mockNext);
+        const response = await request(app)
+          .get('/steps/')
+          .set('Authorization', `Bearer ${authToken}`);
 
         /* Test everything works as expected */
-        expect(mockNext).toHaveBeenCalled();
-        expect(mockNext).toHaveBeenCalledWith({
-            status: returnStatus,
-            success: returnSuccess,
-            message: returnMessage
-        });
+        expect(response.status).toBe(returnStatus);
+        
+        expect(typeof response.body.status).toBe('number');
+        expect(typeof response.body.success).toBe('boolean');
+        expect(typeof response.body.message).toBe('string');
+
+        expect(response.body.status).toEqual(returnStatus);
+        expect(response.body.success).toEqual(returnSuccess);
+        expect(response.body.message).toEqual(returnMessage);
 
     });
 
@@ -122,16 +171,20 @@ describe('stepsController.find', () => {
         const mockNext = jest.fn();
 
         /* Execute the function */
-        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-        await stepsController.find(mockRequest, mockResponse, mockNext);
+        const response = await request(app)
+          .get('/steps/')
+          .set('Authorization', `Bearer ${authToken}`);
 
         /* Test everything works as expected */
-        expect(mockNext).toHaveBeenCalled();
-        expect(mockNext).toHaveBeenCalledWith({
-            status: returnStatus,
-            success: returnSuccess,
-            message: returnMessage
-        });
+        expect(response.status).toBe(returnStatus);
+        
+        expect(typeof response.body.status).toBe('number');
+        expect(typeof response.body.success).toBe('boolean');
+        expect(typeof response.body.message).toBe('string');
+
+        expect(response.body.status).toEqual(returnStatus);
+        expect(response.body.success).toEqual(returnSuccess);
+        expect(response.body.message).toEqual(returnMessage);
 
     });
 
@@ -143,7 +196,14 @@ describe('stepsController.findById', () => {
      * Steps to run before and after this test suite
      */
     beforeEach(async () => {
-  
+      user = {
+        id: 1,
+        email: 'admin@localhost',
+        forename: 'Site',
+        surname: 'Administrator',
+        roles: ['Admin']
+    }
+      authToken = await userModel.generateToken({user});
     });
   
     afterEach(() => {
@@ -181,12 +241,50 @@ describe('stepsController.findById', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-       .get(`/steps/${stepId}`);
+       .get(`/steps/${stepId}`)
+       .set('Authorization', `Bearer ${authToken}`);
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body).toHaveLength(1);
+  
+    });
+
+    it('should return status 401 if a non logged in user tries to access this resource', async () => {
+  
+      // Set Mocked data that models and controllers should return
+        const modelReturnData = [
+            {
+                id: 1,
+                recipeId: 12,
+                stepNo: 1,
+                content: 'Mix dry ingredients together into a bowl'
+            }
+        ];
+
+      // Set any variables needed to be passed to controllers and or models
+      const stepId = 1;
+
+      // Mock any needed third party modules
+      jest.spyOn(stepModel, 'findById').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+  
+      /* Mock Express request and response */
+      const mockRequest = {};
+      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+      const mockNext = jest.fn();
+
+      /* Execute the function */
+      const response = await request(app)
+      .get(`/steps/${stepId}`);
+
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
   
     });
 
@@ -214,16 +312,20 @@ describe('stepsController.findById', () => {
         const mockNext = jest.fn();
 
         /* Execute the function */
-        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-        await stepsController.findById(mockRequest, mockResponse, mockNext);
+      const response = await request(app)
+      .get(`/steps/${stepId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
-        /* Test everything works as expected */
-        expect(mockNext).toHaveBeenCalled();
-        expect(mockNext).toHaveBeenCalledWith({
-            status: returnStatus,
-            success: returnSuccess,
-            message: returnMessage
-        });
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
+      
+      expect(typeof response.body.status).toBe('number');
+      expect(typeof response.body.success).toBe('boolean');
+      expect(typeof response.body.message).toBe('string');
+
+      expect(response.body.status).toEqual(returnStatus);
+      expect(response.body.success).toEqual(returnSuccess);
+      expect(response.body.message).toEqual(returnMessage);
 
     });
 
@@ -233,7 +335,7 @@ describe('stepsController.findById', () => {
       const modelReturnData = [];
 
       // Set any variables needed to be passed to controllers and or models
-      const stepId = 1;
+      let stepId;
 
       // Mock any needed third party modules
       jest.spyOn(stepModel, 'findById').mockImplementation(() => {
@@ -251,53 +353,20 @@ describe('stepsController.findById', () => {
       const mockNext = jest.fn();
 
       /* Execute the function */
-      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-      await stepsController.findById(mockRequest, mockResponse, mockNext);
+      const response = await request(app)
+      .get(`/steps/${stepId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
       /* Test everything works as expected */
-      expect(mockNext).toHaveBeenCalled();
-      expect(mockNext).toHaveBeenCalledWith({
-          status: returnStatus,
-          success: returnSuccess,
-          message: returnMessage
-      });
+      expect(response.status).toBe(returnStatus);
+      
+      expect(typeof response.body.status).toBe('number');
+      expect(typeof response.body.success).toBe('boolean');
+      expect(typeof response.body.message).toBe('string');
 
-    });
-
-    it('should return status 400 if the request parameter is undefined', async () => {
-    
-      // Set Mocked data that models and controllers should return
-      const modelReturnData = [];
-
-      // Set any variables needed to be passed to controllers and or models
-      const stepId = 1;
-
-      // Mock any needed third party modules
-      jest.spyOn(stepModel, 'findById').mockImplementation(() => {
-          return modelReturnData;
-      });
-
-      // Set here the expected return values for the test
-      const returnStatus = 400;
-      const returnSuccess = false;
-      const returnMessage = 'Undefined request parameter';
-
-      /* Mock Express request and response */
-      const mockRequest = {};
-      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
-      const mockNext = jest.fn();
-
-      /* Execute the function */
-      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-      await stepsController.findById(mockRequest, mockResponse, mockNext);
-
-      /* Test everything works as expected */
-      expect(mockNext).toHaveBeenCalled();
-      expect(mockNext).toHaveBeenCalledWith({
-          status: returnStatus,
-          success: returnSuccess,
-          message: returnMessage
-      });
+      expect(response.body.status).toEqual(returnStatus);
+      expect(response.body.success).toEqual(returnSuccess);
+      expect(response.body.message).toEqual(returnMessage);
 
     });
 
@@ -310,6 +379,7 @@ describe('stepsController.findById', () => {
         };
 
         // Set any variables needed to be passed to controllers and or models
+        const stepId = 1;
 
         // Mock any needed third party modules
         jest.spyOn(stepModel, 'findById').mockImplementation(() => {
@@ -327,16 +397,20 @@ describe('stepsController.findById', () => {
         const mockNext = jest.fn();
 
         /* Execute the function */
-        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-        await stepsController.find(mockRequest, mockResponse, mockNext);
+      const response = await request(app)
+      .get(`/steps/${stepId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
-        /* Test everything works as expected */
-        expect(mockNext).toHaveBeenCalled();
-        expect(mockNext).toHaveBeenCalledWith({
-            status: returnStatus,
-            success: returnSuccess,
-            message: returnMessage
-        });
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
+      
+      expect(typeof response.body.status).toBe('number');
+      expect(typeof response.body.success).toBe('boolean');
+      expect(typeof response.body.message).toBe('string');
+
+      expect(response.body.status).toEqual(returnStatus);
+      expect(response.body.success).toEqual(returnSuccess);
+      expect(response.body.message).toEqual(returnMessage);
 
     });
 
@@ -348,7 +422,14 @@ describe('stepsController.create', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -392,6 +473,7 @@ describe('stepsController.create', () => {
         stepNo: stepNo,
         content: stepContent
       })
+      .set('Authorization', `Bearer ${authToken}`)
 
     /* Test everything works as expected */
     expect(response.status).toEqual(returnStatus);
@@ -401,27 +483,28 @@ describe('stepsController.create', () => {
 
   });
 
-  it('should return status 400 if request body is undefined', async () => {
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
 
     // Set Mocked data that models and controllers should return
-    const modelReturnData = [];
+    const modelReturnData = [
+      {
+        id: 2
+      }
+    ];
 
     // Set any variables needed to be passed to controllers and or models
-    const recipeID = 1;
-    const stepNo = 0;
-    const stepContent = 'Toss the dry ingredients into a bowl and mix together';
-
+    const recipeId = 1;
+    const stepNo = 1;
+    const stepContent = 'Combine dry and wet ingredients together in the bowl';
+    
     // Mock any needed third party modules
     jest.spyOn(stepModel, 'create').mockImplementation(() => {
       return modelReturnData;
     });
 
     // Set here the expected return values for the test
-    const mockMessage = {
-      status: 400,
-      success: false,
-      message: 'Undefined request body'
-    }
+    const returnStatus = 401;
+    const returnBody = [{ id: 2}];
 
     /* Mock Express request and response */
     const mockRequest = {};
@@ -430,11 +513,18 @@ describe('stepsController.create', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.create(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post('/steps/')
+      .send({
+        recipeId: recipeId,
+        stepNo: stepNo,
+        content: stepContent
+      })
+      
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(mockMessage);
+    expect(response.status).toEqual(returnStatus);
+
 
   });
 
@@ -467,11 +557,25 @@ describe('stepsController.create', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.create(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post('/steps/')
+      .send({
+        
+        stepNo: stepNo,
+        content: stepContent
+      })
+      .set('Authorization', `Bearer ${authToken}`)
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(mockMessage);
+    expect(response.status).toEqual(400);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(mockMessage.status);
+    expect(response.body.success).toEqual(mockMessage.success);
+    expect(response.body.message).toEqual(mockMessage.message);
 
   });
 
@@ -504,11 +608,25 @@ describe('stepsController.create', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.create(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post('/steps/')
+      .send({
+        recipeId: recipeId,
+        
+        content: stepContent
+      })
+      .set('Authorization', `Bearer ${authToken}`)
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(nextMessage);
+    expect(response.status).toEqual(400);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(nextMessage.status);
+    expect(response.body.success).toEqual(nextMessage.success);
+    expect(response.body.message).toEqual(nextMessage.message);
 
   });
 
@@ -534,18 +652,26 @@ describe('stepsController.create', () => {
       message: 'Undefined content'
     };
 
-    /* Mock Express request and response */
-    const mockRequest = { body: { recipeId: recipeId, stepNo: stepNo } };
-    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
-    const mockNext = jest.fn();
-
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.create(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post('/steps/')
+      .send({
+        recipeId: recipeId,
+        stepNo: stepNo,
+      })
+      .set('Authorization', `Bearer ${authToken}`)
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(nextMessage);
+    expect(response.status).toEqual(400);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(nextMessage.status);
+    expect(response.body.success).toEqual(nextMessage.success);
+    expect(response.body.message).toEqual(nextMessage.message);
 
   });
 
@@ -581,11 +707,25 @@ describe('stepsController.create', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.create(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .post('/steps/')
+      .send({
+        recipeId: recipeId,
+        stepNo: stepNo,
+        content: stepContent
+      })
+      .set('Authorization', `Bearer ${authToken}`)
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(nextMessage);
+    expect(response.status).toEqual(500);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(nextMessage.status);
+    expect(response.body.success).toEqual(nextMessage.success);
+    expect(response.body.message).toEqual(nextMessage.message);
 
   });
 
@@ -597,7 +737,14 @@ describe('stepsController.removeById', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -630,12 +777,48 @@ describe('stepsController.removeById', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const response = await request(app)
-      .delete(`/steps/${recipeId}`);
+      .delete(`/steps/${recipeId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(response.status).toEqual(returnStatus);
     expect(typeof response.body).toBe('number');
     expect(response.body).toEqual(12);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = 12;
+
+    // Set any variables needed to be passed to controllers and or models
+    const recipeId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'removeAllByRecipe').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = true;
+    const returnMessage = 'Step(s) successfully removed';
+
+    /* Mock Express request and response */
+    const mockRequest = { params: { recipeId: recipeId }};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete(`/steps/${recipeId}`)
+      ;
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+    
 
   });
 
@@ -667,50 +850,20 @@ describe('stepsController.removeById', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.removeById(mockRequest, mockResponse, mockNext);
-    
-    /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnMessage.status,
-      success: returnMessage.success,
-      message: returnMessage.message
-    });
-
-  });
-
-  it('should return status 400 if request parameter undefined', async () => {
-
-    // Set Mocked data that models and controllers should return
-    const modelReturnData = [];
-
-    // Set any variables needed to be passed to controllers and or models
-    const recipeId = 1;
-
-    // Mock any needed third party modules
-    jest.spyOn(stepModel, 'removeAllByRecipe').mockImplementation(() => {
-      return modelReturnData;
-    });
-
-    // Set here the expected return values for the test
-    const nextMessage = {
-      status: 400,
-      success: false,
-      message: 'Undefined request parameters'
-    }
-
-    /* Mock Express request and response */
-    const mockRequest = {};
-    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
-    const mockNext = jest.fn();
-
-    /* Execute the function */
-    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.removeById(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete(`/steps/${recipeId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(nextMessage);
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(returnMessage.status);
+    expect(response.body.success).toEqual(returnMessage.success);
+    expect(response.body.message).toEqual(returnMessage.message);
 
   });
 
@@ -720,7 +873,7 @@ describe('stepsController.removeById', () => {
     const modelReturnData = [];
 
     // Set any variables needed to be passed to controllers and or models
-    const recipeId = 1;
+    let recipeId;
 
     // Mock any needed third party modules
     jest.spyOn(stepModel, 'removeAllByRecipe').mockImplementation(() => {
@@ -740,13 +893,22 @@ describe('stepsController.removeById', () => {
     const mockResponse = { status: jest.fn().mockReturnThis(), json: jest.fn()};
     const mockNext = jest.fn();
 
-    /* Execute the function */
+     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.removeById(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete(`/steps/${recipeId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(nextMessage);
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(nextMessage.status);
+    expect(response.body.success).toEqual(nextMessage.success);
+    expect(response.body.message).toEqual(nextMessage.message);
 
   });
 
@@ -779,13 +941,22 @@ describe('stepsController.removeById', () => {
     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
     const mockNext = jest.fn();
 
-    /* Execute the function */
+     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.removeById(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete(`/steps/${recipeId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith(nextMessage);
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+
+    expect(response.body.status).toEqual(nextMessage.status);
+    expect(response.body.success).toEqual(nextMessage.success);
+    expect(response.body.message).toEqual(nextMessage.message);
 
   });
 
@@ -797,7 +968,14 @@ describe('stepsController.removeAll', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -832,17 +1010,55 @@ describe('stepsController.removeAll', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const response = await request(app)
-      .delete('/steps/');
+      .delete('/steps/')
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(response.status).toEqual(returnStatus);
+
     expect(typeof response.body).toBe('object');
     expect(typeof response.body.status).toBe('number');
     expect(typeof response.body.success).toBe('boolean');
     expect(typeof response.body.message).toBe('string');
+
     expect(response.body.status).toEqual(returnStatus);
     expect(response.body.success).toEqual(returnMessage.success);
     expect(response.body.message).toEqual(returnMessage.message);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = { count: 35 };
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'removeAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnMessage = {
+      status: returnStatus,
+      success: true,
+      message: `Successfully removed ${modelReturnData.count} steps`
+    }
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete('/steps/');
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
 
   });
 
@@ -872,16 +1088,21 @@ describe('stepsController.removeAll', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.removeAll(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete('/steps/')
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toEqual(returnStatus);
 
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
 
   });
 
@@ -911,17 +1132,23 @@ describe('stepsController.removeAll', () => {
     const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
     const mockNext = jest.fn();
 
-     /* Execute the function */
+    /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.removeAll(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .delete('/steps/')
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
 
   });
 
@@ -933,7 +1160,14 @@ describe('stepsController.update', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -980,17 +1214,69 @@ describe('stepsController.update', () => {
         recipeId: recipeId,
         stepNo: updatedStepNo,
         content: updatedContent
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(response.status).toBe(returnStatus);
+
     expect(typeof response.body).toBe('object');
     expect(typeof response.body.status).toBe('number');
     expect(typeof response.body.success).toBe('boolean');
     expect(typeof response.body.message).toBe('string');
+
     expect(response.body.status).toEqual(returnStatus);
     expect(response.body.success).toEqual(returnMessage.success);
     expect(response.body.message).toEqual(returnMessage.message);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: true,
+      message: 'Step updated successfully'
+    }
+
+    // Set any variables needed to be passed to controllers and or models
+    const stepId = 1;
+    const recipeId = 1;
+    const updatedStepNo = 2;
+    const updatedContent = 'Boil 4 eggs';
+
+    // Mock any needed third party modules
+    jest.spyOn(stepModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnMessage = {
+      status: returnStatus,
+      success: true,
+      message: 'Step successfully updated'
+    };
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        recipeId: recipeId,
+        stepNo: updatedStepNo,
+        content: updatedContent
+      })
+      ;
+
+    /* Test everything works as expected */
+    expect(response.status).toBe(returnStatus);
+    
 
   });
 
@@ -1032,56 +1318,26 @@ describe('stepsController.update', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        recipeId: recipeId,
+        stepNo: updatedStepNo,
+        content: updatedContent
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnMessage.status,
-      success: returnMessage.success,
-      message: returnMessage.message
-    });
+    expect(response.status).toBe(returnStatus);
 
-  });
-
-  it('should return status 400 if request params are undefined', async () => {
-
-    // Set Mocked data that models and controllers should return
-    const modelReturnData = [];
-
-    // Set any variables needed to be passed to controllers and or models
-    const stepId = 1;
-    const recipeId = 1;
-    const stepNo = 1;
-    const content = 'Sift the gluten free flour into a heavy bowl'
-
-    // Mock any needed third party modules
-    jest.spyOn(stepModel, 'update').mockImplementation(() => {
-      return modelReturnData;
-    });
-
-    // Set here the expected return values for the test
-    const returnStatus = 400;
-    const returnSuccess = false;
-    const returnMessage = 'Undefined request parameters';
-
-
-    /* Mock Express request and response */
-    const mockRequest = {};
-    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
-    const mockNext = jest.fn();
-
-    /* Execute the function */
-    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
-
-    /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnMessage.success);
+    expect(response.body.message).toEqual(returnMessage.message);
 
   });
 
@@ -1091,7 +1347,7 @@ describe('stepsController.update', () => {
     const modelReturnData = [];
 
     // Set any variables needed to be passed to controllers and or models
-    const stepId = 1;
+    let stepId;
     const recipeId = 1;
     const stepNo = 1;
     const content = 'Sift the gluten free flour into a heavy bowl'
@@ -1123,16 +1379,25 @@ describe('stepsController.update', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        recipeId: recipeId,
+        stepNo: stepNo,
+        content: content
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toBe(returnStatus);
 
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
   });
 
   it('should return status 400 if request param recipeId undefined', async () => {
@@ -1172,15 +1437,25 @@ describe('stepsController.update', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        stepNo: stepNo,
+        content: content
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toBe(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
 
   });
 
@@ -1221,15 +1496,26 @@ describe('stepsController.update', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        recipeId: recipeId,
+       
+        content: content
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toBe(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
 
   });
 
@@ -1270,15 +1556,26 @@ describe('stepsController.update', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        recipeId: recipeId,
+        stepNo: stepNo,
+        
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toBe(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
 
   });
 
@@ -1322,15 +1619,26 @@ describe('stepsController.update', () => {
 
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-    await stepsController.update(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .put(`/steps/${stepId}`)
+      .send({
+        recipeId: recipeId,
+        stepNo: stepNo,
+        content: content
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalledWith({
-      status: returnStatus,
-      success: returnSuccess,
-      message: returnMessage
-    });
+    expect(response.status).toBe(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+    expect(typeof response.body.message).toBe('string');
+    
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
 
   });
 
@@ -1342,7 +1650,14 @@ xdescribe('<model>Controller.<method>', () => {
      * Steps to run before and after this test suite
      */
     beforeEach(async () => {
-  
+      user = {
+        id: 1,
+        email: 'admin@localhost',
+        forename: 'Site',
+        surname: 'Administrator',
+        roles: ['Admin']
+    }
+      authToken = await userModel.generateToken({user});
     });
   
     afterEach(() => {
