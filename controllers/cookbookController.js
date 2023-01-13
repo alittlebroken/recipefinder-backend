@@ -8,7 +8,7 @@ const cookbookRecipesModel = require('../models/cookbookRecipesModel');
 /* Returns all cookbooks stored within the DB
  * @returns {array} A collection of cookbooks stored in the database
  */
-const get = async (req, res, next) => {
+const list = async (req, res, next) => {
 
   try{
 
@@ -18,6 +18,7 @@ const get = async (req, res, next) => {
     if(!results || results.length < 1) {
       let err = new Error('There were no cookbooks to find');
       err.status = 404;
+      err.success = false;
       throw err;
     };
 
@@ -47,20 +48,8 @@ const getById = async (req, res, next) => {
   try{
 
     /* Validate the ID passed in */
-    if(!req.params){
-        let err = new Error('Invalid parameter');
-        err.status = 400;
-        throw err;
-    }
-
-    if(req.params.id === undefined){
+    if(req.params.id === 'undefined'){
       let err = new Error('Invalid id');
-      err.status = 400;
-      throw err;
-    }
-
-    if(typeof req.params.id !== 'number'){
-      let err = new Error('Invalid id format');
       err.status = 400;
       throw err;
     }
@@ -69,7 +58,15 @@ const getById = async (req, res, next) => {
 
     if(!results || results.length < 1){
       let err = new Error('No matching cookbook found');
-      err.status = 400;
+      err.status = 404;
+      err.success = false;
+      throw err;
+    }
+
+    if(results.success === false){
+      let err = new Error('There was a problem with the resource, please try again later');
+      err.status = 500;
+      err.success = false;
       throw err;
     }
 
@@ -82,7 +79,7 @@ const getById = async (req, res, next) => {
       return next(e);
   }
 
-}
+};
 
 /*
  * Access a cookbook by it's name
@@ -130,7 +127,7 @@ const getByName = async (req, res, next) => {
 
     return next(e);
   }
-}
+};
 
 /*
  * Creates a new cookbook record
@@ -181,7 +178,7 @@ const create = async (req, res, next) => {
 
     return next(e);
   }
-}
+};
 
 /* updates an existing cookbook record within the database */
 const update = async (req, res, next) => {
@@ -718,7 +715,7 @@ const removeById = async (req, res, next) => {
 };
 
 module.exports = {
-  get,
+  list,
   getById,
   getByName,
   create,
@@ -731,5 +728,5 @@ module.exports = {
   removeRecipes,
   removeCategories,
   removeAll,
-  removeById
-};
+  removeById,
+}
