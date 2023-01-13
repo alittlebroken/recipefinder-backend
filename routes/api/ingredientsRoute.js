@@ -8,11 +8,11 @@ const express = require('express');
 const router = express.Router();
 
 // Specify each route and which controllers they will use
-router.get('/', ingredientsController.get);
-router.get('/:id', ingredientsController.getById);
-router.post('/', ingredientsController.create);
-router.delete('/', ingredientsController.remove);
-router.delete('/:id', ingredientsController.removeById);
-router.put('/:id', ingredientsController.update);
+router.get('/', passport.authenticate('jwt', { session: false }), ingredientsController.get);
+router.get('/:id', passport.authenticate('jwt', { session: false }), ingredientsController.getById);
+router.post('/', passport.authenticate('jwt', { session: false }), ingredientsController.create);
+router.delete('/', passport.authenticate('jwt', { session: false }), ingredientsController.remove);
+router.delete('/:id', passport.authenticate('jwt', { session: false }), ingredientsController.removeById);
+router.put('/:id', passport.authenticate('jwt', { session: false }), ingredientsController.update);
 
 module.exports = router;
