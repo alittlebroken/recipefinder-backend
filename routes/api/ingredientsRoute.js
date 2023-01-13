@@ -6,6 +6,7 @@ const ingredientsController = require('../../controllers/ingredientsController')
 
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
 // Specify each route and which controllers they will use
 router.get('/', passport.authenticate('jwt', { session: false }), ingredientsController.get);
