@@ -21,6 +21,13 @@ const get = async (req, res, next) => {
       throw err;
     };
 
+    if(results.success === false){
+      let err = new Error('There was a problem with the resource, please try again later');
+      err.status = 500;
+      err.success = false;
+      throw err;
+    }
+
     res.status(200).json(results);
 
   } catch(e) {
