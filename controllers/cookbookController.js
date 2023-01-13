@@ -82,54 +82,6 @@ const getById = async (req, res, next) => {
 };
 
 /*
- * Access a cookbook by it's name
- */
-const getByName = async (req, res, next) => {
-  try{
-
-    /* Perform validation */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Invalid parameters');
-      err.status = 400;
-      throw err;
-    }
-
-    if(req.params.name === undefined){
-      let err = new Error('Invalid name');
-      err.status = 400;
-      throw err;
-    }
-
-    if(typeof req.params.name !== 'string'){
-      let err = new Error('Invalid name format');
-      err.status = 400;
-      throw err;
-    }
-
-    if(req.params.name === ''){
-      let err = new Error('Invalid name');
-      err.status = 400;
-      throw err;
-    }
-
-    const results = await cookbookModel.findByName(req.params.name);
-
-    if(!results || results.length < 1){
-      let err = new Error('No mathing cookbook(s) found');
-      throw err;
-    }
-
-    res.status(200).json(results);
-
-  } catch(e) {
-    /* Log out the issue(s) */
-    appLogger.logMessage('error', `cookbookController.getByName - Status Code ${e.status}: ${e.message}`);
-
-    return next(e);
-  }
-};
-
-/*
  * Creates a new cookbook record
  */
 const create = async (req, res, next) => {
