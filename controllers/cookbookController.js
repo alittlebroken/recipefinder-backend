@@ -48,26 +48,32 @@ const getById = async (req, res, next) => {
   try{
 
     /* Validate the ID passed in */
+    let validationErrors;
     if(req.params.id === 'undefined'){
-      let err = new Error('Invalid id');
-      err.status = 400;
-      throw err;
+     validationErrors = {
+      status: 400,
+      success: false,
+      message: 'Undefined id'
+     }
     }
+    if(validationErrors) return next(validationErrors);
 
     const results = await cookbookModel.findById(req.params.id);
 
     if(!results || results.length < 1){
-      let err = new Error('No matching cookbook found');
-      err.status = 404;
-      err.success = false;
-      throw err;
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'No matching cookbook found'
+      })
     }
 
     if(results.success === false){
-      let err = new Error('There was a problem with the resource, please try again later');
-      err.status = 500;
-      err.success = false;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
     res.status(200).json(results);
@@ -88,27 +94,53 @@ const create = async (req, res, next) => {
   try{
 
     /* Validate the request variables */
-    if(!req.body || req.body === undefined){
-      let err = new Error('Request body data undefined');
+
+    if(req.body.userId === undefined){
+      let err = new Error('Undefined userId');
       err.status = 400;
+      err.success = false;
       throw err;
     }
 
-    if(req.body.userId === undefined || typeof req.body.userId !== 'number'){
-      let err = new Error('Undefined userId or incorrect format');
+    if(typeof req.body.userId !== 'number'){
+      let err = new Error('Wrong format for userId');
       err.status = 400;
+      err.success = false;
       throw err;
     }
 
-    if(req.body.name === undefined || typeof req.body.name !== 'string'){
-      let err = new Error('Undefined name or incorrect format');
+    if(typeof req.body.userId !== 'number'){
+      let err = new Error('Wrong format for userId');
       err.status = 400;
+      err.success = false;
       throw err;
     }
 
-    if(req.body.description === undefined || typeof req.body.description !== 'string'){
-      let err = new Error('Undefined description or incorrect format');
+    if(req.body.name === undefined){
+      let err = new Error('Undefined name');
       err.status = 400;
+      err.success = false;
+      throw err;
+    }
+
+    if(typeof req.body.name !== 'string'){
+      let err = new Error('Wrong format for name');
+      err.status = 400;
+      err.success = false;
+      throw err;
+    }
+
+    if(req.body.description === undefined){
+      let err = new Error('Undefined description');
+      err.status = 400;
+      err.success = false;
+      throw err;
+    }
+
+    if(typeof req.body.description !== 'string'){
+      let err = new Error('Wrong format for description');
+      err.status = 400;
+      err.success = false;
       throw err;
     }
 
@@ -116,10 +148,12 @@ const create = async (req, res, next) => {
     const {userId, name, description, image} = req.body;
     const results = await cookbookModel.create(userId, name, description, image);
 
-    if(!results){
-      let err = new Error('There was a problem with the resource, please try again later');
-      err.status = 500;
-      throw err;
+    if(results.success === false){
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      });
     }
 
     res.status(200).json(results);
@@ -138,65 +172,69 @@ const update = async (req, res, next) => {
   try{
 
     /* Perform validation */
-    if(!req.body || req.body === undefined){
-      let error = new Error('Undefined request body');
-      error.status = 400;
-      throw error;
+    let validationErrors;
+    if(!req.params.id || req.params.id === 'undefined'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined id'
+      }
     }
-
-    if(!req.params || req.params === undefined){
-      let error = new Error('Undefined request parameters');
-      error.status = 400;
-      throw error;
-    }
-
-    if(!req.params.id || req.params.id === undefined){
-      let error = new Error('Undefined id');
-      error.status = 400;
-      throw error;
-    }
-
-    if(typeof req.params.id !== 'number'){
-      let error = new Error('Wrong id format');
-      error.status = 400
-      throw error;
-    }
+    if(validationErrors) return next(validationErrors);
 
     if(!req.body.userId || req.body.userId === undefined){
-      let error = new Error('Undefined userId');
-      error.status = 400
-      throw error;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined userId'
+      }
     }
+    if(validationErrors) return next(validationErrors);
 
     if(typeof req.body.userId !== 'number'){
-      let error = new Error('Wrong userId format');
-      error.status = 400
-      throw error;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Wrong userId format'
+      }
     }
+    if(validationErrors) return next(validationErrors);
 
     if(!req.body.name || req.body.name === undefined){
-      let error = new Error('Undefined name');
-      error.status = 400
-      throw error;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined name'
+      }
     }
+    if(validationErrors) return next(validationErrors);
 
     if(typeof req.body.name !== 'string'){
-      let error = new Error('Wrong name format');
-      error.status = 400
-      throw error;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Wrong name format'
+      }
     }
+    if(validationErrors) return next(validationErrors);
 
     if(!req.body.description || req.body.description === undefined){
-      let error = new Error('Undefined description');
-      error.status = 400
-      throw error;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined description'
+      }
     }
+    if(validationErrors) return next(validationErrors);
 
     if(typeof req.body.description !== 'string'){
-      let error = new Error('Wrong description format');
-      error.status = 400
-      throw error;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Wrong description format'
+      }
     }
+    if(validationErrors) return next(validationErrors);
 
     /* extra the data from the req body and parameters */
     const { id } = req.params;
@@ -213,12 +251,18 @@ const update = async (req, res, next) => {
     );
 
     if(!result || result.success == false){
-      let error = new Error(result.message);
-      error.status = 500;
-      throw error;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
-    res.status(200).json(result)
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: 'Cookbook successfully updated'
+    })
 
   } catch(e) {
     /* Log out the issue(s) */
@@ -235,21 +279,11 @@ const remove = async (req, res, next) => {
   try{
 
     /* Validte the request data */
-    if(!req.params){
-      let err = new Error('Request parameters undefined');
-      err.status = 400;
-      throw err;
-    }
 
     if(!req.params.id || req.params.id === undefined){
       let err = new Error('Undefined id');
       err.sattus = 400;
-      throw err;
-    }
-
-    if(typeof req.params.id !== 'number'){
-      let err = new Error('Wrong id format');
-      err.status = 400;
+      error.success = false;
       throw err;
     }
 
@@ -280,31 +314,33 @@ const recipes = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
+    let validationErrors;
+    if(!req.params.id || req.params.id === 'undefined'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined id'
+      }
     }
-
-    if(!req.params.id || req.params.id === undefined){
-      let err = new Error('Undefined id');
-      err.status = 400;
-      throw err;
-    }
-
-    if(typeof req.params.id !== 'number'){
-      let err = new Error('Wrong id format');
-      err.status = 400;
-      throw err;
-    }
+    if(validationErrors) return next(validationErrors);
 
     /* get the desired recipes */
     let results = await cookbookModel.recipes(req.params.id);
 
+    if(results.length < 1){
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'The cookbook currently has no recipes'
+      })
+    }
+
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
     res.status(200).json(results);
@@ -324,31 +360,35 @@ const getCategories = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
+    let validationErrors;
+    if(!req.params.id || req.params.id === 'undefined'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined id'
+      }
     }
-
-    if(!req.params.id || req.params.id === undefined){
-      let err = new Error('Undefined id');
-      err.status = 400;
-      throw err;
-    }
+    if(validationErrors) return next(validationErrors);
 
     let id = parseInt(req.params.id);
 
     /* get the desired recipes */
     let results = await cookbookCategoriesModel.findByCookbook(id);
-
-    if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+    
+    if(results.length < 1) {
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'The cookbook currently has no categories'
+      });
     }
 
-    if(!results || results.length < 1) {
-      res.status(404).json([]);
+    if(results?.success === false){
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
 
@@ -358,11 +398,7 @@ const getCategories = async (req, res, next) => {
     /* Log out the issue(s) */
     appLogger.logMessage('error', `cookbookController.getCategories - Status Code ${e.status}: ${e.message}`);
 
-    return next({
-      status: e.status,
-      success: false,
-      message: e.message
-    });
+    return next(e);
   }
 
 };
@@ -372,29 +408,33 @@ const addRecipe = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
+    let validationErrors;
+    if(!req.params.id || req.params.id === 'undefined'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined id'
+      }
     }
-
-    if(!req.params.id || req.params.id === undefined){
-      let err = new Error('Undefined id');
-      err.status = 400;
-      throw err;
-    }
-
-    if(!req.body || req.body === undefined){
-      let err = new Error('Undefined request body');
-      err.status = 400;
-      throw err;
-    }
+    if(validationErrors) return next(validationErrors);
 
     if(!req.body.recipeId || req.body.recipeId === undefined){
-      let err = new Error('Undefined recipeId');
-      err.status = 400;
-      throw err;
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined recipeId'
+      }
     }
+    if(validationErrors) return next(validationErrors);
+
+    if(typeof req.body.recipeId !== 'number'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Wrong format for recipeId'
+      }
+    }
+    if(validationErrors) return next(validationErrors);
 
     let id = parseInt(req.params.id);
     let recipeId = parseInt(req.body.recipeId);
@@ -408,16 +448,18 @@ const addRecipe = async (req, res, next) => {
     let results = await cookbookRecipesModel.create(data);
 
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
-    if(!results || results.length < 1) {
-      res.status(404).json([]);
-    }
-
-    res.status(200).json(results);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: 'Recipe added to cookbook successfully'
+    });
 
   } catch(e) {
     /* Log out the issue(s) */
@@ -437,29 +479,34 @@ const addCategory = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
+    let validationErrors;
+    if(!req.params.id || req.params.id === 'undefined'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined id'
+      }
     }
-
-    if(!req.params.id || req.params.id === undefined){
-      let err = new Error('Undefined id');
-      err.status = 400;
-      throw err;
-    }
-
-    if(!req.body || req.body === undefined){
-      let err = new Error('Undefined request body');
-      err.status = 400;
-      throw err;
-    }
+    if(validationErrors) return next(validationErrors)
 
     if(!req.body.categoryId || req.body.categoryId === undefined){
-      let err = new Error('Undefined categoryId');
-      err.status = 400;
-      throw err;
+      
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined categoryId'
+      }
     }
+    if(validationErrors) return next(validationErrors)
+
+    if( typeof req.body.categoryId !== 'number'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Wrong format for categoryId'
+      }
+    }
+    if(validationErrors) return next(validationErrors)
 
     let id = parseInt(req.params.id);
     let categoryId = parseInt(req.body.categoryId);
@@ -473,13 +520,19 @@ const addCategory = async (req, res, next) => {
     let results = await cookbookCategoriesModel.create(data);
 
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
-    if(!results || results.length < 1) {
-      res.status(404).json([]);
+    if(results.length < 1) {
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'No data found matching supplied values'
+      });
     }
 
     res.status(200).json(results);
@@ -502,15 +555,11 @@ const removeRecipes = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
-    }
 
-    if(!req.params.id || req.params.id === undefined){
+    if(!req.params.id || req.params.id === 'undefined'){
       let err = new Error('Undefined id');
       err.status = 400;
+      err.success = false;
       throw err;
     }
 
@@ -520,16 +569,26 @@ const removeRecipes = async (req, res, next) => {
     let results = await cookbookRecipesModel.removeByCookbook(id);
 
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      });
     }
 
     if(!results || results.length < 1) {
-      res.status(404).json([]);
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'No matching records found'
+      });
     }
 
-    res.status(200).json(results);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: results.message
+    });
 
   } catch(e) {
     /* Log out the issue(s) */
@@ -549,13 +608,8 @@ const removeCategories = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
-    }
 
-    if(!req.params.id || req.params.id === undefined){
+    if(!req.params.id || req.params.id === 'undefined'){
       let err = new Error('Undefined id');
       err.status = 400;
       throw err;
@@ -567,16 +621,26 @@ const removeCategories = async (req, res, next) => {
     let results = await cookbookCategoriesModel.removeByCookbook(id);
 
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      });
     }
 
     if(!results || results.length < 1) {
-      res.status(404).json([]);
+      res.status(404).json({
+        status: 404,
+        success: false,
+        message: 'No categories found to be removed'
+      });
     }
 
-    res.status(200).json(results);
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: 'All categories for specified cookbook removed successfully'
+    });
 
   } catch(e) {
     /* Log out the issue(s) */
@@ -599,9 +663,11 @@ const removeAll = async (req, res, next) => {
     let results = await cookbookModel.removeAll();
 
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      })
     }
 
     res.status(200).json({
@@ -628,40 +694,43 @@ const removeById = async (req, res, next) => {
   try{
 
     /* Validate the request object values we need */
-    if(!req.params || req.params === undefined){
-      let err = new Error('Undefined request parameters');
-      err.status = 400;
-      throw err;
-    }
+   
+    let validationErrors;
 
-    if(!req.params.id || req.params.id === undefined){
-      let err = new Error('Undefined id');
-      err.status = 400;
-      throw err;
+    if(!req.params.id || req.params.id === 'undefined'){
+      validationErrors = {
+        status: 400,
+        success: false,
+        message: 'Undefined id'
+      }
     }
-
+    if(validationErrors) return next(validationErrors);
+    
     let id = parseInt(req.params.id);
 
     /* Delete the cookbooks recipes */
-    let results = await cookbookModel.remove(id);
+    const results = await cookbookModel.remove(id);
 
     if(results.success === false){
-      let err = new Error(results.message);
-      err.status = 500;
-      throw err;
+     res.status(500).json({
+      status: 500,
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+     })
     }
 
-    res.status(200).json(results);
+    res.status(200).json({
+      status: 200,
+      success: results.success,
+      message: results.message
+    });
 
   } catch(e) {
+    
     /* Log out the issue(s) */
     appLogger.logMessage('error', `cookbookController.removeById - Status Code ${e.status}: ${e.message}`);
 
-    return next({
-      status: e.status,
-      success: false,
-      message: e.message
-    });
+    return next(e);
   }
 
 };
@@ -669,7 +738,6 @@ const removeById = async (req, res, next) => {
 module.exports = {
   list,
   getById,
-  getByName,
   create,
   update,
   remove,
