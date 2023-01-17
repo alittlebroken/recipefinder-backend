@@ -224,7 +224,7 @@ const updateItem = async pantryItem => {
        ingredientId: pantryItem.ingredientId
      })
      .returning('*');
-     console.log(result)
+     
      if(!result){
        throw {
          name: 'PANTRYMODEL_ERROR',
@@ -241,7 +241,7 @@ const updateItem = async pantryItem => {
     /* We only wish to have the errors specific to the model reported back others are caught as
     a generic error */
     let message;
-    console.log(e.message)
+    
     if(e.name === 'PANTRYMODEL_ERROR'){
       message = e.message;
     } else {
