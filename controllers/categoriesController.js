@@ -22,19 +22,21 @@ const list = async (req, res, next) => {
         const results = await categoryModel.findAll();
 
         if(!results || results.success === false){
-            throw {
-                status: 500,
-                success: false,
-                message: 'There was a problem with the resource, please try again later'
-            }
+            res.status(500).json(
+                {
+                    status: 500,
+                    success: false,
+                    message: 'There was a problem with the resource, please try again later'
+                }
+            )
         }
 
         if(results.length < 1){
-            throw {
+            res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'There are no categories to return'
-            }
+            })
         }
 
         res.status(200).json(results);
@@ -61,31 +63,35 @@ const create = async (req, res, next) => {
     try{
 
         /* Validate any passed in values via request */
-        if(!req.body || req.body === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined request body'
-            }
-        }
+        let validationErrors;
 
         if(!req.body.name || req.body.name === undefined){
-            throw {
+            validationErrors = {
                 status: 400,
                 success: false,
-                message: 'Undefined name'
+                message: 'Undefined category name'
             }
         }
+        if(validationErrors) return next(validationErrors)
+
+        if(typeof req.body.name !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for category name'
+            }
+        }
+        if(validationErrors) return next(validationErrors)
 
         /* Add the new category */
         const result = await categoryModel.create(req.body.name);
 
         if(!result || result.success === false){
-            throw {
+            res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later'
-            }
+            })
         }
 
         res.status(200).json({
@@ -119,19 +125,19 @@ const removeAll = async (req, res, next) => {
         const result = await categoryModel.removeAll();
 
         if(!result || result.success === false){
-            throw {
+            res.status(500).json({
                 status: 500,
-                success: result.success,
-                message: result.message
-            }
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            })
         }
 
-        if(result.count < 1){
-            throw {
+        if(result.length < 1){
+            res.status(404).json({
                 status: 404,
                 success: false,
-                message: 'No categories found to be removed'
-            }
+                message: 'There are no categories to remove'
+            })
         }
 
         res.status(200).json({
@@ -162,40 +168,35 @@ const remove = async (req, res, next) => {
     try{
 
         /* Validate any req parameters */
-        if(!req.params || req.params === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined request parameters'
-            }
-        }
+        let validationErrors;
 
-        if(!req.params.id || req.params.id === undefined){
-            throw {
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
                 status: 400,
                 success: false,
-                message: 'Undefined id'
+                message: 'Undefined category id'
             }
         }
+        if(validationErrors) return next(validationErrors);
 
         /* Remove the requested category */
         let id = parseInt(req.params.id);
         const result = await categoryModel.remove(id);
 
         if(!result || result.success === false){
-            throw {
+            res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later'
-            }
+            })
         }
 
-        if(result.count < 1){
-            throw {
+        if(result.length < 1){
+            res.status(404).json({
                 status: 404,
                 success: false,
-                message: 'No categories found to be removed'
-            }
+                message: 'No matching category found to be removed'
+            })
         }
 
         res.status(200).json({
@@ -226,38 +227,35 @@ const update = async (req, res, next) => {
     try{
 
         /* Validate the request parameters */
-        if(!req.params || req.params === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined request parameters'
-            }
-        }
+        let validationErrors;
 
-        if(!req.params.id || req.params.id === undefined){
-            throw {
+        if(!req.params.id || req.params.id === 'undefined'){
+            validationErrors = {
                 status: 400,
                 success: false,
-                message: 'Undefined id'
+                message: 'Undefined category id'
             }
         }
-
-        if(!req.body || req.body === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined request body'
-            }
-        }
+        if(validationErrors) return next(validationErrors)
 
         if(!req.body.name || req.body.name === undefined){
-            throw {
+            validationErrors = {
                 status: 400,
                 success: false,
-                message: 'Undefined name'
+                message: 'Undefined category name'
             }
         }
+        if(validationErrors) return next(validationErrors)
 
+        if(typeof req.body.name !== 'string'){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'Wrong format for category name'
+            }
+        }
+        if(validationErrors) return next(validationErrors)
+        
         /* Update the specified parameter */
         let id = parseInt(req.params.id);
         let name = req.body.name;
@@ -265,19 +263,19 @@ const update = async (req, res, next) => {
         const result = await categoryModel.update(id, name);
         
         if(!result || result.success === false){
-            throw {
+            res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later'
-            }
+            })
         }
 
-        if(result.count < 1){
-            throw {
+        if(result.length < 1){
+            res.status(404).json({
                 status: 404,
                 success: false,
-                message: 'No categories found to update'
-            }
+                message: 'There are no records to update matching the supplied id'
+            })
         }
 
         res.status(200).json({
