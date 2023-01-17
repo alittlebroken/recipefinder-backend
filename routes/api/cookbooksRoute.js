@@ -19,6 +19,6 @@ router.delete('/', passport.authenticate('jwt', { session: false }), cookbookCon
 router.delete('/:id', passport.authenticate('jwt', { session: false }), cookbookController.removeById);
 router.delete('/:id/recipes', passport.authenticate('jwt', { session: false }), cookbookController.removeRecipes);
 router.delete('/:id/categories', passport.authenticate('jwt', { session: false }), cookbookController.removeCategories);
-router.put('/', passport.authenticate('jwt', { session: false }), cookbookController.update);
+router.put('/:id', passport.authenticate('jwt', { session: false }), cookbookController.update);
 
 module.exports = router;
