@@ -1,6 +1,6 @@
 /* Import any needed modules */
 require('dotenv').config();
-const appLogger = require('../../config/winston');
+const { checkRoles } = require('../../middlewares/verifyMiddleware');
 
 const express = require('express');
 const router = express.Router();
@@ -17,7 +17,7 @@ router.post('/',passport.authenticate('jwt', { session: false }), recipesControl
 router.post('/:id/ingredients',passport.authenticate('jwt', { session: false }), recipesController.addRecipeIngredients);
 router.post('/:id/steps',passport.authenticate('jwt', { session: false }), recipesController.addRecipeSteps);
 router.post('/:id/categories',passport.authenticate('jwt', { session: false }), recipesController.addRecipeCategories);
-router.delete('/',passport.authenticate('jwt', { session: false }), recipesController.removeAll);
+router.delete('/',passport.authenticate('jwt', { session: false }), checkRoles(['Admin']), recipesController.removeAll);
 router.delete('/:id',passport.authenticate('jwt', { session: false }), recipesController.remove);
 router.delete('/:id/ingredients',passport.authenticate('jwt', { session: false }), recipesController.removeRecipeIngredients);
 router.delete('/:id/steps',passport.authenticate('jwt', { session: false }), recipesController.removeRecipeSteps);
