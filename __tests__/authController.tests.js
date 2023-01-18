@@ -1,6 +1,5 @@
 /* Modules required for the tests */
 require('dotenv').config();
-const messageHelper = require('../helpers/constants');
 
 const request = require('supertest');
 const app = require('../index.js');
@@ -10,7 +9,7 @@ const userModel = require('../models/userModel');
 
 const passport = require('passport');
 
-xdescribe('authController.loginUser', () => {
+describe('authController.loginUser', () => {
 
     /*
      * Steps to run before and after this test suite
@@ -47,7 +46,7 @@ xdescribe('authController.loginUser', () => {
       const passportOptions = { session: false };
       const authType = 'local-login';
       const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-      const secretToken = 'token-secret';
+      const secretToken = process.env.JWT_TOKEN_SECRET;
 
       const returnStatus = 200;
       const returnSuccess = true;
@@ -82,7 +81,7 @@ xdescribe('authController.loginUser', () => {
   
       // Mock the required request functions and properties
 
-      req.get = jest.fn().mockReturnValue('token-secret');
+      req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
       const returnStatus = 400;
       const returnSuccess = false;
@@ -124,7 +123,7 @@ xdescribe('authController.loginUser', () => {
           password: 'letmein'
         }
 
-        req.get = jest.fn().mockReturnValue('token-secret');
+        req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
         const returnStatus = 400;
         const returnSuccess = false;
@@ -167,7 +166,7 @@ xdescribe('authController.loginUser', () => {
           password: 'letmein'
         }
 
-        req.get = jest.fn().mockReturnValue('token-secret');
+        req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
         const returnStatus = 400;
         const returnSuccess = false;
@@ -209,7 +208,7 @@ xdescribe('authController.loginUser', () => {
           username: 'terry',
         }
 
-        req.get = jest.fn().mockReturnValue('token-secret');
+        req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
         const returnStatus = 400;
         const returnSuccess = false;
@@ -252,7 +251,7 @@ xdescribe('authController.loginUser', () => {
           password: 70
         }
 
-        req.get = jest.fn().mockReturnValue('token-secret');
+        req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
         const returnStatus = 400;
         const returnSuccess = false;
@@ -381,7 +380,7 @@ xdescribe('authController.loginUser', () => {
             password: 'password'
           }
 
-          req.get = jest.fn().mockReturnValue('token-secret');
+          req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
           const returnStatus = 404;
           const returnSuccess = false;
@@ -422,7 +421,7 @@ xdescribe('authController.loginUser', () => {
           username: 'terry',
           password: 'password'
         }
-        req.get = jest.fn().mockReturnValue('token-secret');
+        req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
         const returnStatus = 409;
         const returnSuccess = false;
@@ -464,7 +463,7 @@ xdescribe('authController.loginUser', () => {
           username: 'terry',
           password: 'password'
         }
-        req.get = jest.fn().mockReturnValue('token-secret');
+        req.get = jest.fn().mockReturnValue(process.env.JWT_TOKEN_SECRET);
 
         // Mock the arguments for the passport authenticate method
         const passportError = 'There was a problem with the resource, please try again later';
@@ -569,7 +568,7 @@ describe('authController.createUser', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .post('/register')
-        .set('secret_token', 'token-secret')
+        .set('secret_token', process.env.JWT_TOKEN_SECRET)
         .send(postPayload)
 
       /* Test everything works as expected */
@@ -1235,7 +1234,7 @@ describe('authController.createUser', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .post('/register')
-        .set('secret_token', 'token-secret')
+        .set('secret_token', process.env.JWT_TOKEN_SECRET)
         .send(postPayload)
         
 
