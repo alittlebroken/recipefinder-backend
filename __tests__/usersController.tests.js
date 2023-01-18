@@ -23,8 +23,19 @@ describe('userController.listAll', () => {
       forename: 'Site',
       surname: 'Administrator',
       roles: ['Admin']
-  }
+    }
     authToken = await userModel.generateToken({user});
+
+    /* User used to trigger a failed authorised middleware check */
+    failUser = {
+      id: 2,
+      email: 'failed@localhost',
+      forename: 'Failed',
+      surname: 'User',
+      roles: ['Sales']
+    }
+    failToken = await userModel.generateToken({ user: failUser});
+    
   });
 
   afterEach(() => {
@@ -80,7 +91,7 @@ describe('userController.listAll', () => {
 
   });
 
-  it('should return status 401 if unathorized users tries to access route', async () => {
+  it('should return status 401 if a non logged in user tries to access route', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = [];
@@ -114,7 +125,49 @@ describe('userController.listAll', () => {
 
   });
 
-  it('should return status 204 if no users were found', async () => {
+  it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 403;
+    const returnSuccess = false;
+    const returnMessage = 'You are not authorized to access the specified route';
+    const returnResults = [];
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .get('/users')
+      .set('Authorization', `Bearer ${failToken}`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 404 if no users were found', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = [];
@@ -1428,6 +1481,50 @@ describe('userController.createUser', () => {
 
   });
 
+  it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const username = 'twatts@acedrinks.com';
+    const email  = 'twatts@acedrinks.com';
+    const password = 'terrylovesyoghurt';
+
+    const payload = {
+      email,
+      password
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 403;
+    const returnSuccess = false;
+    const returnMessage = 'You are not authorized to access the specified route';
+
+    /* Execute the function */
+    const res = await request(app)
+      .post(`/users`)
+      .send(payload)
+      .set('Authorization', `Bearer ${failToken}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toEqual(returnStatus);
+
+    expect(typeof res.body).toBe('object');
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+
+  });
+
   it('should return status 400 if username is undefined', async () => {
 
     // Set Mocked data that models and controllers should return
@@ -1465,7 +1562,7 @@ describe('userController.createUser', () => {
     const res = await request(app)
       .post(`/users`)
       .send(payload)
-      .set('Authorization', `Bearer ${authToken}`);;
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4484,6 +4581,41 @@ describe('userController.removeAllUsers', () => {
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
+
+  });
+
+  it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 403;
+    const returnSuccess = false;
+    const returnMessage = 'You are not authorized to access the specified route';
+
+    /* Execute the function */
+    const res = await request(app)
+      .delete(`/users`)
+      .set('Authorization', `Bearer ${failToken}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toEqual(returnStatus);
+
+    expect(typeof res.body).toBe('object');
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
 
   });
 
