@@ -16,8 +16,6 @@ const list = async (req, res, next) => {
 
     const moduleMethod = 'list';
 
-    console.log('Loged in user: ', req.user)
-
     try{
 
         /* List all the categories we have */
