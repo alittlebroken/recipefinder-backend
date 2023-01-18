@@ -114,8 +114,9 @@ passport.use(
       secretOrKey: process.env.JWT_TOKEN_SECRET,
       jwtFromRequest: ExtractJWT.fromExtractors([
         ExtractJWT.fromUrlQueryParameter('secret_token'),
-        ExtractJWT.fromHeader('secret_token'),
-        ExtractJWT.fromAuthHeaderAsBearerToken()
+        ExtractJWT.fromHeader('auth_token'),
+        ExtractJWT.fromAuthHeaderAsBearerToken(),
+        ExtractJWT.fromAuthHeaderWithScheme('Authentication')
       ])
     },
     /* Callback used to process the strategy */
@@ -123,7 +124,7 @@ passport.use(
       try{
         return done(null, token.user);
       } catch(e) {
-        return done(error);
+        return done(e);
       }
     }
   )

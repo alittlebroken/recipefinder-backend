@@ -1,27 +1,28 @@
 /* Import any needed modules */
 require('dotenv').config();
-const appLogger = require('../../config/winston');
+const { checkRoles } = require('../../middlewares/verifyMiddleware');
 
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
 const recipesController = require('../../controllers/recipesController');
 
-router.get('/', recipesController.listAll);
-router.get('/:id', recipesController.list);
-router.get('/:id/ingredients', recipesController.listRecipeIngredients);
-router.get('/:id/steps', recipesController.listRecipeSteps);
-router.get('/:id/categories', recipesController.listRecipeCategories);
-router.post('/', recipesController.create);
-router.post('/:id/ingredients', recipesController.addRecipeIngredients);
-router.post('/:id/steps', recipesController.addRecipeSteps);
-router.post('/:id/categories', recipesController.addRecipeCategories);
-router.delete('/', recipesController.removeAll);
-router.delete('/:id', recipesController.remove);
-router.delete('/:id/ingredients', recipesController.removeRecipeIngredients);
-router.delete('/:id/steps', recipesController.removeRecipeSteps);
-router.delete('/:id/categories', recipesController.removeRecipeCategories);
-router.put('/:id', recipesController.update);
+router.get('/',passport.authenticate('jwt', { session: false }), recipesController.listAll);
+router.get('/:id',passport.authenticate('jwt', { session: false }), recipesController.list);
+router.get('/:id/ingredients',passport.authenticate('jwt', { session: false }), recipesController.listRecipeIngredients);
+router.get('/:id/steps',passport.authenticate('jwt', { session: false }), recipesController.listRecipeSteps);
+router.get('/:id/categories',passport.authenticate('jwt', { session: false }), recipesController.listRecipeCategories);
+router.post('/',passport.authenticate('jwt', { session: false }), recipesController.create);
+router.post('/:id/ingredients',passport.authenticate('jwt', { session: false }), recipesController.addRecipeIngredients);
+router.post('/:id/steps',passport.authenticate('jwt', { session: false }), recipesController.addRecipeSteps);
+router.post('/:id/categories',passport.authenticate('jwt', { session: false }), recipesController.addRecipeCategories);
+router.delete('/',passport.authenticate('jwt', { session: false }), checkRoles(['Admin']), recipesController.removeAll);
+router.delete('/:id',passport.authenticate('jwt', { session: false }), recipesController.remove);
+router.delete('/:id/ingredients',passport.authenticate('jwt', { session: false }), recipesController.removeRecipeIngredients);
+router.delete('/:id/steps',passport.authenticate('jwt', { session: false }), recipesController.removeRecipeSteps);
+router.delete('/:id/categories',passport.authenticate('jwt', { session: false }), recipesController.removeRecipeCategories);
+router.put('/:id',passport.authenticate('jwt', { session: false }), recipesController.update);
 
 /* Future API expansion
 router.get('/:id/comments', recipesController.listRecipeComments);

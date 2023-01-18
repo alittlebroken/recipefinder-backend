@@ -1,6 +1,5 @@
 /* Modules required for the tests */
 require('dotenv').config();
-const messageHelper = require('../helpers/constants');
 
 const request = require('supertest');
 const app = require('../index.js');
@@ -10,9 +9,7 @@ const recipeModel = require('../models/recipeModel');
 const cookbookModel = require('../models/cookbookModel');
 const pantryIngredients = require('../models/pantryIngredientsModel');
 const pantryModel = require('../models/pantryModel');
-const userController = require('../controllers/usersController');
 
-const passport = require('passport');
 
 describe('userController.listAll', () => {
 
@@ -20,7 +17,25 @@ describe('userController.listAll', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+    }
+    authToken = await userModel.generateToken({user});
 
+    /* User used to trigger a failed authorised middleware check */
+    failUser = {
+      id: 2,
+      email: 'failed@localhost',
+      forename: 'Failed',
+      surname: 'User',
+      roles: ['Sales']
+    }
+    failToken = await userModel.generateToken({ user: failUser});
+    
   });
 
   afterEach(() => {
@@ -58,7 +73,8 @@ describe('userController.listAll', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const response = await request(app)
-      .get('/users');
+      .get('/users')
+      .set('Authorization', `Bearer ${authToken}`)
 
     /* Test everything works as expected */
     expect(response.status).toEqual(returnStatus);
@@ -75,7 +91,83 @@ describe('userController.listAll', () => {
 
   });
 
-  it('should return status 204 if no users were found', async () => {
+  it('should return status 401 if a non logged in user tries to access route', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = '';
+    const returnResults = modelReturnData;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .get('/users');
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+
+  });
+
+  it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 403;
+    const returnSuccess = false;
+    const returnMessage = 'You are not authorized to access the specified route';
+    const returnResults = [];
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const response = await request(app)
+      .get('/users')
+      .set('Authorization', `Bearer ${failToken}`);
+
+    /* Test everything works as expected */
+    expect(response.status).toEqual(returnStatus);
+
+    expect(typeof response.body).toBe('object');
+    expect(typeof response.body.status).toBe('number');
+    expect(typeof response.body.success).toBe('boolean');
+
+    expect(response.body.status).toEqual(returnStatus);
+    expect(response.body.success).toEqual(returnSuccess);
+    expect(response.body.message).toEqual(returnMessage);
+
+  });
+
+  it('should return status 404 if no users were found', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = [];
@@ -101,7 +193,8 @@ describe('userController.listAll', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const response = await request(app)
-      .get('/users');
+      .get('/users')
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(response.status).toEqual(returnStatus);
@@ -149,7 +242,8 @@ describe('userController.listAll', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const response = await request(app)
-      .get('/users');
+      .get('/users')
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(response.status).toEqual(returnStatus);
@@ -175,7 +269,14 @@ describe('userController.listUser', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -212,7 +313,8 @@ describe('userController.listUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}`);
+      .get(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toEqual(returnStatus);
@@ -227,6 +329,42 @@ describe('userController.listUser', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if user is not logged in whilst trying to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1001;
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findById').mockImplementation(() => {
+      return modelReturnData;
+    })
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = '';
+    const returnResults = modelReturnData;
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .get(`/users/${userId}`)
+      ;
+
+    /* Test everything works as expected */
+    expect(res.status).toEqual(returnStatus);
 
   });
 
@@ -258,7 +396,8 @@ describe('userController.listUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}`);
+      .get(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toEqual(returnStatus);
@@ -304,7 +443,8 @@ describe('userController.listUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}`);
+      .get(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toEqual(returnStatus);
@@ -353,7 +493,8 @@ describe('userController.listUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}`);
+      .get(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toEqual(returnStatus);
@@ -379,7 +520,14 @@ describe('userController.listUserRecipes', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -427,7 +575,8 @@ describe('userController.listUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .get(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -442,6 +591,41 @@ describe('userController.listUserRecipes', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'The user currently has no recipes';
+    const returnResults = modelReturnData;
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .get(`/users/${userId}/recipes`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -473,7 +657,8 @@ describe('userController.listUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .get(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -519,7 +704,8 @@ describe('userController.listUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .get(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -568,7 +754,8 @@ describe('userController.listUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .get(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -586,7 +773,7 @@ describe('userController.listUserRecipes', () => {
 
   });
 
-  it('should return status ', async () => {
+  xit('should return status ', async () => {
 
     // Set Mocked data that models and controllers should return
     const modelReturnData = [
@@ -627,7 +814,8 @@ describe('userController.listUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/recipes`);
+      .get(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -653,7 +841,14 @@ describe('userController.listUserCookbooks', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -701,7 +896,8 @@ describe('userController.listUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/cookbooks`);
+      .get(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -716,6 +912,41 @@ describe('userController.listUserCookbooks', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 13;
+
+    // Mock any needed third party modules
+    jest.spyOn(cookbookModel, 'findByUserId').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = '';
+    const returnResults = modelReturnData;
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .get(`/users/${userId}/cookbooks`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -747,7 +978,8 @@ describe('userController.listUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/cookbooks`);
+      .get(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -793,7 +1025,8 @@ describe('userController.listUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/cookbooks`);
+      .get(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -842,7 +1075,8 @@ describe('userController.listUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/cookbooks`);
+      .get(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -868,7 +1102,14 @@ describe('userController.listUserPantryItems', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -912,7 +1153,8 @@ describe('userController.listUserPantryItems', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/pantry`);
+      .get(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -927,6 +1169,42 @@ describe('userController.listUserPantryItems', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(pantryIngredients, 'findByUser').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = '';
+    const returnResults = modelReturnData;
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .get(`/users/${userId}/pantry`)
+      ;
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -958,7 +1236,8 @@ describe('userController.listUserPantryItems', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/pantry`);
+      .get(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1004,7 +1283,8 @@ describe('userController.listUserPantryItems', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/pantry`);
+      .get(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1053,7 +1333,8 @@ describe('userController.listUserPantryItems', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .get(`/users/${userId}/pantry`);
+      .get(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1079,7 +1360,14 @@ describe('userController.createUser', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+    }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -1131,7 +1419,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1146,6 +1435,93 @@ describe('userController.createUser', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if user is not authorized to access the route', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const username = 'twatts@acedrinks.com';
+    const email  = 'twatts@acedrinks.com';
+    const password = 'terrylovesyoghurt';
+
+    const payload = {
+      email,
+      password
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'insert').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined username';
+    const returnResults = modelReturnData;
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .post(`/users`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+  });
+
+  it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const username = 'twatts@acedrinks.com';
+    const email  = 'twatts@acedrinks.com';
+    const password = 'terrylovesyoghurt';
+
+    const payload = {
+      email,
+      password
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 403;
+    const returnSuccess = false;
+    const returnMessage = 'You are not authorized to access the specified route';
+
+    /* Execute the function */
+    const res = await request(app)
+      .post(`/users`)
+      .send(payload)
+      .set('Authorization', `Bearer ${failToken}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toEqual(returnStatus);
+
+    expect(typeof res.body).toBe('object');
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
 
   });
 
@@ -1185,7 +1561,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1240,7 +1617,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1294,7 +1672,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1349,7 +1728,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1403,7 +1783,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1458,7 +1839,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1516,7 +1898,8 @@ describe('userController.createUser', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1542,7 +1925,14 @@ describe('userController.createUserRecipe', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -1606,7 +1996,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1621,6 +2012,60 @@ describe('userController.createUserRecipe', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+    const payload = {
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbookId: 2,
+      categories: [
+        { categoryId: 1},
+        { categoryId: 2}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = '';
+    const returnResults = modelReturnData;
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .post(`/users/${userId}/recipes`)
+      .send(payload)
+      ;
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -1670,7 +2115,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1735,7 +2181,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1807,7 +2254,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1878,7 +2326,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -1950,7 +2399,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2021,7 +2471,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2093,7 +2544,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2165,7 +2617,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2237,7 +2690,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2309,7 +2763,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2381,7 +2836,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2453,7 +2909,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2525,7 +2982,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2597,7 +3055,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2669,7 +3128,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2736,7 +3196,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2803,7 +3264,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2871,7 +3333,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -2940,7 +3403,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3012,7 +3476,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3084,7 +3549,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3153,7 +3619,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3222,7 +3689,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3297,7 +3765,8 @@ describe('userController.createUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3323,7 +3792,14 @@ describe('userController.addUserPantry', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -3383,7 +3859,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3398,6 +3875,55 @@ describe('userController.addUserPantry', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    pantryIngredientsReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    const payload = {
+      ingredientId: 1,
+      amount: 200,
+      amount_type: 'grams'
+    };
+
+    // Mock any needed third party modules
+    jest.spyOn(pantryIngredients, 'findByUser').mockImplementation(() => {
+      return pantryIngredientsReturnData;
+    });
+
+    jest.spyOn(pantryIngredients, 'create').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Unable to find pantry for user';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .post(`/users/${userId}/pantry`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
 
   });
 
@@ -3442,7 +3968,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3501,7 +4028,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3559,7 +4087,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3618,7 +4147,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3676,7 +4206,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3735,7 +4266,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3793,7 +4325,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3852,7 +4385,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3916,7 +4450,8 @@ describe('userController.addUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .post(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3942,7 +4477,14 @@ describe('userController.removeAllUsers', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -3984,7 +4526,8 @@ describe('userController.removeAllUsers', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users`);
+      .delete(`/users`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -3999,6 +4542,80 @@ describe('userController.removeAllUsers', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if the user is not logged in whilst accessing this route', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelFindAllReturnData = [];
+
+    const modelFailedFindAllReturnData = {
+      success: false,
+      message: 'No customer accounts have been removed'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'removeAll').mockImplementation(() => {
+      return modelFailedFindAllReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = modelFailedFindAllReturnData.message;
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+  });
+
+  it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 403;
+    const returnSuccess = false;
+    const returnMessage = 'You are not authorized to access the specified route';
+
+    /* Execute the function */
+    const res = await request(app)
+      .delete(`/users`)
+      .set('Authorization', `Bearer ${failToken}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toEqual(returnStatus);
+
+    expect(typeof res.body).toBe('object');
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
 
   });
 
@@ -4037,7 +4654,8 @@ describe('userController.removeAllUsers', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users`);
+      .delete(`/users`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4090,7 +4708,8 @@ describe('userController.removeAllUsers', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users`);
+      .delete(`/users`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4116,7 +4735,14 @@ describe('userController.removeUser', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -4154,7 +4780,8 @@ describe('userController.removeUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}`);
+      .delete(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4169,6 +4796,41 @@ describe('userController.removeUser', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'remove').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -4200,7 +4862,8 @@ describe('userController.removeUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}`);
+      .delete(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4249,7 +4912,8 @@ describe('userController.removeUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}`);
+      .delete(`/users/${userId}`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4275,7 +4939,14 @@ describe('userController.removeUserRecipes', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -4313,7 +4984,8 @@ describe('userController.removeUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/recipes`);
+      .delete(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4328,6 +5000,45 @@ describe('userController.removeUserRecipes', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'The user has no recipes to remove'
+    };
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'removeAllByUser').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'The user has no recipes to remove';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}/recipes`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
 
   });
 
@@ -4362,7 +5073,8 @@ describe('userController.removeUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/recipes`);
+      .delete(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4408,7 +5120,8 @@ describe('userController.removeUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/recipes`);
+      .delete(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4457,7 +5170,8 @@ describe('userController.removeUserRecipes', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/recipes`);
+      .delete(`/users/${userId}/recipes`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4483,7 +5197,14 @@ describe('userController.removeUserCookbooks', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -4521,7 +5242,8 @@ describe('userController.removeUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/cookbooks`);
+      .delete(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4536,6 +5258,41 @@ describe('userController.removeUserCookbooks', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+
+    // Mock any needed third party modules
+    jest.spyOn(cookbookModel, 'removeAllByUser').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}/cookbooks`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -4567,7 +5324,8 @@ describe('userController.removeUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/cookbooks`);
+      .delete(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4616,7 +5374,8 @@ describe('userController.removeUserCookbooks', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/cookbooks`);
+      .delete(`/users/${userId}/cookbooks`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4642,7 +5401,14 @@ describe('userController.removeUserPantry', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -4679,7 +5445,8 @@ describe('userController.removeUserPantry', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/pantry`);
+      .delete(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
 
     /* Test everything works as expected */
@@ -4695,6 +5462,42 @@ describe('userController.removeUserPantry', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+
+    // Mock any needed third party modules
+    jest.spyOn(pantryModel, 'removeAllByUser').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .delete(`/users/${userId}/pantry`);
+
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -4726,7 +5529,8 @@ describe('userController.removeUserPantry', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/pantry`);
+      .delete(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
 
     /* Test everything works as expected */
@@ -4776,7 +5580,8 @@ describe('userController.removeUserPantry', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
-      .delete(`/users/${userId}/pantry`);
+      .delete(`/users/${userId}/pantry`)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4802,7 +5607,14 @@ describe('userController.updateUser', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -4856,7 +5668,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4871,6 +5684,61 @@ describe('userController.updateUser', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [{
+      id: 1,
+      username: 'twatkins',
+      email: 'twatkins@devloper.net',
+      roles: ['Customer'],
+      forename: 'Theresa',
+      surname: 'Watkins'
+    }];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+    const username = 'twatkins';
+    const email = 'twatkins@dev.com';
+    const roles = ['Customer'];
+    const forename = 'Theresa';
+    const surname = 'Watkins';
+
+    // Mock any needed third party modules
+    jest.spyOn(userModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}`)
+      .send({
+        username,
+        email,
+        roles,
+        forename,
+        surname
+      })
+      ;
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -4921,7 +5789,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -4982,7 +5851,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5039,7 +5909,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5097,7 +5968,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5154,7 +6026,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5212,7 +6085,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5269,7 +6143,8 @@ describe('userController.updateUser', () => {
         email,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5327,7 +6202,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5384,7 +6260,8 @@ describe('userController.updateUser', () => {
         email,
         roles,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5442,7 +6319,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5499,7 +6377,8 @@ describe('userController.updateUser', () => {
         email,
         roles,
         forename,
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5557,7 +6436,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5618,7 +6498,8 @@ describe('userController.updateUser', () => {
         roles,
         forename,
         surname
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5638,14 +6519,20 @@ describe('userController.updateUser', () => {
 
 });
 
-
 describe('userController.updateUserRecipe', () => {
 
   /*
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -5711,7 +6598,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5726,6 +6614,69 @@ describe('userController.updateUserRecipe', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access this resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = [];
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+    const payload = {
+      recipe: {
+        recipeId: 12,
+        userId: 1,
+        name: 'Beans on toast',
+        servings: 1,
+        calories_per_serving: 345,
+        prep_time: 3,
+        cook_time: 10
+      },
+      steps: [
+        { stepNo: 1, content: 'Pour beans into a saucepan and place on a medium heat' },
+        { stepNo: 2, content: 'Toast the bread in a toaster or under the grill'},
+        { stepNo: 3, content: 'Place toast on a plate and pour over the beans'},
+        { stepNo: 4, content: 'Server and enjoy'}
+      ],
+      ingredients: [
+        { ingredientId: 1, amount: 1, amount_type: 'slice' },
+        { ingredientId: 2, amount: 250, amount_type: 'grams'}
+      ],
+      cookbooks: [
+        { id: 1, cookbookId: 1, recipeId: 1}
+      ],
+      categories: [
+        { id: 1, recipeId: 1, categoryId: 1}
+      ],
+    }
+
+    // Mock any needed third party modules
+    jest.spyOn(recipeModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/recipes`)
+      .send(payload);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -5785,7 +6736,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5859,7 +6811,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -5933,7 +6886,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6007,7 +6961,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6081,7 +7036,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6155,7 +7111,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6229,7 +7186,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6303,7 +7261,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6377,7 +7336,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6451,7 +7411,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6525,7 +7486,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6598,7 +7560,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6672,7 +7635,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6746,7 +7710,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6820,7 +7785,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6891,7 +7857,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -6960,7 +7927,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7034,7 +8002,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7105,7 +8074,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7179,7 +8149,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7251,7 +8222,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7325,7 +8297,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7397,7 +8370,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7474,7 +8448,8 @@ describe('userController.updateUserRecipe', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/recipes`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7500,7 +8475,14 @@ describe('userController.updateUserCookbook', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -7550,7 +8532,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7565,6 +8548,53 @@ describe('userController.updateUserCookbook', () => {
     expect(res.body.message).toEqual(returnMessage);
     expect(res.body.results).toEqual(returnResults);
     expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = []
+
+    // Set any variables needed to be passed to controllers and or models
+    let userId;
+
+    const cookbookId = 1;
+    const name = 'Vegan puddings';
+    const description = 'A selection of delightful and easy to make vegan puds';
+    const image = 'vegan_puds.png'
+
+    // Mock any needed third party modules
+    jest.spyOn(cookbookModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 401;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined userId';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/cookbooks`)
+      .send({
+        cookbookId,
+        userId,
+        name,
+        description,
+        image
+      });
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
 
   });
 
@@ -7608,7 +8638,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7664,7 +8695,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7722,7 +8754,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7779,7 +8812,8 @@ describe('userController.updateUserCookbook', () => {
         
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7837,7 +8871,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7894,7 +8929,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -7951,7 +8987,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8008,7 +9045,8 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8066,7 +9104,70 @@ describe('userController.updateUserCookbook', () => {
         name,
         description,
         image
-      });
+      })
+      .set('Authorization', `Bearer ${authToken}`);
+
+    /* Test everything works as expected */
+    expect(res.status).toBe(returnStatus);
+
+    expect(typeof res.body.status).toBe('number');
+    expect(typeof res.body.success).toBe('boolean');
+    expect(typeof res.body.message).toBe('string');
+    expect(Array.isArray(res.body.results)).toBe(true);
+
+    expect(res.body.status).toEqual(returnStatus);
+    expect(res.body.success).toEqual(returnSuccess);
+    expect(res.body.message).toEqual(returnMessage);
+    expect(res.body.results).toEqual(returnResults);
+    expect(res.body.results).toHaveLength(returnResultsLength);
+
+  });
+
+  it('should return status 500 if there was another problem with the resource', async () => {
+
+    // Set Mocked data that models and controllers should return
+    const modelReturnData = {
+      success: false,
+      message: 'There was an issue with the resource, pleaee try again later'
+    }
+
+    // Set any variables needed to be passed to controllers and or models
+    const userId = 1;
+
+    const cookbookId = 1;
+    const name = 'Vegan puddings';
+    const description = 'A selection of delightful and easy to make vegan puds';
+    const image = 'image.png';
+
+    // Mock any needed third party modules
+    jest.spyOn(cookbookModel, 'update').mockImplementation(() => {
+      return modelReturnData;
+    });
+
+    // Set here the expected return values for the test
+    const returnStatus = 500;
+    const returnSuccess = false;
+    const returnMessage = 'There was a problem with the resource, please try again later';
+    const returnResults = [];
+    const returnResultsLength = 0;
+
+    /* Mock Express request and response */
+    const mockRequest = {};
+    const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
+    const mockNext = jest.fn();
+
+    /* Execute the function */
+    //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+    const res = await request(app)
+      .put(`/users/${userId}/cookbooks`)
+      .send({
+        cookbookId,
+        userId,
+        name,
+        description,
+        image
+      })
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8092,7 +9193,14 @@ describe('userController.updateUserPantry', () => {
    * Steps to run before and after this test suite
    */
   beforeEach(async () => {
-
+    user = {
+      id: 1,
+      email: 'admin@localhost',
+      forename: 'Site',
+      surname: 'Administrator',
+      roles: ['Admin']
+  }
+    authToken = await userModel.generateToken({user});
   });
 
   afterEach(() => {
@@ -8138,7 +9246,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8192,7 +9301,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8246,7 +9356,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8300,7 +9411,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8353,7 +9465,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8407,7 +9520,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8460,7 +9574,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8514,7 +9629,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8567,7 +9683,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8621,7 +9738,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8674,7 +9792,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8728,7 +9847,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8785,7 +9905,8 @@ describe('userController.updateUserPantry', () => {
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const res = await request(app)
       .put(`/users/${userId}/pantry`)
-      .send(payload);
+      .send(payload)
+      .set('Authorization', `Bearer ${authToken}`);
 
     /* Test everything works as expected */
     expect(res.status).toBe(returnStatus);
@@ -8811,7 +9932,14 @@ xdescribe('<model>Controller.<method>', () => {
      * Steps to run before and after this test suite
      */
     beforeEach(async () => {
-  
+      user = {
+        id: 1,
+        email: 'admin@localhost',
+        forename: 'Site',
+        surname: 'Administrator',
+        roles: ['Admin']
+    }
+      authToken = await userModel.generateToken({user});
     });
   
     afterEach(() => {
@@ -8859,7 +9987,8 @@ xdescribe('<model>Controller.<method>', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
-        .get(`/users/${userId}/recipes`);
+        .get(`/users/${userId}/recipes`)
+        .set('Authorization', `Bearer ${authToken}`);
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);

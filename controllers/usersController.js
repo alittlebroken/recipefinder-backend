@@ -2,14 +2,12 @@
 require('dotenv').config();
 const appLogger = require('../config/winston');
 
-const passport = require('passport');
 const moduleName = 'userController';
 const userModel = require('../models/userModel');
 const cookbookModel = require('../models/cookbookModel');
 const recipeModel = require('../models/recipeModel');
 const pantryIngredients = require('../models/pantryIngredientsModel');
 const pantryModel = require('../models/pantryModel');
-const { emptyQuery } = require('pg-protocol/dist/messages');
 
 /* 
  * Retrieve a list of all users in the system

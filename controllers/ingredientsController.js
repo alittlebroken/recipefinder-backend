@@ -54,7 +54,7 @@ const getById = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -68,6 +68,16 @@ const getById = async (req, res, next) => {
 
         if(!result || result.length < 1){
             res.status(404).json([]);
+        }
+
+        if(result.success === false){
+            let err = {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            };
+
+            throw err;
         }
 
         res.status(200).json(result);
@@ -193,7 +203,7 @@ const removeById = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
@@ -252,7 +262,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,

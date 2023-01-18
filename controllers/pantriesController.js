@@ -67,7 +67,7 @@ const list = async (req, res, next) => {
             }
         }
 
-        if(!req.params.id || req.params.id === undefined){
+        if(!req.params.id || req.params.id === 'undefined'){
             throw {
                 status: 400,
                 success: false,
