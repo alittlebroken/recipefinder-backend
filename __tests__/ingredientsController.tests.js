@@ -15,8 +15,18 @@ describe('ingredientsController', () => {
       forename: 'Site',
       surname: 'Administrator',
       roles: ['Admin']
-  }
+    }
     authToken = await userModel.generateToken({user});
+
+    /* User used to trigger a failed authorised middleware check */
+    failUser = {
+      id: 2,
+      email: 'failed@localhost',
+      forename: 'Failed',
+      surname: 'User',
+      roles: ['Sales']
+    }
+    failToken = await userModel.generateToken({ user: failUser});
   });
 
   describe('get', () => {
@@ -107,6 +117,41 @@ describe('ingredientsController', () => {
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
      
+    });
+
+    it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = [];
+    
+      // Set Mocked data that models and controllers should return
+      
+      // Mock any needed third party modules
+      jest.spyOn(ingredientModel, 'findAll').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 403;
+      const returnSuccess = false;
+      const returnMessage = 'You are not authorized to access the specified route';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .get('/ingredients')
+        .set('Authorization', `Bearer ${failToken}`);
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+  
+      expect(typeof res.body).toBe('object');
+      expect(typeof res.body.status).toBe('number');
+      expect(typeof res.body.success).toBe('boolean');
+  
+      expect(res.body.status).toEqual(returnStatus);
+      expect(res.body.success).toEqual(returnSuccess);
+      expect(res.body.message).toEqual(returnMessage);
+  
     });
 
     it('returns an empty list if no ingredients found with a status of 404', async () => {
@@ -712,6 +757,41 @@ describe('ingredientsController', () => {
   
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
+  
+    });
+
+    it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = [];
+    
+      // Set Mocked data that models and controllers should return
+      
+      // Mock any needed third party modules
+      jest.spyOn(ingredientModel,'removeAll').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 403;
+      const returnSuccess = false;
+      const returnMessage = 'You are not authorized to access the specified route';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .delete('/ingredients')
+        .set('Authorization', `Bearer ${failToken}`);
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+  
+      expect(typeof res.body).toBe('object');
+      expect(typeof res.body.status).toBe('number');
+      expect(typeof res.body.success).toBe('boolean');
+  
+      expect(res.body.status).toEqual(returnStatus);
+      expect(res.body.success).toEqual(returnSuccess);
+      expect(res.body.message).toEqual(returnMessage);
   
     });
 
