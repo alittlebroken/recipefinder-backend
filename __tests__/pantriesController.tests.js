@@ -23,6 +23,16 @@ describe('pantriesController', () => {
       roles: ['Admin']
   }
     authToken = await userModel.generateToken({user});
+
+    /* User used to trigger a failed authorised middleware check */
+    failUser = {
+      id: 2,
+      email: 'failed@localhost',
+      forename: 'Failed',
+      surname: 'User',
+      roles: ['Sales']
+    }
+    failToken = await userModel.generateToken({ user: failUser});
   });
 
   afterEach(() => {
@@ -141,6 +151,41 @@ describe('pantriesController', () => {
       expect(response.body.success).toEqual(returnSuccess);
       expect(response.body.message).toEqual(returnMessage);
     
+    });
+
+    it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+    
+      // Set any variables needed to be passed to controllers and or models
+      
+      // Mock any needed third party modules
+      jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
+        return modelreturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 403;
+      const returnSuccess = false;
+      const returnMessage = 'You are not authorized to access the specified route';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .get('/pantries')
+        .set('Authorization', `Bearer ${failToken}`);
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+  
+      expect(typeof res.body).toBe('object');
+      expect(typeof res.body.status).toBe('number');
+      expect(typeof res.body.success).toBe('boolean');
+  
+      expect(res.body.status).toEqual(returnStatus);
+      expect(res.body.success).toEqual(returnSuccess);
+      expect(res.body.message).toEqual(returnMessage);
+  
     });
 
     it('should return status 404 if there are no pantries', async () => {
@@ -516,6 +561,82 @@ describe('pantriesController', () => {
 
     });
 
+    it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+    
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = [
+        { id: 1, userId: 1}
+      ]
+  
+      // Set any variables needed to be passed to controllers and or models
+      const userId = 1;
+      
+      // Mock any needed third party modules
+      jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
+        return modelreturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+      const returnSuccess = false;
+      const returnMessage = '';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .post('/pantries')
+        .send({ userId: userId});
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+
+  
+    });
+
+    it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+    
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = [
+        { id: 1, userId: 1}
+      ]
+  
+      // Set any variables needed to be passed to controllers and or models
+      const userId = 1;
+      
+      // Mock any needed third party modules
+      jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
+        return modelreturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 403;
+      const returnSuccess = false;
+      const returnMessage = 'You are not authorized to access the specified route';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .post('/pantries')
+        .send({ userId: userId})
+        .set('Authorization', `Bearer ${failToken}`);
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+  
+      expect(typeof res.body).toBe('object');
+      expect(typeof res.body.status).toBe('number');
+      expect(typeof res.body.success).toBe('boolean');
+  
+      expect(res.body.status).toEqual(returnStatus);
+      expect(res.body.success).toEqual(returnSuccess);
+      expect(res.body.message).toEqual(returnMessage);
+  
+    });
+
     it('should return status 400 if request body is undefined', async () => {
 
       // Set Mocked data that models and controllers should return
@@ -736,6 +857,40 @@ describe('pantriesController', () => {
       expect(response.body.success).toEqual(returnSuccess);
       expect(response.body.message).toEqual(returnMessage);
 
+    });
+
+    it('should return status 401 if a non logged in user tries to access this resource', async () => {
+  
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+  
+      // Set any variables needed to be passed to controllers and or models
+      const pantryId = 1;
+      const pantryItem = {
+        ingredientId: 1,
+        amount: 200,
+        amount_type: 'grams'
+      };
+
+      // Mock any needed third party modules
+      jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
+        return modelReturnData;
+      });
+
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+      const returnSuccess = false;
+      const returnMessage = 'There are no pantries to list';
+
+  
+      /* Perform the test */
+      const response = await request(app)
+        .post(`/pantries/${pantryId}`)
+        .send(pantryItem);
+
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
+    
     });
 
     it('should return status 404 if pantry does not exist', async () => {
@@ -1265,6 +1420,67 @@ describe('pantriesController', () => {
 
     });
 
+    it('should return status 401 if a non logged in user tries to access the resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+    
+      // Set Mocked data that models and controllers should return
+      
+      // Mock any needed third party modules
+      jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+      const returnSuccess = false;
+      const returnMessage = '';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .delete('/pantries');
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+  
+    });
+
+    it('should return status 403 if a unauthorised users tries to use this resource', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+    
+      // Set Mocked data that models and controllers should return
+      
+      // Mock any needed third party modules
+      jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
+        return modelReturnData;
+      });
+  
+      // Set here the expected return values for the test
+      const returnStatus = 403;
+      const returnSuccess = false;
+      const returnMessage = 'You are not authorized to access the specified route';
+  
+      /* Execute the function */
+      const res = await request(app)
+        .delete('/pantries')
+        .set('Authorization', `Bearer ${failToken}`);
+  
+      /* Test everything works as expected */
+      expect(res.status).toEqual(returnStatus);
+  
+      expect(typeof res.body).toBe('object');
+      expect(typeof res.body.status).toBe('number');
+      expect(typeof res.body.success).toBe('boolean');
+  
+      expect(res.body.status).toEqual(returnStatus);
+      expect(res.body.success).toEqual(returnSuccess);
+      expect(res.body.message).toEqual(returnMessage);
+  
+    });
+
     it('should return status 404 if no pantries to remove', async () => {
 
       // Set Mocked data that models and controllers should return
@@ -1399,6 +1615,34 @@ describe('pantriesController', () => {
       expect(response.body.success).toEqual(returnSuccess);
       expect(response.body.message).toEqual(returnMessage);
 
+    });
+
+    it('should return status 401 if a non logged in user tries to access this resource', async () => {
+  
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+  
+      // Set any variables needed to be passed to controllers and or models
+      const pantryId = 1;
+
+      // Mock any needed third party modules
+      jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
+        return modelReturnData;
+      });
+
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+      const returnSuccess = false;
+      const returnMessage = 'There are no pantries to list';
+
+  
+      /* Perform the test */
+      const response = await request(app)
+        .delete(`/pantries/${pantryId}`);
+
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
+    
     });
 
     it('should return status 404 if the selected pantry has no entries to remove', async () => {
@@ -1552,7 +1796,7 @@ describe('pantriesController', () => {
 
   });
 
-  describe('.update', () => {
+  describe('update', () => {
 
     /*
     * Steps to run before and after this test suite
@@ -1616,6 +1860,41 @@ describe('pantriesController', () => {
       expect(response.body.success).toEqual(returnSuccess);
       expect(response.body.message).toEqual(returnMessage);
 
+    });
+
+    it('should return status 401 if a non logged in user tries to access this resource', async () => {
+  
+      // Set Mocked data that models and controllers should return
+      const modelreturnData = [];
+  
+       // Set any variables needed to be passed to controllers and or models
+       const id = 1;
+       const payload = {
+         pantryId: 1,
+         ingredientId: 1,
+         amount: 200,
+         amount_type: 'grams'
+       }
+ 
+       // Mock any needed third party modules
+       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
+         return modelReturnData;
+       });
+
+      // Set here the expected return values for the test
+      const returnStatus = 401;
+      const returnSuccess = false;
+      const returnMessage = 'There are no pantries to list';
+
+  
+      /* Perform the test */
+      const response = await request(app)
+        .put(`/pantries/${id}`)
+        .send(payload);
+
+      /* Test everything works as expected */
+      expect(response.status).toBe(returnStatus);
+    
     });
 
     it('should return status 404 if nothing to update', async () => {
