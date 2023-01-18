@@ -6,11 +6,14 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 
+const { checkRoles } = require('../../middlewares/verifyMiddleware')
+
 const userController = require('../../controllers/usersController');
 
 router.get(
     '/',
     passport.authenticate('jwt', { session: false }),
+    checkRoles(['Admin']),
     userController.listAll
     );
 
@@ -41,6 +44,7 @@ router.get(
 router.post(
     '/', 
     passport.authenticate('jwt', { session: false }),
+    checkRoles(['Admin']),
     userController.createUser
     );
 
@@ -59,6 +63,7 @@ router.post(
 router.delete(
     '/', 
     passport.authenticate('jwt', { session: false }),
+    checkRoles(['Admin']),
     userController.removeAllUsers
     );
 
