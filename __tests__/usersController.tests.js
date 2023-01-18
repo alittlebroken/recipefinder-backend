@@ -1,6 +1,5 @@
 /* Modules required for the tests */
 require('dotenv').config();
-const messageHelper = require('../helpers/constants');
 
 const request = require('supertest');
 const app = require('../index.js');
@@ -10,9 +9,7 @@ const recipeModel = require('../models/recipeModel');
 const cookbookModel = require('../models/cookbookModel');
 const pantryIngredients = require('../models/pantryIngredientsModel');
 const pantryModel = require('../models/pantryModel');
-const userController = require('../controllers/usersController');
 
-const passport = require('passport');
 
 describe('userController.listAll', () => {
 
