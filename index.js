@@ -14,11 +14,11 @@ const bodyParser = require('body-parser');
 /*
  * Configure the app
  */
- require('./config/passport');
- app.use(express.json());
+ app.use(express.json()); 
  app.use(express.urlencoded({ extended: true }));
  app.use(cors());
  app.use(passport.initialize());
+ require('./config/passport');
 
 /* Logging Information */
 
