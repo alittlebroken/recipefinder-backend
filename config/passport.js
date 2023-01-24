@@ -2,7 +2,7 @@
  * Import any required modules
  */
 const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const JWTstrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
 const userModel = require('../models/userModel');
@@ -15,9 +15,9 @@ const userModel = require('../models/userModel');
  */
 passport.use(
   /* Set an identifier for this handler */
-  'login-local',
+  'local',
   /* Which Strategy to use for the login */
-  new localStrategy(
+  new LocalStrategy(
     /* Callback function that will handle getting the details from the DB and
      * checking they are correct
      */
@@ -75,7 +75,7 @@ passport.use(
 passport.use(
   /* Set the handlers indetifier */
   'register',
-  new localStrategy(
+  new LocalStrategy(
     {
         usernameField: 'email',
         passwordField: 'password'
