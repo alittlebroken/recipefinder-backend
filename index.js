@@ -78,7 +78,7 @@ app.use('/steps', stepsRoute);
 app.use('/pantries', pantriesRoute);
 app.use('/categories', categoriesRoute);
 app.use('/recipes', recipesRoute);
-app.use(authRoute);
+app.use('/auth', authRoute);
 app.use('/search', searchRoute);
 app.use('/users', usersRoute);
 
