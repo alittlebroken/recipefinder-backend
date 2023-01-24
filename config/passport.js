@@ -88,16 +88,16 @@ passport.use(
     try {
       
       const result = await userModel.insert(email,password, email);
-      console.log(result)
-      if(result){
-        
-        return done(null, user);
+      
+      if(result || result.length > 0){
+        return done(null, result[0]);
       } else {
         return done(null, false, { message: 'Unable to register user'});
       }
       
 
     } catch(e) {
+      console.log(e)
       let error = new Error('There was an issue registering the user');
       return done(error);
     }
