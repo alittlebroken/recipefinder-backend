@@ -24,11 +24,14 @@ const insert = async (username, password, email, roles = 'Customer') => {
       }
     }
 
+    /* Hash the password */
+    const hashedPassword = await hash(password)
+    
     /* Add the record to the database */
     const result = await db('users').insert(
       {
         username: username,
-        password: password,
+        password: hashedPassword,
         email: email,
         roles: roles
       }
