@@ -1,5 +1,5 @@
 const checkRoles = (roles) => (req, res, next) => {
-
+    
     /* We should check we are logged in first */
     if(!req.user){
         return next({
@@ -10,7 +10,7 @@ const checkRoles = (roles) => (req, res, next) => {
     }
 
     /* Check the specified roles against any the user has */
-    const rolesFound = roles.includes(req?.user?.roles[0]);
+    const rolesFound = roles.includes(req?.user?.roles);
 
     if(!rolesFound){
         return next({
