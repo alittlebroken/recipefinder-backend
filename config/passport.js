@@ -79,15 +79,16 @@ passport.use(
   new LocalStrategy(
     {
         usernameField: 'email',
-        passwordField: 'password'
+        passwordField: 'password',
+        passReqToCallback : true
     }, 
   /* Main callback function */
-  async (email, password, done) => {
+  async (req, email, password, done) => {
 
     /* Register the user via the userModel */
     try {
       
-      const result = await userModel.insert(email,password, email);
+      const result = await userModel.insert(email,password, email, req.body.roles);
       
       if(result || result.length > 0){
         return done(null, result[0]);
