@@ -13,7 +13,7 @@ const messageHelper = require('../helpers/constants');
  * @param {string} username - The login name of the user
  * @param {string} password - The unencrypted password of the user
  */
-const insert = async (username, password, email, roles = 'user') => {
+const insert = async (username, password, email, roles = 'Customer') => {
 
   try {
     /* Check that we have valid data passed in */
@@ -44,7 +44,7 @@ const insert = async (username, password, email, roles = 'user') => {
     return records;
 
   } catch(e) {
-
+    console.log(e)
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message
