@@ -97,7 +97,7 @@ passport.use(
       
 
     } catch(e) {
-      console.log(e)
+      
       let error = new Error('There was an issue registering the user');
       return done(error);
     }
