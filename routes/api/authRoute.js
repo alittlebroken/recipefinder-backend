@@ -9,6 +9,10 @@ const authController = require('../../controllers/authController');
 
 router.post('/login', authController.loginUser);
 router.post('/register', authController.createUser);
+
+router.post('/refresh-token', authController.refreshToken);
+router.delete('/refresh-token', authController.removeToken);
+
 /*
  * TODO /logout
  * router.post('/logout', authController/logoutUser);
