@@ -31,7 +31,8 @@ passport.use(
         /* Find the user within the DB, check it is a valid user and if not
         reject the login attempt */
         const user = await userModel.findByEmail(email);
-        if(!user){
+        
+        if(!user || user.success === false){
           return done(null, false, { message: 'email not registered'});
         }
 
@@ -86,7 +87,8 @@ passport.use(
     /* Register the user via the userModel */
     try {
       
-      const result = userModel.insert(email,password, email);
+      const result = await userModel.insert(email,password, email);
+      console.log(result)
       if(result){
         
         return done(null, user);
