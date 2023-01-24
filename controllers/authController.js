@@ -30,26 +30,6 @@ const loginUser = async (req, res, next) => {
         }
         if(validationError) return next(validationError);
 
-        /* if(!req.get('secret_token')){
-            validationError = {
-                status: 401,
-                success: false,
-                message: 'Undefined secret_token'
-            }
-        }
-        if(validationError) return next(validationError);
-        */
-
-        /*if(req.get('secret_token') && req.get('secret_token') !== process.env.JWT_TOKEN_SECRET){
-            validationError = {
-                status: 401,
-                success: false,
-                message: 'Incorrect secret_token'
-            }
-        }
-        if(validationError) return next(validationError);
-        */
-
         if(!req.body.username || req.body.username === undefined){
             validationError = {
                 status: 400,
@@ -94,14 +74,14 @@ const loginUser = async (req, res, next) => {
 
             /* Check to see if passport has returned an error at all */
             if(error || !user){
-                
-                if(info?.message === 'user not found'){
+            
+                if(info?.message === 'email not registered'){
                     errorFound = {
                         status: 404,
                         success: false,
                         message: 'User not found'
                     }
-                } else if(info?.message === 'Wrong password'){
+                } else if(info?.message === 'supplied password does not match'){
                     errorFound = {
                         status: 409,
                         success: false,
@@ -220,24 +200,6 @@ const createUser = async (req, res, next) => {
                 status: 400,
                 success: false,
                 message: 'Wrong format for email'
-            }
-        }
-        if(validationResult) return next(validationResult);
-
-        if(!req.get('secret_token')){
-            validationResult = {
-                status: 401,
-                success: false,
-                message: 'Undefined secret_token'
-            }
-        }
-        if(validationResult) return next(validationResult);
- 
-        if(req.get('secret_token') && req.get('secret_token') !== process.env.JWT_TOKEN_SECRET){
-            validationResult = {
-                status: 401,
-                success: false,
-                message: 'Incorrect secret_token'
             }
         }
         if(validationResult) return next(validationResult);
