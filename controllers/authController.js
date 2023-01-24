@@ -30,7 +30,7 @@ const loginUser = async (req, res, next) => {
         }
         if(validationError) return next(validationError);
 
-        if(!req.get('secret_token')){
+        /* if(!req.get('secret_token')){
             validationError = {
                 status: 401,
                 success: false,
@@ -38,8 +38,9 @@ const loginUser = async (req, res, next) => {
             }
         }
         if(validationError) return next(validationError);
+        */
 
-        if(req.get('secret_token') && req.get('secret_token') !== process.env.JWT_TOKEN_SECRET){
+        /*if(req.get('secret_token') && req.get('secret_token') !== process.env.JWT_TOKEN_SECRET){
             validationError = {
                 status: 401,
                 success: false,
@@ -47,6 +48,7 @@ const loginUser = async (req, res, next) => {
             }
         }
         if(validationError) return next(validationError);
+        */
 
         if(!req.body.username || req.body.username === undefined){
             validationError = {
@@ -85,7 +87,7 @@ const loginUser = async (req, res, next) => {
         if(validationError) return next(validationError);
 
         /* Authenticate the user */
-        await passport.authenticate('login-user', async (error, user, info) => {
+        await passport.authenticate('local', async (error, user, info) => {
 
             /* Determinesd if there was an error and what to return */
             let errorFound = null;

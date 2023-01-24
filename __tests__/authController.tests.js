@@ -329,6 +329,7 @@ describe('authController.loginUser', () => {
     
     });
 
+    
     it('should return status 401 if secret_token is incorrect', async () => {
   
         // Mock the required request functions and properties
@@ -371,6 +372,7 @@ describe('authController.loginUser', () => {
         });
     
     });
+  
 
     it('should return status 404 if user does not match records', async () => { 
   
