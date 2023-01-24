@@ -6,7 +6,7 @@ exports.up = function(knex) {
     return knex.schema
      .createTable('refreshtokens', table => {
        table.increments('id').primary();
-       table.string('username', 255).notNullable();
+       table.integer('userid').unsigned().notNullable();
        table.string('token', 255).notNullable();
        table.timestamps(true, true);
      });
