@@ -409,7 +409,7 @@ const findAll = async () => {
  * @param {object} payload - The data to be included within the JWT token
  * @returns {string} The token generated with the specified payload
  */
-const generateToken = async data => {
+const generateTokens = async data => {
 
   try{
 
@@ -421,9 +421,11 @@ const generateToken = async data => {
       }
     };
 
-    /* Sign the payload and return the generated token */
-    const genToken = await jwt.sign(data, process.env.JWT_TOKEN_SECRET);
-    return genToken;
+    /* Generate the token and refresh token */
+    const accessToken = await jwt.sign(data, process.env.JWT_TOKEN_SECRET);
+    const refreshToken = await jwt.sign(data, process.env.JWT_REFRESH_TOKEN_SECRET);
+
+    return { accessToken, refreshToken };
 
   } catch(e) {
     /* Check for library errors and if found swap them out for a generic
@@ -493,7 +495,7 @@ module.exports = {
   hash,
   verify,
   findAll,
-  generateToken,
+  generateTokens,
   verifyToken,
   removeAll
 }

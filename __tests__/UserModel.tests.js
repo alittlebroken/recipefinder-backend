@@ -11,6 +11,7 @@ const messageHelper = require('../helpers/constants');
 
 /* Mocks for the JWT library testing */
 const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
+const JWT_REFRESH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
 const JWT_SECRET_KEY = 'mockedsecretkey!-758472<';
 const JWT_PAYLOAD = {
   "id": 1,
@@ -710,7 +711,7 @@ describe('userModel.findAll', () => {
 
 });
 
-describe('userModel.generateToken', () => {
+describe('userModel.generateTokens', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -732,19 +733,22 @@ describe('userModel.generateToken', () => {
     jest.clearAllMocks();
   })
 
-  it('returns a valid token when signing a payload', async () => {
+  it('returns valid access and refresh tokens when signing a payload', async () => {
 
     /** Mock the 3rd party library responses */
 
     /** Set the data to pass into the models function */
 
     /** Execute the function */
-    const result = await userModel.generateToken(JWT_PAYLOAD);
+    const result = await userModel.generateTokens(JWT_PAYLOAD);
 
     /** Test the response back from the function */
-    expect(typeof result).toBe('string');
-    expect(result).toBe(JWT_TOKEN);
+    expect(typeof result).toBe('object');
+    expect(typeof result.accessToken).toBe('string');
+    expect(typeof result.refreshToken).toBe('string');
 
+    expect(result.accessToken).toEqual(JWT_TOKEN);
+    expect(result.refreshToken).toEqual(JWT_REFRESH_TOKEN);
 
   });
 
@@ -756,7 +760,7 @@ describe('userModel.generateToken', () => {
     let payload = null;
 
     /** Execute the function */
-    const result = await userModel.generateToken(payload);
+    const result = await userModel.generateTokens(payload);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -776,7 +780,7 @@ describe('userModel.generateToken', () => {
     /** Set the data to pass into the models function */
 
     /** Execute the function */
-    const result = await userModel.generateToken(JWT_PAYLOAD);
+    const result = await userModel.generateTokens(JWT_PAYLOAD);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
