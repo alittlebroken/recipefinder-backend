@@ -151,9 +151,9 @@ describe('userModel.findByEmail', () => {
     const result = await userModel.findByEmail(usersEmail);
 
     /* Check the response */
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(1);
-    expect(result[0].email).toEqual(usersEmail);
+    expect(typeof result).toBe('object');
+    expect(typeof result.email).toBe('string');
+    expect(result.email).toEqual(usersEmail);
 
   });
 
