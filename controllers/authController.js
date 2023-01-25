@@ -117,9 +117,9 @@ const loginUser = async (req, res, next) => {
                 }
 
                 /* create a new token */
-                let token = await userModel.generateToken({ user: tokenBody });
+                let { accessToken, refreshToken } = await userModel.generateTokens({ user: tokenBody });
                 
-                return res.json({ token });
+                return res.json({ accessToken, refreshToken });
 
             });
 
