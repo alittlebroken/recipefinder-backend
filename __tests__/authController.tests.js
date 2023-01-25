@@ -44,32 +44,31 @@ describe('authController.loginUser', () => {
       };
       const passportInfo = null;
       const passportOptions = { session: false };
-      const authType = 'local-login';
+      const authType = 'local';
       const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
       const secretToken = process.env.JWT_TOKEN_SECRET;
 
       const returnStatus = 200;
       const returnSuccess = true;
-      const returnBody = { token: returnToken };
+      const returnBody = { accessToken: returnToken, refreshToken: returnToken };
 
       // Mock any needed third party modules
       passport.authenticate = jest.fn((authType, callback) => () => {
         callback(passportError, passportUser, passportInfo);
       });
 
-      jest.spyOn(userModel, 'generateToken').mockImplementation(() => {
-        return returnToken;
+      jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+        return {accessToken: returnToken, refreshToken: returnToken};
       });
   
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/login')
+        .post('/auth/login')
         .send({
           username: 'twallis@functionalmath.com',
           password: 'someMothersDoAveEm'
-        })
-        .set('secret_token', secretToken);
+        });
 
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -91,11 +90,9 @@ describe('authController.loginUser', () => {
       const passportError = 'Specified user was not found';
       const passportUser = { id: 1, username: 'Terry'};
       const passportInfo = { message: 'user not found'};
-      const authType = 'local-login';
+      const authType = 'local';
   
       const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-      const mockHeader = jest.fn().mockReturnValue('test-secret-token');
 
       // Mock any needed third party modules
       passport.authenticate = jest.fn((authType, callback) => () => {
@@ -133,11 +130,9 @@ describe('authController.loginUser', () => {
         const passportError = 'Specified user was not found';
         const passportUser = { id: 1, username: 'Terry'};
         const passportInfo = { message: 'user not found'};
-        const authType = 'local-login';
+        const authType = 'local';
     
         const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('test-secret-token');
 
         // Mock any needed third party modules
         passport.authenticate = jest.fn((authType, callback) => () => {
@@ -176,11 +171,9 @@ describe('authController.loginUser', () => {
         const passportError = 'Specified user was not found';
         const passportUser = { id: 1, username: 'Terry'};
         const passportInfo = { message: 'user not found'};
-        const authType = 'local-login';
+        const authType = 'local';
     
         const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('test-secret-token');
 
         // Mock any needed third party modules
         passport.authenticate = jest.fn((authType, callback) => () => {
@@ -218,11 +211,9 @@ describe('authController.loginUser', () => {
         const passportError = 'Specified user was not found';
         const passportUser = { id: 1, username: 'Terry'};
         const passportInfo = { message: 'user not found'};
-        const authType = 'local-login';
+        const authType = 'local';
     
         const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('test-secret-token');
 
         // Mock any needed third party modules
         passport.authenticate = jest.fn((authType, callback) => () => {
@@ -261,11 +252,9 @@ describe('authController.loginUser', () => {
         const passportError = 'Specified user was not found';
         const passportUser = { id: 1, username: 'Terry'};
         const passportInfo = { message: 'user not found'};
-        const authType = 'local-login';
+        const authType = 'local';
     
         const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('test-secret-token');
 
         // Mock any needed third party modules
         passport.authenticate = jest.fn((authType, callback) => () => {
@@ -285,94 +274,6 @@ describe('authController.loginUser', () => {
         });
     
     });
-
-    it('should return status 401 if secret_token is undefined', async () => {
-  
-        // Mock the required request functions and properties
-        req.body = {
-          username: 'terry',
-          password: 'password'
-        }
-
-        req.get = jest.fn().mockReturnValue(false);
-
-        const returnStatus = 401;
-        const returnSuccess = false;
-        const returnMessage = 'Undefined secret_token';
-
-        // Set Mocked data that models and controllers should return
-        const passportError = 'Specified user was not found';
-        const passportUser = { id: 1, username: 'Terry'};
-        const passportInfo = { message: 'user not found'};
-        const authType = 'local-login';
-    
-        const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('test-secret-token');
-
-        // Mock any needed third party modules
-        passport.authenticate = jest.fn((authType, callback) => () => {
-          callback(passportError, passportUser, passportInfo);
-        });
-    
-        /* Execute the function */
-        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-        await authController.loginUser(req, res, next);
-    
-        /* Test everything works as expected */
-        expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith({
-          status: returnStatus,
-          success: returnSuccess,
-          message: returnMessage
-        });
-    
-    });
-
-    
-    it('should return status 401 if secret_token is incorrect', async () => {
-  
-        // Mock the required request functions and properties
-        req.body = {
-          username: 'terry',
-          password: 'password'
-        }
-
-        req.get = jest.fn().mockReturnValue('secret');
-
-        const returnStatus = 401;
-        const returnSuccess = false;
-        const returnMessage = 'Incorrect secret_token';
-
-        // Set Mocked data that models and controllers should return
-        const passportError = 'Specified user was not found';
-        const passportUser = { id: 1, username: 'Terry'};
-        const passportInfo = { message: 'user not found'};
-        const authType = 'local-login';
-    
-        const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('test-secret-token');
-
-        // Mock any needed third party modules
-        passport.authenticate = jest.fn((authType, callback) => () => {
-          callback(passportError, passportUser, passportInfo);
-        });
-    
-        /* Execute the function */
-        //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-        await authController.loginUser(req, res, next);
-    
-        /* Test everything works as expected */
-        expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith({
-          status: returnStatus,
-          success: returnSuccess,
-          message: returnMessage
-        });
-    
-    });
-  
 
     it('should return status 404 if user does not match records', async () => { 
   
@@ -391,12 +292,11 @@ describe('authController.loginUser', () => {
           // Set Mocked data that models and controllers should return
           const passportError = 'Specified user was not found';
           const passportUser = { id: 1, username: 'Terry'};
-          const passportInfo = { message: 'user not found'};
-          const authType = 'local-login';
+          const passportInfo = { message: 'email not registered'};
+          const authType = 'local';
       
           const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
 
-          const mockHeader = jest.fn().mockReturnValue('test-secret-token');
 
           // Mock any needed third party modules
           passport.authenticate = jest.fn((authType, callback) => () => {
@@ -432,12 +332,10 @@ describe('authController.loginUser', () => {
         // Set Mocked data that models and controllers should return
         const passportError = 'Specified password is incorrect';
         const passportUser = null;
-        const passportInfo = { message: 'Wrong password'};
-        const authType = 'local-login';
+        const passportInfo = { message: 'supplied password does not match'};
+        const authType = 'local';
     
         const returnToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InVzZXJfaWQiOjEyLCJlbWFpbCI6InRkcmlsbGVyQGZhdXgubmV0IiwiZm9yZW5hbWUiOiJUaG9tYXMiLCJzdXJuYW1lIjoiRHJpbGxlciIsInJvbGVzIjoiQ3VzdG9tZXIifX0.ra6xjIjvPfh407KouCGq33BiN32unO9CF2tu2BXGwI4";
-
-        const mockHeader = jest.fn().mockReturnValue('secret_token');
 
         // Mock any needed third party modules
         passport.authenticate = jest.fn((authType, callback) => () => {
@@ -569,8 +467,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', process.env.JWT_TOKEN_SECRET)
+        .post('/auth/register')
         .send(postPayload)
 
       /* Test everything works as expected */
@@ -650,8 +547,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', 'token-secret')
+        .post('/auth/register')
         .send(postPayload)
         
 
@@ -724,8 +620,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', 'token-secret')
+        .post('/auth/register')
         .send(postPayload)
         
 
@@ -797,8 +692,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', 'token-secret')
+        .post('/auth/register')
         .send(postPayload)
         
 
@@ -870,8 +764,7 @@ describe('authController.createUser', () => {
     /* Execute the function */
     //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
     const response = await request(app)
-      .post('/register')
-      .set('secret_token', 'token-secret')
+      .post('/auth/register')
       .send(postPayload)
       
 
@@ -943,8 +836,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', 'token-secret')
+        .post('/auth/register')
         .send(postPayload)
         
 
@@ -1016,154 +908,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', 'token-secret')
-        .send(postPayload)
-        
-
-      /* Test everything works as expected */
-      
-      expect(response.status).toEqual(returnStatus)
-
-      expect(typeof response.body.status).toBe('number')
-      expect(typeof response.body.success).toBe('boolean')
-      expect(typeof response.body.message).toBe('string')
-
-      expect(response.body.status).toEqual(returnStatus)
-      expect(response.body.success).toEqual(returnSuccess)
-      expect(response.body.message).toEqual(returnMessage)
-  
-    });
-
-    it('should return status 400 if secret_token is missing', async () => {
-  
-      // Set Mocked data that models and controllers should return
-      const mockUser = {
-        id: 12,
-          username: 'bob@wallis.co.uk',
-          password: 'efjsdfdsjfsoidfjdjfiosdjfs',
-          roles: 'Customer'
-      }
-  
-      // Set any variables needed to be passed to controllers and or models
-      const postPayload = {
-        username: 'bob@wallis.co.uk',
-        password: 'djfhSLFHWJHFSDGFJSHDG',
-        email: 'bob@wallis.co.uk'
-      };
-
-      mockReq.user ={ ...mockUser };
-
-      const passportError = null;
-      const passportUser = mockUser;
-      const passportInfo = null;
-
-      // Mock any needed third party modules
-      jest.spyOn(userModel, 'insert').mockImplementation(() => {
-        return mockUser
-      })
-
-      passport.authenticate = jest.fn((authType, options, callback) => () => {
-        callback(passportError, passportUser, passportInfo);
-      });
-  
-      // Set here the expected return values for the test
-      const returnStatus = 401;
-
-      const returnResult = {
-        message: 'Signup successful',
-        status: 200,
-        success: true,
-        user: {
-          id: mockUser.id,
-          password: mockUser.password,
-          username: mockUser.username,
-          roles: mockUser.roles
-        }
-      }
-
-      const returnSuccess = false
-      const returnMessage = 'Undefined secret_token'
-
-  
-      /* Execute the function */
-      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-      const response = await request(app)
-        .post('/register')
-        //.set('secret_token', 'token-secret')
-        .send(postPayload)
-        
-
-      /* Test everything works as expected */
-      
-      expect(response.status).toEqual(returnStatus)
-
-      expect(typeof response.body.status).toBe('number')
-      expect(typeof response.body.success).toBe('boolean')
-      expect(typeof response.body.message).toBe('string')
-
-      expect(response.body.status).toEqual(returnStatus)
-      expect(response.body.success).toEqual(returnSuccess)
-      expect(response.body.message).toEqual(returnMessage)
-  
-    });
-
-    it('should return status 400 if secret_token is incorrect', async () => {
-  
-      // Set Mocked data that models and controllers should return
-      const mockUser = {
-        id: 12,
-          username: 'bob@wallis.co.uk',
-          password: 'efjsdfdsjfsoidfjdjfiosdjfs',
-          roles: 'Customer'
-      }
-  
-      // Set any variables needed to be passed to controllers and or models
-      const postPayload = {
-        username: 'bob@wallis.co.uk',
-        password: 'djfhSLFHWJHFSDGFJSHDG',
-        email: 'bob@wallis.co.uk'
-      };
-
-      mockReq.user ={ ...mockUser };
-
-      const passportError = null;
-      const passportUser = mockUser;
-      const passportInfo = null;
-
-      // Mock any needed third party modules
-      jest.spyOn(userModel, 'insert').mockImplementation(() => {
-        return mockUser
-      })
-
-      passport.authenticate = jest.fn((authType, options, callback) => () => {
-        callback(passportError, passportUser, passportInfo);
-      });
-  
-      // Set here the expected return values for the test
-      const returnStatus = 401;
-
-      const returnResult = {
-        message: 'Signup successful',
-        status: 200,
-        success: true,
-        user: {
-          id: mockUser.id,
-          password: mockUser.password,
-          username: mockUser.username,
-          roles: mockUser.roles
-        }
-      }
-
-      const returnSuccess = false
-      const returnMessage = 'Incorrect secret_token'
-
-  
-      /* Execute the function */
-      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-      const response = await request(app)
-        .post('/register')
-        .set('secret_token', 'tokensecret')
+        .post('/auth/register')
         .send(postPayload)
         
 
@@ -1235,8 +980,7 @@ describe('authController.createUser', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
-        .post('/register')
-        .set('secret_token', process.env.JWT_TOKEN_SECRET)
+        .post('/auth/register')
         .send(postPayload)
         
 
