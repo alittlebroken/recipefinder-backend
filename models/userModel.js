@@ -422,8 +422,16 @@ const generateTokens = async data => {
     };
 
     /* Generate the token and refresh token */
-    const accessToken = await jwt.sign(data, process.env.JWT_TOKEN_SECRET);
-    const refreshToken = await jwt.sign(data, process.env.JWT_REFRESH_TOKEN_SECRET);
+    const accessToken = await jwt.sign(
+        data, 
+        process.env.JWT_TOKEN_SECRET,
+        { expiresAt: "14m" }
+        );
+    const refreshToken = await jwt.sign(
+      data, 
+      process.env.JWT_REFRESH_TOKEN_SECRET,
+      { expiresAt: "30d" }
+      );
 
     return { accessToken, refreshToken };
 
