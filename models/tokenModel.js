@@ -105,7 +105,83 @@ const removeOne = async userid => {
 
 }
 
+/*
+ *  Assigns a refresh token to a user
+ *
+ * @param {object} payload - Contains the user id and refresh token to assign
+ * @returns {object} - Either true or false with supporting message
+ */
+const addOne = async payload => {
+
+    try {
+
+        /* Validate the passed in parameters */
+        if(typeof payload !== 'object'){
+            return {
+                success: false,
+                message: 'Wrong format for payload'
+            }
+        }
+
+        if(!payload.userId || payload.userId === undefined){
+            return {
+                success: false,
+                message: 'Undefined user id'
+            }
+        }
+
+        if(typeof payload.userId !== 'number'){
+            return {
+                success: false,
+                message: 'Wrong format for user id'
+            }
+        }
+
+        if(!payload.refreshToken || payload.refreshToken === undefined){
+            return {
+                success: false,
+                message: 'Undefined refresh token'
+            }
+        }
+
+        if(typeof payload.refreshToken !== 'string'){
+            return {
+                success: false,
+                message: 'Wrong format for refresh token'
+            }
+        }
+
+        /* Try to assign the token to the user */
+        const result = await db('refreshtokens')
+            .insert({
+                userid: payload.userId,
+                token: payload.refreshToken
+            })
+            .returning('id')
+
+        if(!result || result.length < 1){
+            return {
+                success: false,
+                message: 'There was a problem with the resource, please try again later'
+            }
+        }
+
+        return {
+            success: true,
+            message: 'Refresh token successfully added'
+        }
+
+    } catch(e) {
+        return {
+            success: false,
+            message: 'There was a problem with the resource, please try again later'
+        }
+    }
+
+}
+
 module.exports = {
     findOne,
-    removeOne
+    removeOne,
+    addOne
 }

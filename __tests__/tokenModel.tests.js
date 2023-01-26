@@ -270,4 +270,195 @@ describe('tokenModel', () => {
 
     })
 
+    describe('addOne', () => {
+
+        beforeEach(() => {
+
+        })
+      
+        afterEach(() => {
+          jest.clearAllMocks()
+        })
+
+        it('should add a refresh token to the appropriate table', async () => {
+
+            // Setup
+            const payload = {
+                userId: 1,
+                refreshToken: '34346367435-566345345345-435434534-3445345-45'
+            }
+
+            tracker.on.insert('refreshtokens').responseOnce([ { id: 1 } ])
+
+            const returnSuccess = true
+            const returnMessage = 'Refresh token successfully added'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+        it('should return an error if the payload is in the wrong format', async () => {
+
+            // Setup
+            const payload = 'TwentyFourBlackBirdsBakingAPie'
+
+            tracker.on.insert('refreshtokens').responseOnce([  ])
+
+            const returnSuccess = false
+            const returnMessage = 'Wrong format for payload'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+        it('should return an error if the user id is undefined ', async () => {
+
+            // Setup
+            const payload = {
+                userId: undefined,
+                refreshToken: '34346367435-566345345345-435434534-3445345-45'
+            }
+
+            tracker.on.insert('refreshtokens').responseOnce([  ])
+
+            const returnSuccess = false
+            const returnMessage = 'Undefined user id'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+        it('should return an error if the user id is in the wrong format', async () => {
+
+            // Setup
+            const payload = {
+                userId: 'Twentytwo',
+                refreshToken: '34346367435-566345345345-435434534-3445345-45'
+            }
+
+            tracker.on.insert('refreshtokens').responseOnce([  ])
+
+            const returnSuccess = false
+            const returnMessage = 'Wrong format for user id'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+        it('should return an error if the refresh token is undefined', async () => {
+
+            // Setup
+            const payload = {
+                userId: 1,
+                refreshToken: undefined
+            }
+
+            tracker.on.insert('refreshtokens').responseOnce([  ])
+
+            const returnSuccess = false
+            const returnMessage = 'Undefined refresh token'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+        it('should return an error if the refresh token is in the wrong format', async () => {
+
+            // Setup
+            const payload = {
+                userId: 1,
+                refreshToken: 343547684534
+            }
+
+            tracker.on.insert('refreshtokens').responseOnce([  ])
+
+            const returnSuccess = false
+            const returnMessage = 'Wrong format for refresh token'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+        it('should return an error if the resource encounters any other problems', async () => {
+
+            // Setup
+            const payload = {
+                userId: 1,
+                refreshToken: '34346367435-566345345345-435434534-3445345-45'
+            }
+
+            tracker.on.insert('refreshtokens').simulateError('lost connection to DB')
+
+            const returnSuccess = false
+            const returnMessage = 'There was a problem with the resource, please try again later'
+
+            // Execute
+            const result = await tokenModel.addOne(payload)
+
+            // Assert
+            expect(typeof result).toBe('object')
+            expect(typeof result.success).toBe('boolean')
+            expect(typeof result.message).toBe('string')
+
+            expect(result.success).toEqual(returnSuccess)
+            expect(result.message).toEqual(returnMessage)
+
+        })
+
+    })
+
 })
