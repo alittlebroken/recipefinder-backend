@@ -65,6 +65,24 @@ describe('authController.loginUser', () => {
       jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
         return {accessToken: returnToken, refreshToken: returnToken};
       });
+
+      jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+        return []
+      })
+
+      jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+        return {
+          success: true,
+          message: 'refreshToken successfully removed'
+        }
+      })
+
+      jest.spyOn(tokenModel, 'addOne').mockImplementation(() => {
+        return {
+          success: true,
+          message: 'Refresh token successfully added'
+      }
+      })
   
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);

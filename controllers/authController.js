@@ -121,6 +121,29 @@ const loginUser = async (req, res, next) => {
                 /* create a new token */
                 let { accessToken, refreshToken } = await userModel.generateTokens({ user: tokenBody });
                 
+                /*
+                    Check to see if the refreshToken is already taken
+                */
+               const isAssigned = await tokenModel.findOne(tokenBody.id)
+                if(isAssigned.id){
+                    /* Remove the old refresh token */
+                    await tokenModel.removeOne(tokenBody.id)
+                }
+
+                /* assign the refresh token for the user logging in */
+                const isTokenAdded = await tokenModel.addOne({
+                    userId: tokenBody.id,
+                    refreshToken: refreshToken
+                })
+
+                if(isTokenAdded.success === false){
+                    return next({
+                        status: 500,
+                        success: false,
+                        message: 'There was a problem with the resource, please try again later'
+                    })
+                }
+
                 return res.json({ accessToken, refreshToken });
 
             });
