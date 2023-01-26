@@ -648,6 +648,7 @@ describe('userModel.verify', () => {
 
 });
 
+
 describe('userModel.findAll', () => {
 
   /*
@@ -871,6 +872,96 @@ describe('userModel.verifyToken', () => {
 
     /** Execute the function */
     const result = await userModel.verifyToken(JWT_TOKEN);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+
+  });
+
+});
+
+describe('userModel.verifyRefreshToken', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+    const mockJwtVerify = jest.spyOn(jwt, 'verify').mockImplementation((token, secretKeyOrToken) => {
+      if(!token || !secretKeyOrToken) return false;
+      return JWT_PAYLOAD;
+    });
+
+    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToken) => {
+      if(!payload || !secretKeyOrToken) return false;
+      return JWT_TOKEN;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('returns the payload from a valid JWT Refresh token', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.verifyRefreshToken(JWT_TOKEN);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+  
+    expect(typeof result.id).toBe('number');
+    expect(result.id).toBe(JWT_PAYLOAD.id);
+
+    expect(typeof result.username).toBe('string');
+    expect(result.username).toBe(JWT_PAYLOAD.username);
+
+    expect(typeof result.email).toBe('string');
+    expect(result.email).toBe(JWT_PAYLOAD.email);
+
+    expect(typeof result.roles).toBe('string');
+    expect(result.roles).toBe(JWT_PAYLOAD.roles);
+
+    expect(typeof result.commonRoom).toBe('number');
+    expect(result.commonRoom).toBe(JWT_PAYLOAD.commonRoom);
+
+  });
+
+  it('returns an error if token is missing or incorrect', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+    let invalidToken = null;
+
+    /** Execute the function */
+    const result = await userModel.verifyRefreshToken(invalidToken);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+  });
+
+  it('returns an error if underlying library produces an error', async () => {
+
+    /** Mock the 3rd party library responses */
+    const mockJwtVerifyError = jest.spyOn(jwt, 'verify')
+      .mockImplementation((token, secretKeyOrToken) => {
+        throw new Error('Token appears to be invalid')
+      });
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.verifyRefreshToken(JWT_TOKEN);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
