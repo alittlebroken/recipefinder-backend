@@ -6,6 +6,8 @@ const passport = require('passport');
 
 const userModel = require('../models/userModel');
 
+const tokenModel = require('../models/tokenModel')
+
 const moduleName = 'authController';
 
 /* 
@@ -253,6 +255,182 @@ const createUser = async (req, res, next) => {
 };
 
 /* 
+ * generate a new access token based on a valid 
+ * refresh token
+ */
+const refreshToken = async (req, res, next) => {
+
+    const moduleMethod = 'refreshToken';
+
+    try{
+
+        /* Validate any paramaters used */
+        if(!req.body.refreshToken || req.body.refreshToken === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Undefined refresh token',
+                token: ''
+            })
+        }
+
+        if(typeof req.body.refreshToken !== 'string'){
+            return res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Wrong format for refresh token',
+                token: ''
+            })
+        }
+
+        /* Validate the supplied refresh token */
+        const refreshValid = await userModel.verifyRefreshToken(req.body.refreshToken)
+        
+        if(!refreshValid || refreshValid.success === false){
+            if(refreshValid.message === 'There was a problem with the resource, please try again later'){
+                return res.status(500).json({
+                    status: 500,
+                    success: refreshValid.success,
+                    message: refreshValid.message,
+                    token: ''
+                })
+            } else {
+                return res.status(400).json({
+                    status: 400,
+                    success: false,
+                    token: '',
+                    message: 'Not a valid refresh token, please login'
+                })
+            }
+        } 
+
+        /* Is the refresh token being used currently */
+        const refreshTokenInUse = await tokenModel.findOne(refreshValid.id) 
+
+        if(!refreshTokenInUse){
+            return res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Refresh token not in use, please login',
+                token: ''
+            }) 
+        }
+
+        /* Generate a new access token */
+        const { newAccessToken } = await userModel.generateTokens(refreshValid)
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            token: newAccessToken,
+            message: 'New access token created'
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * function template
+ */
+const removeToken = async (req, res, next) => {
+
+    const moduleMethod = 'removeToken';
+
+    try{
+
+        /* Validate passed in parameters */
+        if(!req.body.refreshToken || req.body.refreshToken === undefined){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Undefined refresh token',
+                token: ''
+            })
+        }
+
+        if(typeof req.body.refreshToken !== 'string'){
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Wrong format for refresh token',
+                token: ''
+            })
+        }
+
+        /* is this refresh token in the list of assigned refresh tokens */
+        const isAssigned = await tokenModel.findOne(refreshToken.id)
+        
+        if(!isAssigned || isAssigned.success === false){
+            if(isAssigned.message === 'There was a problem with the resource, please try again later'){
+                throw {
+                    status: 500,
+                    success: false,
+                    message: 'There was a problem with the resource, please try again later',
+                    token: ''
+                }
+            } else {
+                throw {
+                    status: 404,
+                    success: false,
+                    message: 'Refresh token not assigned',
+                    token: ''
+                }
+            }
+            
+        } 
+
+        /* Remove the token if all OK so far */
+        const isRemoved = await tokenModel.removeOne(refreshToken.id)
+        
+        if(!isRemoved || isRemoved.success === false){
+            if(isRemoved.message === 'No refresh tokens were found matching supplied data'){
+                throw {
+                    status: 400,
+                    success: false,
+                    message: 'No refresh tokens were found matching supplied data',
+                    token: ''
+                }
+            } else {
+                throw {
+                    status: 500,
+                    success: false,
+                    message: 'There was a problem with the resource, please try again later',
+                    token: ''
+                }
+            }
+        }
+
+        /* token removed, let the calling app know */
+        res.status(201).json({
+            status: 201,
+            success: true,
+            message: 'Successfully logged out',
+            token: ''
+        })
+
+    } catch(e) {
+        
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -275,5 +453,7 @@ const method = async (req, res, next) => {
 
 module.exports = {
     loginUser,
-    createUser
+    createUser,
+    refreshToken,
+    removeToken
 };

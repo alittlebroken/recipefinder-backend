@@ -6,8 +6,13 @@ const app = require('../index.js');
 
 const authController = require('../controllers/authController');
 const userModel = require('../models/userModel');
+const tokenModel = require('../models/tokenModel')
 
 const passport = require('passport');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+
+
 
 describe('authController.loginUser', () => {
 
@@ -999,3 +1004,590 @@ describe('authController.createUser', () => {
     });
   
 });
+
+describe('authController.refreshToken', () => {
+
+  beforeEach(() => {
+
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should return status 200 and a valid access token with a valid refresh token', async () => {
+
+    // Setup
+    const mockedVerifiedRefreshPayload = { _id: 1, username: 'twatkins'}
+    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+
+    const newAccessToken = '45345345-34534534513-3451334234-1341234234'
+    const newRefreshToken = '451344234-12344562456-25624556456-265245626'
+
+    const foundRefreshTokenData = {
+      id: 1,
+      userId: 1,
+      token: refreshToken,
+      created_at: '',
+      updated_at: ''
+    }
+
+    jest.spyOn(userModel, 'verifyRefreshToken').mockImplementation(() => {
+      return mockedVerifiedRefreshPayload;
+    })
+
+    jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+      return { newAccessToken, newRefreshToken }
+    })
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    const returnStatus = 200;
+    const returnSuccess = true;
+    const returnMessage = 'New access token created';
+
+    // Execute
+    const result = await request(app)
+     .post(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual(newAccessToken)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 400 if supplied refresh token is not in use', async () => {
+
+    // Setup
+    const mockedVerifiedRefreshPayload = { _id: 1, username: 'twatkins'}
+    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+
+    const newAccessToken = '45345345-34534534513-3451334234-1341234234'
+    const newRefreshToken = '451344234-12344562456-25624556456-265245626'
+
+    const foundRefreshTokenData = false
+
+    jest.spyOn(userModel, 'verifyRefreshToken').mockImplementation(() => {
+      return mockedVerifiedRefreshPayload;
+    })
+
+    jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+      return { newAccessToken, newRefreshToken }
+    })
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Refresh token not in use, please login';
+
+    // Execute
+    const result = await request(app)
+     .post(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual('')
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 400 if supplied refresh token is not valid', async () => {
+
+    // Setup
+    const mockedVerifiedRefreshPayload = false
+    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+
+    const newAccessToken = '45345345-34534534513-3451334234-1341234234'
+    const newRefreshToken = '451344234-12344562456-25624556456-265245626'
+
+    const foundRefreshTokenData = false
+
+    jest.spyOn(userModel, 'verifyRefreshToken').mockImplementation(() => {
+      return mockedVerifiedRefreshPayload;
+    })
+
+    jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+      return { newAccessToken, newRefreshToken }
+    })
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Not a valid refresh token, please login';
+
+    // Execute
+    const result = await request(app)
+     .post(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual('')
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 400 if supplied refresh token is of the wrong format', async () => {
+
+    // Setup
+    const mockedVerifiedRefreshPayload = { _id: 1, username: 'twatkins'}
+    const refreshToken = 453456756623554
+
+    const newAccessToken = '45345345-34534534513-3451334234-1341234234'
+    const newRefreshToken = '451344234-12344562456-25624556456-265245626'
+
+    const foundRefreshTokenData = false
+
+    jest.spyOn(userModel, 'verifyRefreshToken').mockImplementation(() => {
+      return mockedVerifiedRefreshPayload;
+    })
+
+    jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+      return { newAccessToken, newRefreshToken }
+    })
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for refresh token';
+
+    // Execute
+    const result = await request(app)
+     .post(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual('')
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 404 if the refresh token is undefined', async () => {
+
+    // Setup
+    const mockedVerifiedRefreshPayload = {}
+    let refreshToken
+
+    let newAccessToken
+    let newRefreshToken
+
+    const foundRefreshTokenData = {}
+
+    jest.spyOn(userModel, 'verifyRefreshToken').mockImplementation(() => {
+      return mockedVerifiedRefreshPayload;
+    })
+
+    jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+      return { newAccessToken, newRefreshToken }
+    })
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined refresh token';
+
+    // Execute
+    const result = await request(app)
+     .post(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual('')
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 500 if there are other problems that the resource encounters', async () => {
+
+    // Setup
+    const mockedVerifiedRefreshPayload = { 
+      success: false,
+      message: 'There was a problem with the resource, please try again later' 
+    }
+    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+
+    const newAccessToken = ''
+    const newRefreshToken = ''
+
+    const foundRefreshTokenData = {
+      id: 1,
+      userId: 1,
+      token: refreshToken,
+      created_at: '',
+      updated_at: ''
+    }
+
+    jest.spyOn(userModel, 'verifyRefreshToken').mockImplementation(() => {
+      return mockedVerifiedRefreshPayload;
+    })
+
+    jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
+      return { newAccessToken, newRefreshToken }
+    })
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    const returnStatus = 500;
+    const returnSuccess = false;
+    const returnMessage = 'There was a problem with the resource, please try again later';
+
+    // Execute
+    const result = await request(app)
+     .post(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual(newAccessToken)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+})
+
+describe('authController.removeToken', () => {
+
+  beforeEach(() => {
+
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should return status 201 and remove the refresh token from the assigned list', async () => {
+
+    // Setup
+    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+
+    const foundRefreshTokenData = {
+      id: 1,
+      userId: 1,
+      token: refreshToken,
+      created_at: '',
+      updated_at: ''
+    }
+
+    const removeTokenData = {
+      success: true,
+      message: 'refreshToken successfully removed'
+    }
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+      return removeTokenData;
+    })
+
+    const returnStatus = 201;
+    const returnSuccess = true;
+    const returnMessage = 'Successfully logged out';
+    const returnToken = '';
+
+    // Execute
+    const result = await request(app)
+     .delete(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.token).toBe('string')
+
+    expect(result.body.token).toEqual(returnToken)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 404 if no refresh token supplied', async () => {
+
+    // Setup
+    let refreshToken
+
+    const foundRefreshTokenData = {}
+
+    const removeTokenData = {}
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+      return removeTokenData;
+    })
+
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'Undefined refresh token';
+    const returnToken = '';
+
+    // Execute
+    const result = await request(app)
+     .delete(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.success).toBe('boolean')
+    expect(typeof result.body.status).toBe('number')
+
+    expect(result.body.status).toEqual(returnStatus)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 404 if refresh token is not assigned', async () => {
+
+    // Setup
+    let refreshToken = '344234234234-4656855234-3452634-453453'
+
+    const foundRefreshTokenData = false
+
+    const removeTokenData = {}
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+      return removeTokenData;
+    })
+
+    const returnStatus = 404;
+    const returnSuccess = false;
+    const returnMessage = 'Refresh token not assigned';
+    const returnToken = '';
+
+    // Execute
+    const result = await request(app)
+     .delete(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.success).toBe('boolean')
+    expect(typeof result.body.status).toBe('number')
+
+    expect(result.body.status).toEqual(returnStatus)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 400 if the refresh token is in the wrong format', async () => {
+
+    // Setup
+    const refreshToken = 3453456467
+
+    const foundRefreshTokenData = {}
+
+    const removeTokenData = {}
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+      return removeTokenData;
+    })
+
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'Wrong format for refresh token';
+    const returnToken = '';
+
+    // Execute
+    const result = await request(app)
+     .delete(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.success).toBe('boolean')
+    expect(typeof result.body.status).toBe('number')
+
+    expect(result.body.status).toEqual(returnStatus)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 400 if there was a problem removing the refresh token', async () => {
+
+    // Setup
+    const refreshToken = '3453456467-4545645635-53541345-453451345'
+
+    const foundRefreshTokenData = {
+      id: 1,
+      userId: 1,
+      token: refreshToken,
+      created_at: '',
+      updated_at: ''
+    }
+
+    const removeTokenData = {
+      success: false,
+      message: 'No refresh tokens were found matching supplied data'
+  }
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+      return removeTokenData;
+    })
+
+    const returnStatus = 400;
+    const returnSuccess = false;
+    const returnMessage = 'No refresh tokens were found matching supplied data';
+    const returnToken = '';
+
+    // Execute
+    const result = await request(app)
+     .delete(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.success).toBe('boolean')
+    expect(typeof result.body.status).toBe('number')
+
+    expect(result.body.status).toEqual(returnStatus)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+  it('should return status 500 if the resource encounters any other problems', async () => {
+
+    // Setup
+    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+
+    const foundRefreshTokenData = {
+      success: false,
+      message: 'There was a problem with the resource, please try again later'
+    }
+
+    const removeTokenData = {}
+
+    jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
+      return foundRefreshTokenData;
+    })
+
+    jest.spyOn(tokenModel, 'removeOne').mockImplementation(() => {
+      return removeTokenData;
+    })
+
+    const returnStatus = 500;
+    const returnSuccess = false;
+    const returnMessage = 'There was a problem with the resource, please try again later';
+    const returnToken = '';
+
+    // Execute
+    const result = await request(app)
+     .delete(`/auth/refresh-token`)
+     .send({
+      refreshToken
+     })
+
+    // Assert
+    expect(result.status).toBe(returnStatus)
+
+    expect(typeof result.body.message).toBe('string')
+    expect(typeof result.body.success).toBe('boolean')
+    expect(typeof result.body.status).toBe('number')
+
+    expect(result.body.status).toEqual(returnStatus)
+    expect(result.body.success).toEqual(returnSuccess)
+    expect(result.body.message).toEqual(returnMessage)
+
+  })
+
+})
