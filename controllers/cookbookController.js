@@ -710,6 +710,7 @@ const removeById = async (req, res, next) => {
 
     /* Delete the cookbooks recipes */
     const results = await cookbookModel.remove(id);
+    console.log(results)
 
     if(results.success === false){
      res.status(500).json({
