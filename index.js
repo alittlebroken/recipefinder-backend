@@ -97,7 +97,11 @@ app.use((error, req, res, next) => {
   let results;
 
   if(error){
-      statusCode = error.status;
+      
+    if(error.status){
+        statusCode = error.status
+    } 
+      
       message = error.message;
 
       /* Some messages we also send extra information that we need to also include */
