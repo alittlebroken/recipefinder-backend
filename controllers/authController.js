@@ -343,8 +343,7 @@ const refreshToken = async (req, res, next) => {
 
         /* Generate a new access token */
         const { accessToken, refreshToken } = await userModel.generateTokens(refreshValid.user)
-        console.error(accessToken)
-
+        
         res.status(200).json({
             status: 200,
             success: true,
