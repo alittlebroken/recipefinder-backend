@@ -4,6 +4,7 @@
 const knex = require('knex');
 const db = require('../database');
 const userModel = require('../models/userModel');
+const pantryModel = require('../models/pantryModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
@@ -69,6 +70,10 @@ describe('userModel.insert', () => {
       }
     ]);
 
+    jest.spyOn(pantryModel, 'create').mockImplementation(() => {
+      return [ { id: 1, userId: 1 } ];
+    })
+
     /* Set the data to be inserted */
     const usersName = 'bcollins';
     const usersEmail = 'bcollins@testmailer.com';
@@ -76,6 +81,7 @@ describe('userModel.insert', () => {
 
     /* Insert some users into the users table */
     const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
+    console.log(user1)
 
     /* Check the user was added */
     expect(Array.isArray(user1)).toBe(true);
@@ -84,6 +90,7 @@ describe('userModel.insert', () => {
     expect(user1[0].username).toEqual('bcollins');
 
   });
+
 
   it('should throw an error if required data is not passed', async () => {
 
@@ -99,6 +106,49 @@ describe('userModel.insert', () => {
     expect(typeof result).toEqual('object');
     expect(result.success).toBe(false);
     expect(result.message).toBe('You must provide values for username,password or email.');
+
+  });
+
+  it('should add an error if the pantry is unable to be created and the user is not removed', async () => {
+
+    /* Mock the response for the insert */
+    tracker.on.insert('users').response([{ id: 1 }]);
+    tracker.on.select('users').response([
+      {
+        id: 1,
+        username: 'bcollins',
+        email: 'bcollins@testemailer.com',
+        roles: 'user'
+      }
+    ]);
+
+    jest.spyOn(pantryModel, 'create').mockImplementation(() => {
+      return { success: false,  };
+    })
+
+    jest.spyOn(userModel, 'remove').mockImplementation(() => {
+      return { success: false,  };
+    })
+
+    /* Set the data to be inserted */
+    const usersName = 'bcollins';
+    const usersEmail = 'bcollins@testmailer.com';
+    const usersPassword = 'b0st1nr365s';
+
+    const returnSuccess = false
+    const returnMessage = 'Unable to create pantry and remove user account'
+
+    /* Insert some users into the users table */
+    const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
+    console.log(user1)
+
+    /* Check the user was added */
+    expect(typeof user1).toBe('object')
+    expect(typeof user1.success).toBe('boolean')
+    expect(typeof user1.message).toBe('string')
+
+    expect(user1.success).toEqual(returnSuccess)
+    expect(user1.message).toEqual(returnMessage)
 
   });
 
