@@ -1,7 +1,7 @@
 /* Require needed modules */
 require('dotenv').config();
 
-const { checkRoles } = require('../../middlewares/verifyMiddleware');
+const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
 
 const express = require('express');
 const router = express.Router();
@@ -9,8 +9,8 @@ const passport = require('passport');
 
 const cookbookController = require('../../controllers/cookbookController');
 
-  /* Add the various routes */
-router.get('/', passport.authenticate('jwt', { session: false }), checkRoles(['Admin']),cookbookController.list);
+/* Add the various routes */
+router.get('/', checkToken, checkRoles(['Admin']), cookbookController.list);
 router.get('/:id', passport.authenticate('jwt', { session: false }), cookbookController.getById);
 router.get('/:id/recipes', passport.authenticate('jwt', { session: false }), cookbookController.recipes);
 router.get('/:id/category', passport.authenticate('jwt', { session: false }), cookbookController.getCategories);
