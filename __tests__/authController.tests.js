@@ -1037,10 +1037,10 @@ describe('authController.refreshToken', () => {
 
     // Setup
     const mockedVerifiedRefreshPayload = { _id: 1, username: 'twatkins'}
-    const refreshToken = '41234234-2341234234123-2341234234-2342341234'
+    //const refreshToken = '41234234-2341234234123-2341234234-2342341234'
 
-    const newAccessToken = '45345345-34534534513-3451334234-1341234234'
-    const newRefreshToken = '451344234-12344562456-25624556456-265245626'
+    const accessToken = '45345345-34534534513-3451334234-1341234234'
+    const refreshToken = '451344234-12344562456-25624556456-265245626'
 
     const foundRefreshTokenData = {
       id: 1,
@@ -1055,7 +1055,7 @@ describe('authController.refreshToken', () => {
     })
 
     jest.spyOn(userModel, 'generateTokens').mockImplementation(() => {
-      return { newAccessToken, newRefreshToken }
+      return { accessToken, refreshToken }
     })
 
     jest.spyOn(tokenModel, 'findOne').mockImplementation(() => {
@@ -1073,13 +1073,15 @@ describe('authController.refreshToken', () => {
       refreshToken
      })
 
+    console.log(result.body)
+
     // Assert
     expect(result.status).toBe(returnStatus)
 
     expect(typeof result.body.message).toBe('string')
     expect(typeof result.body.token).toBe('string')
 
-    expect(result.body.token).toEqual(newAccessToken)
+    expect(result.body.token).toEqual(accessToken)
     expect(result.body.success).toEqual(returnSuccess)
     expect(result.body.message).toEqual(returnMessage)
 
