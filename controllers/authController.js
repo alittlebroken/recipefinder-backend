@@ -111,7 +111,7 @@ const loginUser = async (req, res, next) => {
                 if(err) return next(err);
 
                 const tokenBody = {
-                    id: user.user_id,
+                    id: user.id,
                     email: user.email,
                     forename: user.forename,
                     surname: user.surname,
@@ -124,10 +124,12 @@ const loginUser = async (req, res, next) => {
                 /*
                     Check to see if the refreshToken is already taken
                 */
+               
                const isAssigned = await tokenModel.findOne(tokenBody.id)
                 if(isAssigned.id){
                     /* Remove the old refresh token */
                     await tokenModel.removeOne(tokenBody.id)
+                    appLogger.logMessage('info', 'Existing refresh token found and being removed')
                 }
 
                 /* assign the refresh token for the user logging in */
