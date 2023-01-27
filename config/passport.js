@@ -125,7 +125,7 @@ passport.use(
     /* Callback used to process the strategy */
     async (token, done) => {
       try{
-        return done(null, token);
+        return done(null, token.user);
       } catch(e) {
         return done(e);
       }
