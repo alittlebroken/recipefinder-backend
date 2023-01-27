@@ -12,7 +12,7 @@ const checkRoles = (roles) => (req, res, next) => {
 
     /* Check the specified roles against any the user has */
     const rolesFound = roles.includes(req?.user?.roles);
-
+    
     if(!rolesFound){
         return next({
             status: 403,
@@ -50,7 +50,8 @@ const checkToken = async (req,res,next) => {
                 }
             } else {
                 /* Assign the user to the req object */
-                req.user = user
+                
+                req.user = user.user
                 return next()
             }
         }
