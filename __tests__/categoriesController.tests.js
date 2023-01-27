@@ -22,7 +22,7 @@ describe('categoriesController', () => {
       email: 'failed@localhost',
       forename: 'Failed',
       surname: 'User',
-      roles: 'Sales'
+      roles: 'Customer'
     }
 
     const goodToken = await userModel.generateTokens({ user });
@@ -63,7 +63,7 @@ describe('categoriesController', () => {
   
       // Set here the expected return values for the test
       const returnStatus = 200;
-  
+
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
