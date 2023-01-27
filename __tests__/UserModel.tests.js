@@ -81,7 +81,7 @@ describe('userModel.insert', () => {
 
     /* Insert some users into the users table */
     const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
-    console.log(user1)
+    
 
     /* Check the user was added */
     expect(Array.isArray(user1)).toBe(true);
@@ -140,7 +140,7 @@ describe('userModel.insert', () => {
 
     /* Insert some users into the users table */
     const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
-    console.log(user1)
+    
 
     /* Check the user was added */
     expect(typeof user1).toBe('object')
@@ -507,7 +507,7 @@ describe('userModel.remove', () => {
     const result = await userModel.remove(userId);
 
     /* Test the response */
-    expect(result instanceof Object).toBe(true);
+    expect(typeof result).toBe('object');
     expect(result.success).toBe(true);
     expect(result.message).toEqual(expectedResponseMessage);
 

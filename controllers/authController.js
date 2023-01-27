@@ -153,7 +153,7 @@ const loginUser = async (req, res, next) => {
         })(req, res, next);
 
         } catch(e) {
-            //console.log(e)
+            
             /* Log out the issue(s) */
             appLogger.logMessage(
                 'error', 

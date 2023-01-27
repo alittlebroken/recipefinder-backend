@@ -1073,8 +1073,6 @@ describe('authController.refreshToken', () => {
       refreshToken
      })
 
-    console.log(result.body)
-
     // Assert
     expect(result.status).toBe(returnStatus)
 
