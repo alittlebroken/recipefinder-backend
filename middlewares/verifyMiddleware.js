@@ -1,5 +1,6 @@
+const passport = require('passport')
 const checkRoles = (roles) => (req, res, next) => {
-    
+   
     /* We should check we are logged in first */
     if(!req.user){
         return next({
@@ -25,6 +26,32 @@ const checkRoles = (roles) => (req, res, next) => {
 
 }
 
+/* Verify the JWT token the user is sending */
+const checkToken = async (req,res,next) => {
+    return await passport.authenticate(
+        'jwt',
+        { session: false },
+        (err, user, info) => {
+            
+            if(err || !user){
+                console.log('Error encountered')
+                if(info.message === 'jwt expired'){
+                    return res.status(401).json({ 
+                        status: 401,
+                        success: false,
+                        message: 'Your access token has expired, please login'
+                    })
+                }
+            } else {
+                /* Assign the user to the req object */
+                req.user = user
+                return next()
+            }
+        }
+    )(req, res, next)
+}
+
 module.exports = {
-    checkRoles
+    checkRoles,
+    checkToken
 }
