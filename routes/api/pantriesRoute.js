@@ -4,40 +4,40 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { checkRoles } = require('../../middlewares/verifyMiddleware');
+const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
 
 const pantriesController = require('../../controllers/pantriesController');
 
 router.get(
     '/', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     checkRoles(['Admin']),
     pantriesController.listAll);
 router.get(
     '/:id', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     pantriesController.list);
 router.post(
     '/', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     checkRoles(['Admin']),
     pantriesController.create);
 router.post(
     '/:pantryId', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     pantriesController.add);
 router.delete(
     '/', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     checkRoles(['Admin']),
     pantriesController.removeAll);
 router.delete(
     '/:pantryId', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     pantriesController.removeItems);
 router.put(
     '/:id', 
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     pantriesController.update);
 
 module.exports = router;

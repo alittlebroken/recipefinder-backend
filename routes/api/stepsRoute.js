@@ -5,45 +5,45 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 
-const { checkRoles } = require('../../middlewares/verifyMiddleware');
+const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
 
 const stepsController = require('../../controllers/stepsController');
 
 router.get(
     '/', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     checkRoles(['Admin']),
     stepsController.find
     );
 
 router.get(
     '/:id', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     stepsController.findById
     );
 
 router.post(
     '/', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     stepsController.create
     );
 
 router.delete(
     '/', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     checkRoles(['Admin']),
     stepsController.removeAll
     );
 
 router.delete(
     '/:id', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     stepsController.removeById
     );
 
 router.put(
     '/:id', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     stepsController.update
     );
 
