@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 /* Import helper modules */
 const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
+const pantryModel = require('../models/pantryModel');
 
 /**
  * Insert a user into the database
@@ -35,13 +36,33 @@ const insert = async (username, password, email, roles = 'Customer') => {
         email: email,
         roles: roles
       }
-    );
-
+    ).returning('id');
 
     /* Get the newly added records */
-    const records = db('users')
+    const records = await db('users')
     .select('id', 'username', 'email', 'roles')
-    .where('username', username);
+    .where('id', result[0].id);
+
+    /* Create for the user a pantry model */
+    const pantryResult = await pantryModel.create(result[0].id);
+
+    if(pantryResult.success === false){
+      /* Delete the user account */
+      const removeUser = await remove(result[0].id)
+      
+      if(removeUser.success === false)
+      {
+        throw {
+          name: 'USERMODEL_ERROR',
+          message: 'Unable to create pantry and remove user account'
+        }
+      }
+
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'Unable to create pantry, so removing the user'
+      }
+    }
 
     /* No issues so return the data found */
     return records;
