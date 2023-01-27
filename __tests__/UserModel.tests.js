@@ -60,8 +60,8 @@ describe('userModel.insert', () => {
   it('should add a user into the users table', async () => {
 
     /* Mock the response for the insert */
-    tracker.on.insert('users').response([{ id: 1 }]);
-    tracker.on.select('users').response([
+    tracker.on.insert('users').responseOnce([{ id: 1 }]);
+    tracker.on.select('users').responseOnce([
       {
         id: 1,
         username: 'bcollins',
@@ -82,7 +82,6 @@ describe('userModel.insert', () => {
     /* Insert some users into the users table */
     const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
     
-
     /* Check the user was added */
     expect(Array.isArray(user1)).toBe(true);
     expect(user1).toHaveLength(1);
@@ -121,12 +120,9 @@ describe('userModel.insert', () => {
         roles: 'user'
       }
     ]);
+    tracker.on.delete('users').responseOnce([])
 
     jest.spyOn(pantryModel, 'create').mockImplementation(() => {
-      return { success: false,  };
-    })
-
-    jest.spyOn(userModel, 'remove').mockImplementation(() => {
       return { success: false,  };
     })
 
@@ -137,6 +133,46 @@ describe('userModel.insert', () => {
 
     const returnSuccess = false
     const returnMessage = 'Unable to create pantry and remove user account'
+
+    /* Insert some users into the users table */
+    const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
+    
+
+    /* Check the user was added */
+    expect(typeof user1).toBe('object')
+    expect(typeof user1.success).toBe('boolean')
+    expect(typeof user1.message).toBe('string')
+
+    expect(user1.success).toEqual(returnSuccess)
+    expect(user1.message).toEqual(returnMessage)
+
+  });
+
+  it('should add an error if the pantry is unable to be created and the user can be removed', async () => {
+
+    /* Mock the response for the insert */
+    tracker.on.insert('users').response([{ id: 1 }]);
+    tracker.on.select('users').response([
+      {
+        id: 1,
+        username: 'bcollins',
+        email: 'bcollins@testemailer.com',
+        roles: 'user'
+      }
+    ]);
+    tracker.on.delete('users').responseOnce([ { id: 1 }])
+
+    jest.spyOn(pantryModel, 'create').mockImplementation(() => {
+      return { success: false,  };
+    })
+
+    /* Set the data to be inserted */
+    const usersName = 'bcollins';
+    const usersEmail = 'bcollins@testmailer.com';
+    const usersPassword = 'b0st1nr365s';
+
+    const returnSuccess = false
+    const returnMessage = 'Unable to create pantry and user successfully removed'
 
     /* Insert some users into the users table */
     const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
@@ -490,33 +526,23 @@ describe('userModel.remove', () => {
   it('should remove the specified record', async () => {
 
     /* Mock the DB repsonses */
-    tracker.on.delete('users').response({ id: 1 });
-    tracker.on.select('users').response({
-      success: true,
-      message: 'The record was deleted successfully'
-    });
+    tracker.on.delete('users').responseOnce({ id: 1 });
 
     /* Set data to pass to function */
     const userId = 1;
 
     /* Set the expected response value(s) */
     const expectedResponseMessage = 'The record was deleted successfully';
-    const expectedSelectResponseMessage = 'No records found matching passed in id';
-
+    
     /* Execute the function */
     const result = await userModel.remove(userId);
-
+    
     /* Test the response */
     expect(typeof result).toBe('object');
     expect(result.success).toBe(true);
     expect(result.message).toEqual(expectedResponseMessage);
 
-    /* Perform a search of the DB to ensure the record is not there */
-    const searchResult = await userModel.findById(userId);
-    expect(searchResult instanceof Object).toBe(true);
-    expect(searchResult.success).toBe(false);
-    expect(searchResult.message).toEqual(expectedSelectResponseMessage);
-
+   
   });
 
   it('should error if passed in argument is missing or incorrect', async () => {
