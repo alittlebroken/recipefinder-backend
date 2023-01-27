@@ -33,20 +33,20 @@ const checkToken = async (req,res,next) => {
         { session: false },
         (err, user, info) => {
             if(err || !user){
-                if(info.message === 'jwt expired'){
+                if(info?.message === 'jwt expired'){
                     return res.status(401).json({ 
                         status: 401,
                         success: false,
                         message: 'Your access token has expired, please login'
                     })
-                } else if(info.message === 'No auth token'){
+                } else if(info?.message === 'No auth token'){
                     return res.status(401).json({
                         status: 401,
                         success: false,
                         message: 'You are not authorized to access this resource, please login'
                     })
                 } else {
-                    return next(info.message)
+                    return next(info?.message)
                 }
             } else {
                 /* Assign the user to the req object */
