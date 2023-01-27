@@ -45,12 +45,12 @@ const insert = async (username, password, email, roles = 'Customer') => {
 
     /* Create for the user a pantry model */
     const pantryResult = await pantryModel.create(result[0].id);
-
+    
     if(pantryResult.success === false){
       /* Delete the user account */
-      const removeUser = await remove(result[0].id)
+      const removeUser = await db('users').del().where('id', result[0].id)
       
-      if(removeUser.success === false)
+      if(removeUser.length < 1)
       {
         throw {
           name: 'USERMODEL_ERROR',
@@ -60,7 +60,7 @@ const insert = async (username, password, email, roles = 'Customer') => {
 
       throw {
         name: 'USERMODEL_ERROR',
-        message: 'Unable to create pantry, so removing the user'
+        message: 'Unable to create pantry and user successfully removed'
       }
     }
 
@@ -68,7 +68,7 @@ const insert = async (username, password, email, roles = 'Customer') => {
     return records;
 
   } catch(e) {
-    
+   
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message
@@ -258,19 +258,21 @@ const remove = async id => {
     }
 
     /* Remove the user */
-    await db('users').del().where('id', id);
+    await db('users').delete().where('id', id)
 
     /* Check the user was deleted */
-    const userCheck = await db('users')
+    /*const userCheck = await db('users')
      .select('*')
      .where('id', id);
+    */
 
-      return {
+    return {
         success: true,
         message: 'The record was deleted successfully'
     }
 
   } catch(e) {
+    
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message;
