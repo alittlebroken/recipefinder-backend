@@ -260,12 +260,6 @@ const remove = async id => {
     /* Remove the user */
     await db('users').delete().where('id', id)
 
-    /* Check the user was deleted */
-    /*const userCheck = await db('users')
-     .select('*')
-     .where('id', id);
-    */
-
     return {
         success: true,
         message: 'The record was deleted successfully'
