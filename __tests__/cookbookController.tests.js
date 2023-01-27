@@ -3206,8 +3206,6 @@ describe('cookbookController', () => {
         .delete(`/cookbooks/${cookbookId}`)
         .set('Authorization', `Bearer ${authToken}`);
 
-      console.log(res.body)
-
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
 
