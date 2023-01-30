@@ -364,7 +364,7 @@ const refreshToken = async (req, res, next) => {
 };
 
 /* 
- * function template
+ * remove an assigned refreshtoken from a user
  */
 const removeToken = async (req, res, next) => {
 
@@ -456,6 +456,67 @@ const removeToken = async (req, res, next) => {
 };
 
 /* 
+ * log the user out of the system
+ */
+const logoutUser = async (req, res, next) => {
+
+    const moduleMethod = 'logoutUser';
+
+    try{
+
+        /* Validate passed in parameters */
+        if(!req.body.refreshToken || req.body.refreshToken === undefined){
+            throw {
+                status: 404,
+                success: false,
+                message: 'Missing refresh token'
+            }
+        }
+
+        if(typeof req.body.refreshToken !== 'string'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Refresh token is not in the correct format'
+            }
+        }
+
+        /* Check to see if the refresh token is valid */
+        const isTokenValid = await userModel.verifyRefreshToken(req.body.refreshToken)
+        if(isTokenValid.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There is a problem with the resource, please try again later'
+            }
+        }
+
+        /* Check if token has previosuly been assigned and if it has remove it and in either case
+        send back that we have logged them out */
+        const isTokenAssigned = await tokenModel.findOne(isTokenValid.id)
+        if(isTokenAssigned.id){
+            let isTokenRemoved = await tokenModel.removeOne(isTokenValid.id);
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Successfully logged out'
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -480,5 +541,6 @@ module.exports = {
     loginUser,
     createUser,
     refreshToken,
-    removeToken
+    removeToken,
+    logoutUser
 };
