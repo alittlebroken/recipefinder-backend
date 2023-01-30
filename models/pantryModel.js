@@ -266,21 +266,21 @@ const listAll = async () => {
     /* Get the list if pantries from the DB */
     const results = await db('pantries as p')
      .join('users as u', 'p.userId', '=', 'u.id')
-     .count('pi.pantryId as numIngredients')
+     //.count('pi.pantryId as numIngredients')
      .select(
       'p.id as id',
       'u.id as userId',
       'u.username as username',
       db('pantry_ingredients as pi')
        .count('*')
-       .whereRaw('?? == ??', ['pi.pantryId', 'p.id'])
+       .whereRaw('?? = ??', ['pi.pantryId', 'p.id'])
        .as('numIngredients')
      );
 
      if(!results){
       throw {
         name: 'PANTRYMODEL_ERROR',
-        message: 'There was a problem with the resource, please try again later'
+        message: 'There was a problem with the resource, please try again'
       }
      }
 
@@ -294,7 +294,7 @@ const listAll = async () => {
     /* We only wish to have the errors specific to the model reported back others are caught as
     a generic error */
     let message;
-    
+    console.log(e)
     if(e.name === 'PANTRYMODEL_ERROR'){
       message = e.message;
     } else {
