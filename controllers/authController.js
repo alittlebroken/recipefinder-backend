@@ -493,9 +493,9 @@ const logoutUser = async (req, res, next) => {
 
         /* Check if token has previosuly been assigned and if it has remove it and in either case
         send back that we have logged them out */
-        const isTokenAssigned = await tokenModel.findOne(isTokenValid.id)
+        const isTokenAssigned = await tokenModel.findOne(isTokenValid.user.id)
         if(isTokenAssigned.id){
-            let isTokenRemoved = await tokenModel.removeOne(isTokenValid.id);
+            await tokenModel.removeOne(isTokenValid.user.id);
         }
 
         res.status(200).json({
