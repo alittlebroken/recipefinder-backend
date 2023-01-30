@@ -2,7 +2,7 @@
  * Import any required modules
  */
 const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const JWTstrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
 const userModel = require('../models/userModel');
@@ -15,9 +15,9 @@ const userModel = require('../models/userModel');
  */
 passport.use(
   /* Set an identifier for this handler */
-  'login-local',
+  'local',
   /* Which Strategy to use for the login */
-  new localStrategy(
+  new LocalStrategy(
     /* Callback function that will handle getting the details from the DB and
      * checking they are correct
      */
@@ -31,7 +31,8 @@ passport.use(
         /* Find the user within the DB, check it is a valid user and if not
         reject the login attempt */
         const user = await userModel.findByEmail(email);
-        if(!user){
+        
+        if(!user || user.success === false){
           return done(null, false, { message: 'email not registered'});
         }
 
@@ -75,27 +76,29 @@ passport.use(
 passport.use(
   /* Set the handlers indetifier */
   'register',
-  new localStrategy(
+  new LocalStrategy(
     {
         usernameField: 'email',
-        passwordField: 'password'
+        passwordField: 'password',
+        passReqToCallback : true
     }, 
   /* Main callback function */
-  async (email, password, done) => {
+  async (req, email, password, done) => {
 
     /* Register the user via the userModel */
     try {
       
-      const result = userModel.insert(email,password, email);
-      if(result){
-        
-        return done(null, user);
+      const result = await userModel.insert(email,password, email, req.body.roles);
+      
+      if(result || result.length > 0){
+        return done(null, result[0]);
       } else {
         return done(null, false, { message: 'Unable to register user'});
       }
       
 
     } catch(e) {
+      
       let error = new Error('There was an issue registering the user');
       return done(error);
     }
@@ -122,7 +125,7 @@ passport.use(
     /* Callback used to process the strategy */
     async (token, done) => {
       try{
-        return done(null, token.user);
+        return done(null, token);
       } catch(e) {
         return done(e);
       }

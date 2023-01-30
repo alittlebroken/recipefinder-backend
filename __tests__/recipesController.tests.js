@@ -23,19 +23,23 @@ describe('recipesController', () => {
       email: 'admin@localhost',
       forename: 'Site',
       surname: 'Administrator',
-      roles: ['Admin']
-  }
-    authToken = await userModel.generateToken({user});
-
+      roles: 'Admin'
+    }
+   
      /* User used to trigger a failed authorised middleware check */
-     failUser = {
+    failUser = {
       id: 2,
       email: 'failed@localhost',
       forename: 'Failed',
       surname: 'User',
-      roles: ['Sales']
+      roles: 'Sales'
     }
-    failToken = await userModel.generateToken({ user: failUser});
+
+    const goodToken = await userModel.generateTokens({ user });
+    const badToken = await userModel.generateTokens({ user: failUser});
+
+    authToken = goodToken.accessToken;
+    failToken = badToken.accessToken;
   });
 
   describe('recipesController.listAll', () => {

@@ -6,112 +6,112 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 
-const { checkRoles } = require('../../middlewares/verifyMiddleware')
+const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
 
 const userController = require('../../controllers/usersController');
 
 router.get(
     '/',
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     checkRoles(['Admin']),
     userController.listAll
     );
 
 router.get(
     '/:id',
-    passport.authenticate('jwt', { session: false }), 
+    checkToken, 
     userController.listUser
     );
 
 router.get(
     '/:id/recipes',
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.listUserRecipes
     );
 
 router.get(
     '/:id/cookbooks',
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
      userController.listUserCookbooks
      );
 
 router.get(
     '/:id/pantry', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.listUserPantry
     );
 
 router.post(
     '/', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     checkRoles(['Admin']),
     userController.createUser
     );
 
 router.post(
     '/:id/recipes', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.createUserRecipe
     );
 
 router.post(
     '/:id/pantry', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.addUserPantry
     );
 
 router.delete(
     '/', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     checkRoles(['Admin']),
     userController.removeAllUsers
     );
 
 router.delete(
     '/:id', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.removeUser
     );
 
 router.delete(
     '/:id/recipes', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.removeUserRecipes
     );
 
 router.delete(
     '/:id/cookbooks', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.removeUserCookbooks
     );
 
 router.delete(
     '/:id/pantry', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.removeUserPantry
     );
 
 router.put(
     '/:id', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.updateUser
     );
 
 router.put(
     '/:id/recipes', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.updateUserRecipe
     );
 
 router.put(
     '/:id/cookbooks', 
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.updateUserCookbook
     );
 
 router.put(
     '/:id/pantry',
-    passport.authenticate('jwt', { session: false }),
+    checkToken,
     userController.updateUserPantry
     );
 

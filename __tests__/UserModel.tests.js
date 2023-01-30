@@ -4,6 +4,7 @@
 const knex = require('knex');
 const db = require('../database');
 const userModel = require('../models/userModel');
+const pantryModel = require('../models/pantryModel');
 const { getTracker, Tracker } = require('knex-mock-client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
@@ -11,6 +12,7 @@ const messageHelper = require('../helpers/constants');
 
 /* Mocks for the JWT library testing */
 const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
+const JWT_REFRESH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJuc2NhcmVtb25nZXIiLCJlbWFpbCI6Im5zY2FyZW1vbmdlckBzZWNyZXR3aXphcmRjYXN0bGUubmV0Iiwicm9sZXMiOiJ3aXphcmQiLCJjb21tb25Sb29tIjozNjM4MjM3fQ.8CDQGDBJbwJ7Q1WIU1GaOhVSzljWsLPrIZl2ZlkcZdY';
 const JWT_SECRET_KEY = 'mockedsecretkey!-758472<';
 const JWT_PAYLOAD = {
   "id": 1,
@@ -58,8 +60,8 @@ describe('userModel.insert', () => {
   it('should add a user into the users table', async () => {
 
     /* Mock the response for the insert */
-    tracker.on.insert('users').response([{ id: 1 }]);
-    tracker.on.select('users').response([
+    tracker.on.insert('users').responseOnce([{ id: 1 }]);
+    tracker.on.select('users').responseOnce([
       {
         id: 1,
         username: 'bcollins',
@@ -68,6 +70,10 @@ describe('userModel.insert', () => {
       }
     ]);
 
+    jest.spyOn(pantryModel, 'create').mockImplementation(() => {
+      return [ { id: 1, userId: 1 } ];
+    })
+
     /* Set the data to be inserted */
     const usersName = 'bcollins';
     const usersEmail = 'bcollins@testmailer.com';
@@ -75,7 +81,7 @@ describe('userModel.insert', () => {
 
     /* Insert some users into the users table */
     const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
-
+    
     /* Check the user was added */
     expect(Array.isArray(user1)).toBe(true);
     expect(user1).toHaveLength(1);
@@ -83,6 +89,7 @@ describe('userModel.insert', () => {
     expect(user1[0].username).toEqual('bcollins');
 
   });
+
 
   it('should throw an error if required data is not passed', async () => {
 
@@ -98,6 +105,86 @@ describe('userModel.insert', () => {
     expect(typeof result).toEqual('object');
     expect(result.success).toBe(false);
     expect(result.message).toBe('You must provide values for username,password or email.');
+
+  });
+
+  it('should add an error if the pantry is unable to be created and the user is not removed', async () => {
+
+    /* Mock the response for the insert */
+    tracker.on.insert('users').response([{ id: 1 }]);
+    tracker.on.select('users').response([
+      {
+        id: 1,
+        username: 'bcollins',
+        email: 'bcollins@testemailer.com',
+        roles: 'user'
+      }
+    ]);
+    tracker.on.delete('users').responseOnce([])
+
+    jest.spyOn(pantryModel, 'create').mockImplementation(() => {
+      return { success: false,  };
+    })
+
+    /* Set the data to be inserted */
+    const usersName = 'bcollins';
+    const usersEmail = 'bcollins@testmailer.com';
+    const usersPassword = 'b0st1nr365s';
+
+    const returnSuccess = false
+    const returnMessage = 'Unable to create pantry and remove user account'
+
+    /* Insert some users into the users table */
+    const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
+    
+
+    /* Check the user was added */
+    expect(typeof user1).toBe('object')
+    expect(typeof user1.success).toBe('boolean')
+    expect(typeof user1.message).toBe('string')
+
+    expect(user1.success).toEqual(returnSuccess)
+    expect(user1.message).toEqual(returnMessage)
+
+  });
+
+  it('should add an error if the pantry is unable to be created and the user can be removed', async () => {
+
+    /* Mock the response for the insert */
+    tracker.on.insert('users').response([{ id: 1 }]);
+    tracker.on.select('users').response([
+      {
+        id: 1,
+        username: 'bcollins',
+        email: 'bcollins@testemailer.com',
+        roles: 'user'
+      }
+    ]);
+    tracker.on.delete('users').responseOnce([ { id: 1 }])
+
+    jest.spyOn(pantryModel, 'create').mockImplementation(() => {
+      return { success: false,  };
+    })
+
+    /* Set the data to be inserted */
+    const usersName = 'bcollins';
+    const usersEmail = 'bcollins@testmailer.com';
+    const usersPassword = 'b0st1nr365s';
+
+    const returnSuccess = false
+    const returnMessage = 'Unable to create pantry and user successfully removed'
+
+    /* Insert some users into the users table */
+    const user1 = await userModel.insert(usersName, usersPassword, usersEmail);
+    
+
+    /* Check the user was added */
+    expect(typeof user1).toBe('object')
+    expect(typeof user1.success).toBe('boolean')
+    expect(typeof user1.message).toBe('string')
+
+    expect(user1.success).toEqual(returnSuccess)
+    expect(user1.message).toEqual(returnMessage)
 
   });
 
@@ -150,9 +237,9 @@ describe('userModel.findByEmail', () => {
     const result = await userModel.findByEmail(usersEmail);
 
     /* Check the response */
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(1);
-    expect(result[0].email).toEqual(usersEmail);
+    expect(typeof result).toBe('object');
+    expect(typeof result.email).toBe('string');
+    expect(result.email).toEqual(usersEmail);
 
   });
 
@@ -439,33 +526,23 @@ describe('userModel.remove', () => {
   it('should remove the specified record', async () => {
 
     /* Mock the DB repsonses */
-    tracker.on.delete('users').response({ id: 1 });
-    tracker.on.select('users').response({
-      success: true,
-      message: 'The record was deleted successfully'
-    });
+    tracker.on.delete('users').responseOnce({ id: 1 });
 
     /* Set data to pass to function */
     const userId = 1;
 
     /* Set the expected response value(s) */
     const expectedResponseMessage = 'The record was deleted successfully';
-    const expectedSelectResponseMessage = 'No records found matching passed in id';
-
+    
     /* Execute the function */
     const result = await userModel.remove(userId);
-
+    
     /* Test the response */
-    expect(result instanceof Object).toBe(true);
+    expect(typeof result).toBe('object');
     expect(result.success).toBe(true);
     expect(result.message).toEqual(expectedResponseMessage);
 
-    /* Perform a search of the DB to ensure the record is not there */
-    const searchResult = await userModel.findById(userId);
-    expect(searchResult instanceof Object).toBe(true);
-    expect(searchResult.success).toBe(false);
-    expect(searchResult.message).toEqual(expectedSelectResponseMessage);
-
+   
   });
 
   it('should error if passed in argument is missing or incorrect', async () => {
@@ -647,6 +724,7 @@ describe('userModel.verify', () => {
 
 });
 
+
 describe('userModel.findAll', () => {
 
   /*
@@ -710,7 +788,7 @@ describe('userModel.findAll', () => {
 
 });
 
-describe('userModel.generateToken', () => {
+describe('userModel.generateTokens', () => {
 
   /*
    * Steps to run before and after this test suite
@@ -732,19 +810,22 @@ describe('userModel.generateToken', () => {
     jest.clearAllMocks();
   })
 
-  it('returns a valid token when signing a payload', async () => {
+  it('returns valid access and refresh tokens when signing a payload', async () => {
 
     /** Mock the 3rd party library responses */
 
     /** Set the data to pass into the models function */
 
     /** Execute the function */
-    const result = await userModel.generateToken(JWT_PAYLOAD);
+    const result = await userModel.generateTokens(JWT_PAYLOAD);
 
     /** Test the response back from the function */
-    expect(typeof result).toBe('string');
-    expect(result).toBe(JWT_TOKEN);
+    expect(typeof result).toBe('object');
+    expect(typeof result.accessToken).toBe('string');
+    expect(typeof result.refreshToken).toBe('string');
 
+    expect(result.accessToken).toEqual(JWT_TOKEN);
+    expect(result.refreshToken).toEqual(JWT_REFRESH_TOKEN);
 
   });
 
@@ -756,7 +837,7 @@ describe('userModel.generateToken', () => {
     let payload = null;
 
     /** Execute the function */
-    const result = await userModel.generateToken(payload);
+    const result = await userModel.generateTokens(payload);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -776,7 +857,7 @@ describe('userModel.generateToken', () => {
     /** Set the data to pass into the models function */
 
     /** Execute the function */
-    const result = await userModel.generateToken(JWT_PAYLOAD);
+    const result = await userModel.generateTokens(JWT_PAYLOAD);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');
@@ -867,6 +948,96 @@ describe('userModel.verifyToken', () => {
 
     /** Execute the function */
     const result = await userModel.verifyToken(JWT_TOKEN);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_GENERIC_RESOURCE);
+
+  });
+
+});
+
+describe('userModel.verifyRefreshToken', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+
+    const mockJwtVerify = jest.spyOn(jwt, 'verify').mockImplementation((token, secretKeyOrToken) => {
+      if(!token || !secretKeyOrToken) return false;
+      return JWT_PAYLOAD;
+    });
+
+    const mockJwtSign = jest.spyOn(jwt, 'sign').mockImplementation((payload, secretKeyOrToken) => {
+      if(!payload || !secretKeyOrToken) return false;
+      return JWT_TOKEN;
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  })
+
+  it('returns the payload from a valid JWT Refresh token', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.verifyRefreshToken(JWT_TOKEN);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+  
+    expect(typeof result.id).toBe('number');
+    expect(result.id).toBe(JWT_PAYLOAD.id);
+
+    expect(typeof result.username).toBe('string');
+    expect(result.username).toBe(JWT_PAYLOAD.username);
+
+    expect(typeof result.email).toBe('string');
+    expect(result.email).toBe(JWT_PAYLOAD.email);
+
+    expect(typeof result.roles).toBe('string');
+    expect(result.roles).toBe(JWT_PAYLOAD.roles);
+
+    expect(typeof result.commonRoom).toBe('number');
+    expect(result.commonRoom).toBe(JWT_PAYLOAD.commonRoom);
+
+  });
+
+  it('returns an error if token is missing or incorrect', async () => {
+
+    /** Mock the 3rd party library responses */
+
+    /** Set the data to pass into the models function */
+    let invalidToken = null;
+
+    /** Execute the function */
+    const result = await userModel.verifyRefreshToken(invalidToken);
+
+    /** Test the response back from the function */
+    expect(typeof result).toBe('object');
+    expect(result.success).toBe(false);
+    expect(result.message).toBe(messageHelper.ERROR_MISSING_VALUES);
+
+  });
+
+  it('returns an error if underlying library produces an error', async () => {
+
+    /** Mock the 3rd party library responses */
+    const mockJwtVerifyError = jest.spyOn(jwt, 'verify')
+      .mockImplementation((token, secretKeyOrToken) => {
+        throw new Error('Token appears to be invalid')
+      });
+
+    /** Set the data to pass into the models function */
+
+    /** Execute the function */
+    const result = await userModel.verifyRefreshToken(JWT_TOKEN);
 
     /** Test the response back from the function */
     expect(typeof result).toBe('object');

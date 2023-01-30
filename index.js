@@ -14,11 +14,11 @@ const bodyParser = require('body-parser');
 /*
  * Configure the app
  */
- require('./config/passport');
- app.use(express.json());
+ app.use(express.json()); 
  app.use(express.urlencoded({ extended: true }));
  app.use(cors());
  app.use(passport.initialize());
+ require('./config/passport');
 
 /* Logging Information */
 
@@ -78,7 +78,7 @@ app.use('/steps', stepsRoute);
 app.use('/pantries', pantriesRoute);
 app.use('/categories', categoriesRoute);
 app.use('/recipes', recipesRoute);
-app.use(authRoute);
+app.use('/auth', authRoute);
 app.use('/search', searchRoute);
 app.use('/users', usersRoute);
 
@@ -97,7 +97,11 @@ app.use((error, req, res, next) => {
   let results;
 
   if(error){
-      statusCode = error.status;
+      
+    if(error.status){
+        statusCode = error.status
+    } 
+      
       message = error.message;
 
       /* Some messages we also send extra information that we need to also include */

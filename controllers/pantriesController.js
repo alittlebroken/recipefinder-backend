@@ -18,7 +18,7 @@ const listAll = async (req, res, next) => {
 
         /* search the DB */
         const result = await pantryModel.listAll();
-
+        
         if(!result || result.success === false){
             throw {
                 status: 500,
@@ -38,6 +38,7 @@ const listAll = async (req, res, next) => {
         res.status(200).json(result);
 
     } catch(e) {
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 

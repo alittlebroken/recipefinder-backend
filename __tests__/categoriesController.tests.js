@@ -13,19 +13,23 @@ describe('categoriesController', () => {
       email: 'admin@localhost',
       forename: 'Site',
       surname: 'Administrator',
-      roles: ['Admin']
-  }
-    authToken = await userModel.generateToken({user});
-
+      roles: 'Admin'
+    }
+   
      /* User used to trigger a failed authorised middleware check */
-     failUser = {
+    failUser = {
       id: 2,
       email: 'failed@localhost',
       forename: 'Failed',
       surname: 'User',
-      roles: ['Sales']
+      roles: 'Customer'
     }
-    failToken = await userModel.generateToken({ user: failUser});
+
+    const goodToken = await userModel.generateTokens({ user });
+    const badToken = await userModel.generateTokens({ user: failUser});
+
+    authToken = goodToken.accessToken;
+    failToken = badToken.accessToken;
   });
 
   describe('list', () => {
@@ -59,7 +63,7 @@ describe('categoriesController', () => {
   
       // Set here the expected return values for the test
       const returnStatus = 200;
-  
+
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
@@ -1080,7 +1084,7 @@ describe('categoriesController', () => {
 
     });
 
-    it('should return status 500 if the resource enciunters any other problem', async () => {
+    it('should return status 500 if the resource encounters any other problem', async () => {
 
       // Set Mocked data that models and controllers should return
       const modelReturnData = {

@@ -1,7 +1,7 @@
 /* Require needed modules */
 require('dotenv').config();
 
-const { checkRoles } = require('../../middlewares/verifyMiddleware');
+const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
 
 const express = require('express');
 const router = express.Router();
@@ -9,18 +9,18 @@ const passport = require('passport');
 
 const cookbookController = require('../../controllers/cookbookController');
 
-  /* Add the various routes */
-router.get('/', passport.authenticate('jwt', { session: false }), checkRoles(['Admin']),cookbookController.list);
-router.get('/:id', passport.authenticate('jwt', { session: false }), cookbookController.getById);
-router.get('/:id/recipes', passport.authenticate('jwt', { session: false }), cookbookController.recipes);
-router.get('/:id/category', passport.authenticate('jwt', { session: false }), cookbookController.getCategories);
-router.post('/', passport.authenticate('jwt', { session: false }), cookbookController.create);
-router.post('/:id/recipe', passport.authenticate('jwt', { session: false }), cookbookController.addRecipe);
-router.post('/:id/category', passport.authenticate('jwt', { session: false }), cookbookController.addCategory);
-router.delete('/', passport.authenticate('jwt', { session: false }), checkRoles(['Admin']),cookbookController.removeAll);
-router.delete('/:id', passport.authenticate('jwt', { session: false }), cookbookController.removeById);
-router.delete('/:id/recipes', passport.authenticate('jwt', { session: false }), cookbookController.removeRecipes);
-router.delete('/:id/categories', passport.authenticate('jwt', { session: false }), cookbookController.removeCategories);
-router.put('/:id', passport.authenticate('jwt', { session: false }), cookbookController.update);
+/* Add the various routes */
+router.get('/', checkToken, checkRoles(['Admin']), cookbookController.list);
+router.get('/:id', checkToken, cookbookController.getById);
+router.get('/:id/recipes', checkToken, cookbookController.recipes);
+router.get('/:id/category', checkToken, cookbookController.getCategories);
+router.post('/', checkToken, cookbookController.create);
+router.post('/:id/recipe', checkToken, cookbookController.addRecipe);
+router.post('/:id/category', checkToken, cookbookController.addCategory);
+router.delete('/', checkToken, checkRoles(['Admin']),cookbookController.removeAll);
+router.delete('/:id', checkToken, cookbookController.removeById);
+router.delete('/:id/recipes', checkToken, cookbookController.removeRecipes);
+router.delete('/:id/categories', checkToken, cookbookController.removeCategories);
+router.put('/:id', checkToken, cookbookController.update);
 
 module.exports = router;
