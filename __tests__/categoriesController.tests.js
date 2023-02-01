@@ -30,6 +30,8 @@ describe('categoriesController', () => {
 
     authToken = goodToken.accessToken;
     failToken = badToken.accessToken;
+    refreshToken = goodToken.refreshToken;
+    
   });
 
   describe('list', () => {
@@ -596,7 +598,10 @@ describe('categoriesController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .delete('/categories')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${refreshToken}`);
+
+      console.log(response.body)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
