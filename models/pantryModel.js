@@ -294,7 +294,7 @@ const listAll = async () => {
     /* We only wish to have the errors specific to the model reported back others are caught as
     a generic error */
     let message;
-    console.log(e)
+    
     if(e.name === 'PANTRYMODEL_ERROR'){
       message = e.message;
     } else {
