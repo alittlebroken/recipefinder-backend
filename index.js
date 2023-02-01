@@ -10,6 +10,7 @@ const morgan = require('morgan');
 const rfs = require('rotating-file-stream');
 const path = require('path');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 /*
  * Configure the app
@@ -17,6 +18,7 @@ const bodyParser = require('body-parser');
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true }));
  app.use(cors());
+ app.use(cookieParser());
  app.use(passport.initialize());
  require('./config/passport');
 

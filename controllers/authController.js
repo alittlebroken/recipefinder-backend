@@ -6,7 +6,8 @@ const passport = require('passport');
 
 const userModel = require('../models/userModel');
 
-const tokenModel = require('../models/tokenModel')
+const tokenModel = require('../models/tokenModel');
+const { json } = require('body-parser');
 
 const moduleName = 'authController';
 
@@ -146,7 +147,10 @@ const loginUser = async (req, res, next) => {
                     })
                 }
 
-                return res.json({ accessToken, refreshToken });
+                return res.cookie('jwt', refreshToken, { httpOnly: true, secure: false })
+                 .status(200)
+                 .json({ accessToken})
+                //return res.json({ accessToken, refreshToken });
 
             });
 
@@ -289,7 +293,7 @@ const refreshToken = async (req, res, next) => {
 
     try{
 
-        /* Validate any paramaters used */
+        /* Validate any paramaters used 
         if(!req.body.refreshToken || req.body.refreshToken === undefined){
             return res.status(404).json({
                 status: 404,
@@ -297,19 +301,29 @@ const refreshToken = async (req, res, next) => {
                 message: 'Undefined refresh token',
                 token: ''
             })
+        }*/
+        if(!req.cookies['jwt']){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Invalid refresh token, please login',
+                token: ''
+            })
         }
 
-        if(typeof req.body.refreshToken !== 'string'){
+        /*if(typeof req.body.refreshToken !== 'string'){
             return res.status(400).json({
                 status: 400,
                 success: false,
                 message: 'Wrong format for refresh token',
                 token: ''
             })
-        }
+        }*/
+
+        let token = req.cookies['jwt'];
 
         /* Validate the supplied refresh token */
-        const refreshValid = await userModel.verifyRefreshToken(req.body.refreshToken)
+        const refreshValid = await userModel.verifyRefreshToken(token)
         
         if(!refreshValid || refreshValid.success === false){
             if(refreshValid.message === 'There was a problem with the resource, please try again later'){
@@ -373,7 +387,7 @@ const removeToken = async (req, res, next) => {
     try{
 
         /* Validate passed in parameters */
-        if(!req.body.refreshToken || req.body.refreshToken === undefined){
+        /*if(!req.body.refreshToken || req.body.refreshToken === undefined){
             res.status(404).json({
                 status: 404,
                 success: false,
@@ -389,10 +403,21 @@ const removeToken = async (req, res, next) => {
                 message: 'Wrong format for refresh token',
                 token: ''
             })
+        }*/
+        
+        if(!req.cookies['jwt']){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No refresh token found',
+                token: ''
+            })
         }
 
+        let token = req.cookies['jwt']
+
         /* is this refresh token in the list of assigned refresh tokens */
-        const isAssigned = await tokenModel.findOne(refreshToken.id)
+        const isAssigned = await tokenModel.findOne(token.id)
         
         if(!isAssigned || isAssigned.success === false){
             if(isAssigned.message === 'There was a problem with the resource, please try again later'){
@@ -414,7 +439,7 @@ const removeToken = async (req, res, next) => {
         } 
 
         /* Remove the token if all OK so far */
-        const isRemoved = await tokenModel.removeOne(refreshToken.id)
+        const isRemoved = await tokenModel.removeOne(token.id)
         
         if(!isRemoved || isRemoved.success === false){
             if(isRemoved.message === 'No refresh tokens were found matching supplied data'){
@@ -434,13 +459,24 @@ const removeToken = async (req, res, next) => {
             }
         }
 
-        /* token removed, let the calling app know */
+        /* clear out the httpOnly cookie */
+        res.clearCookie('jwt')
+         .status(200)
+         .json({
+            status: 201,
+            success: true,
+            message: 'Successfully logged out',
+            token: ''
+        })
+
+        /* token removed, let the calling app know
         res.status(201).json({
             status: 201,
             success: true,
             message: 'Successfully logged out',
             token: ''
         })
+        */
 
     } catch(e) {
         
@@ -463,26 +499,19 @@ const logoutUser = async (req, res, next) => {
     const moduleMethod = 'logoutUser';
 
     try{
-
-        /* Validate passed in parameters */
-        if(!req.body.refreshToken || req.body.refreshToken === undefined){
-            throw {
+        
+        if(!req.cookies['jwt']){
+            res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'Missing refresh token'
-            }
+            })
         }
 
-        if(typeof req.body.refreshToken !== 'string'){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Refresh token is not in the correct format'
-            }
-        }
+        let token = req.cookies['jwt']
 
         /* Check to see if the refresh token is valid */
-        const isTokenValid = await userModel.verifyRefreshToken(req.body.refreshToken)
+        const isTokenValid = await userModel.verifyRefreshToken(token)
         if(isTokenValid.success === false){
             throw {
                 status: 500,
@@ -497,12 +526,14 @@ const logoutUser = async (req, res, next) => {
         if(isTokenAssigned.id){
             await tokenModel.removeOne(isTokenValid.user.id);
         }
-
-        res.status(200).json({
+ 
+        res.clearCookie('jwt')
+         .status(200)
+         .json({
             status: 200,
             success: true,
             message: 'Successfully logged out'
-        })
+         })
 
     } catch(e) {
         /* Log out the issue(s) */

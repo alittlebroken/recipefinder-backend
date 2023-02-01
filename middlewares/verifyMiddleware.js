@@ -12,7 +12,7 @@ const checkRoles = (roles) => (req, res, next) => {
 
     /* Check the specified roles against any the user has */
     const rolesFound = roles.includes(req?.user?.roles);
-    console.log(rolesFound)
+    
     if(!rolesFound){
         return next({
             status: 403,
@@ -40,14 +40,14 @@ const checkToken = async (req,res,next) => {
                         message: 'Your access token has expired, please login'
                     })
                 } else if(info?.message === 'No auth token'){
-                    console.log('=== DEBUG ===: ', err, user, info)
+                    
                     return res.status(401).json({
                         status: 401,
                         success: false,
                         message: 'You are not authorized to access this resource, please login'
                     })
                 } else {
-                    console.log(info)
+                    
                     return next(info?.message)
                 }
             } else {
@@ -59,7 +59,7 @@ const checkToken = async (req,res,next) => {
                     req.user = user
                 }
                 
-                console.log(req.user)
+                
                 return next()
             }
         }
