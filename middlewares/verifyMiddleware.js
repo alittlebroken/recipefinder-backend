@@ -1,4 +1,5 @@
 const passport = require('passport')
+
 const checkRoles = (roles) => (req, res, next) => {
    
     /* We should check we are logged in first */
@@ -12,7 +13,7 @@ const checkRoles = (roles) => (req, res, next) => {
 
     /* Check the specified roles against any the user has */
     const rolesFound = roles.includes(req?.user?.roles);
-    
+
     if(!rolesFound){
         return next({
             status: 403,
@@ -51,12 +52,18 @@ const checkToken = async (req,res,next) => {
                     return next(info?.message)
                 }
             } else {
-                /* Assign the user to the req object */
+                /* Assign the user to the req object, but we should only assign the id and or username */
                 
                 if(user?.user) {
-                    req.user = user.user
+                    req.user = { 
+                        id: user.user.id, 
+                        roles: user.user.roles
+                     }
                 } else {
-                    req.user = user
+                    req.user = { 
+                        id: user.id, 
+                        roles: user.roles
+                     }
                 }
                 
                 
