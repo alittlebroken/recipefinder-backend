@@ -147,15 +147,28 @@ describe('verifyMiddleware', () => {
       const authType = 'jwt'
       const options = { session: false }
 
+      const returnUser = [{
+          id: 1,
+          username: 'tbonaford@utopia.net',
+          email: 'tbonaford@utopia.net',
+          forename: 'Tony',
+          surname: 'Bonaford',
+          roles: 'Customer'
+      }]
+
       passport.authenticate = jest.fn((authType, options, callback) => () => {
         callback(passportError, passportUser, passportInfo);
       });
 
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return returnUser
+      })
+
       // execute
       await verify.checkToken(mockReq, mockRes, mockNxt);
-
+      
       // assert
-      expect(mockReq.user).toEqual(mockTokenUser)
+      expect(mockReq.user).toEqual(returnUser[0])
       expect(mockNxt).toHaveBeenCalled()
 
     })
@@ -241,6 +254,42 @@ describe('verifyMiddleware', () => {
       expect(mockNxt).toHaveBeenCalledWith(passportInfo.message)
       expect(mockReq.user).toEqual(undefined)
       
+    })
+
+    it('should return status 404 if passed in id does not matched any stored users', async () => {
+
+      // setup
+      const passportError = null
+      const passportInfo = null
+      const passportUser = mockTokenUser
+
+      const authType = 'jwt'
+      const options = { session: false }
+
+      const returnUser = []
+
+      passport.authenticate = jest.fn((authType, options, callback) => () => {
+        callback(passportError, passportUser, passportInfo);
+      });
+
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return returnUser
+      })
+
+      // execute
+      await verify.checkToken(mockReq, mockRes, mockNxt);
+      
+      // assert
+      expect(mockReq.user).toEqual(undefined)
+
+      expect(mockRes.status).toHaveBeenCalledWith(404)
+      expect(mockRes.json).toHaveBeenCalledWith({
+        status: 404,
+        success: false,
+        message: 'No user found matching supplied id, please login'
+      })
+
+
     })
 
   })
