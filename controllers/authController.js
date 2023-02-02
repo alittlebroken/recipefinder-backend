@@ -113,9 +113,9 @@ const loginUser = async (req, res, next) => {
 
                 const tokenBody = {
                     id: user.id,
-                    email: user.email,
+                    /*email: user.email,
                     forename: user.forename,
-                    surname: user.surname,
+                    surname: user.surname,*/
                     roles: user.roles
                 }
 
