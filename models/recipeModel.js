@@ -122,17 +122,17 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
        .insert(recipe, 'id')
        .transacting(trx);
 
-      steps.forEach(step => step.recipeId = recipeId);
+      steps.forEach(step => step.recipeId = recipeId[0].id);
       await db('steps').insert(steps).transacting(trx);
 
-      ingredients.forEach(ingredient => ingredient.recipeId = recipeId);
+      ingredients.forEach(ingredient => ingredient.recipeId = recipeId[0].id);
       await db('recipe_ingredients').insert(ingredients).transacting(trx);
 
       await db('cookbook_recipes').insert(
-        { cookbookid: cookbookId, recipeid: recipeId}
+        { cookbookId: cookbookId, recipeId: recipeId[0].id}
       ).transacting(trx);
 
-      categories.forEach(cat => cat.recipeId = recipeId);
+      categories.forEach(cat => cat.recipeId = recipeId[0].id);
       await db('recipe_categories').insert(categories).transacting(trx);
 
       return {
@@ -143,6 +143,7 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
     });
 
   } catch(e) {
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
