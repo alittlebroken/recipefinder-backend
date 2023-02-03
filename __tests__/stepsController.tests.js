@@ -31,6 +31,9 @@ describe('stepsController', () => {
 
     authToken = goodToken.accessToken;
     failToken = badToken.accessToken;
+
+    goodRefreshToken = goodToken.refreshToken
+    badRefreshToken = badToken.refreshToken
   });
 
   describe('find', () => {
@@ -127,6 +130,11 @@ describe('stepsController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [failUser]
+      })
+
       jest.spyOn(stepModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -139,7 +147,8 @@ describe('stepsController', () => {
       /* Execute the function */
       const res = await request(app)
         .get('/steps/')
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -1091,6 +1100,10 @@ describe('stepsController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [failUser]
+      })
+
       jest.spyOn(stepModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1103,7 +1116,8 @@ describe('stepsController', () => {
       /* Execute the function */
       const res = await request(app)
         .delete('/steps/')
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
