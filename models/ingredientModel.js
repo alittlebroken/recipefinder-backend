@@ -21,7 +21,8 @@ const create = async name => {
 
     /* Add the record to the database */
     const result = await db('ingredients')
-     .insert('name', name)
+     //.insert('name', name)
+     .insert({ name })
      .returning('id');
 
     if(!result || result.length < 1){
@@ -31,7 +32,7 @@ const create = async name => {
     }
 
   } catch(e) {
-
+    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
