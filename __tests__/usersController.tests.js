@@ -35,6 +35,10 @@ describe('userController', () => {
 
     authToken = goodToken.accessToken;
     failToken = badToken.accessToken;
+
+    goodRefreshToken = goodToken.refreshToken
+    badRefreshToken = badToken.refreshToken
+
   });
 
   afterEach(() => {
@@ -67,6 +71,10 @@ describe('userController', () => {
       // Set any variables needed to be passed to controllers and or models
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(userModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -87,6 +95,7 @@ describe('userController', () => {
       const response = await request(app)
         .get('/users')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -111,6 +120,10 @@ describe('userController', () => {
       // Set any variables needed to be passed to controllers and or models
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(userModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -145,6 +158,10 @@ describe('userController', () => {
       // Set any variables needed to be passed to controllers and or models
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [failUser]
+      })
+
       jest.spyOn(userModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -164,7 +181,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .get('/users')
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -187,6 +205,10 @@ describe('userController', () => {
       // Set any variables needed to be passed to controllers and or models
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(userModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -206,7 +228,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .get('/users')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -236,6 +259,10 @@ describe('userController', () => {
       // Set any variables needed to be passed to controllers and or models
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(userModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -255,7 +282,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .get('/users')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -300,6 +328,10 @@ describe('userController', () => {
   
       // Mock any needed third party modules
       jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
         return modelReturnData;
       })
   
@@ -319,7 +351,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -346,6 +379,10 @@ describe('userController', () => {
       const userId = 1001;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+      
       jest.spyOn(userModel, 'findById').mockImplementation(() => {
         return modelReturnData;
       })
@@ -382,7 +419,11 @@ describe('userController', () => {
       const userId = 1001;
   
       // Mock any needed third party modules
-      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [user]
+      })
+
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
         return modelReturnData;
       })
   
@@ -402,7 +443,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -429,7 +471,11 @@ describe('userController', () => {
       let userId;
   
       // Mock any needed third party modules
-      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [user]
+      })
+
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
         return modelReturnData;
       })
   
@@ -449,7 +495,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -479,7 +526,11 @@ describe('userController', () => {
       const userId = 1;
   
       // Mock any needed third party modules
-      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [user]
+      })
+
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
         return modelReturnData;
       })
   
@@ -499,7 +550,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -554,6 +606,10 @@ describe('userController', () => {
       const userId = 1;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
         return modelReturnData;
       });
@@ -574,7 +630,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}/recipes`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -601,6 +658,10 @@ describe('userController', () => {
       const userId = 1;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
         return modelReturnData;
       });
@@ -620,7 +681,8 @@ describe('userController', () => {
       /* Execute the function */
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
-        .get(`/users/${userId}/recipes`);
+        .get(`/users/${userId}/recipes`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -636,6 +698,10 @@ describe('userController', () => {
       const userId = 1;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
         return modelReturnData;
       });
@@ -656,7 +722,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}/recipes`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -683,6 +750,10 @@ describe('userController', () => {
       let userId;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
         return modelReturnData;
       });
@@ -703,7 +774,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}/recipes`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -733,6 +805,10 @@ describe('userController', () => {
       const userId = 1;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
         return modelReturnData;
       });
@@ -753,7 +829,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}/recipes`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -793,6 +870,10 @@ describe('userController', () => {
       const userId = 1;
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(recipeModel, 'findByUserId').mockImplementation(() => {
         return modelReturnData;
       });
@@ -813,7 +894,8 @@ describe('userController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const res = await request(app)
         .get(`/users/${userId}/recipes`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -1376,7 +1458,11 @@ describe('userController', () => {
       }
   
       // Mock any needed third party modules
-      jest.spyOn(userModel, 'insert').mockImplementation(() => {
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [user]
+      })
+
+      jest.spyOn(userModel, 'insert').mockImplementationOnce(() => {
         return modelReturnData;
       });
   
@@ -1397,7 +1483,8 @@ describe('userController', () => {
       const res = await request(app)
         .post(`/users`)
         .send(payload)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toBe(returnStatus);
@@ -1474,7 +1561,11 @@ describe('userController', () => {
       }
   
       // Mock any needed third party modules
-      jest.spyOn(userModel, 'findAll').mockImplementation(() => {
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [failUser]
+      })
+
+      jest.spyOn(userModel, 'findAll').mockImplementationOnce(() => {
         return modelReturnData;
       });
   
@@ -1487,7 +1578,9 @@ describe('userController', () => {
       const res = await request(app)
         .post(`/users`)
         .send(payload)
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
+        
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -4548,6 +4641,10 @@ describe('userController', () => {
       // Set any variables needed to be passed to controllers and or models
   
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [failUser]
+      })
+
       jest.spyOn(userModel, 'findAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -4560,7 +4657,8 @@ describe('userController', () => {
       /* Execute the function */
       const res = await request(app)
         .delete(`/users`)
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);

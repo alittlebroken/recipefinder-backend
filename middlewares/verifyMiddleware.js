@@ -1,4 +1,6 @@
 const passport = require('passport')
+const userModel = require('../models/userModel');
+
 const checkRoles = (roles) => (req, res, next) => {
    
     /* We should check we are logged in first */
@@ -10,6 +12,8 @@ const checkRoles = (roles) => (req, res, next) => {
         })
     }
 
+    console.log(req.user)
+
     /* Check the specified roles against any the user has */
     const rolesFound = roles.includes(req?.user?.roles);
     
@@ -20,6 +24,7 @@ const checkRoles = (roles) => (req, res, next) => {
             message: 'You are not authorized to access the specified route'
         })
     }
+    
 
     /* As all seems ok, lets just pass on to the next middleware */
     return next();
@@ -31,7 +36,7 @@ const checkToken = async (req,res,next) => {
     return await passport.authenticate(
         'jwt',
         { session: false },
-        (err, user, info) => {
+        async (err, user, info) => {
             if(err || !user){
                 if(info?.message === 'jwt expired'){
                     return res.status(401).json({ 
@@ -51,17 +56,29 @@ const checkToken = async (req,res,next) => {
                     return next(info?.message)
                 }
             } else {
-                /* Assign the user to the req object */
-                
-                if(user?.user) {
-                    req.user = user.user
+
+                /* Populate the request with a new user object containing the user details 
+                 * 
+                 * Use the userModel to retrieve the data
+                 */
+                let userid = user.user ? user.user.id : user.id;
+                const foundUser = await userModel.findById(userid)
+                console.log('verifyMiddleware.checkToken - foundUser: ', foundUser)
+                /* Assign the found user to the req object */
+                if(foundUser && foundUser.length > 0){
+                    req.user = foundUser[0]
                 } else {
-                    req.user = user
+                    return res.status(404).json({
+                        status: 404,
+                        success: false,
+                        message: 'No user found matching supplied id, please login'
+                    })
                 }
                 
-                
                 return next()
+
             }
+
         }
     )(req, res, next)
 }

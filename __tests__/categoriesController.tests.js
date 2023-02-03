@@ -30,6 +30,9 @@ describe('categoriesController', () => {
 
     authToken = goodToken.accessToken;
     failToken = badToken.accessToken;
+    refreshToken = goodToken.refreshToken;
+    badRefreshToken = badToken.refreshToken
+    
   });
 
   describe('list', () => {
@@ -507,6 +510,10 @@ describe('categoriesController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [failUser]
+      })
+
       jest.spyOn(categoryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -519,7 +526,8 @@ describe('categoriesController', () => {
       /* Execute the function */
       const res = await request(app)
         .delete('/categories')
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -542,6 +550,10 @@ describe('categoriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(categoryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -555,7 +567,8 @@ describe('categoriesController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .delete('/categories')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${refreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
@@ -583,6 +596,10 @@ describe('categoriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(categoryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -596,7 +613,10 @@ describe('categoriesController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .delete('/categories')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${refreshToken}`)
+
+      console.log(response.body)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);

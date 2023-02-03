@@ -49,14 +49,18 @@ passport.use(
         // TODO: Update the last login time here
 
         /* generate a user object to send back */
-        const authedUser = {
+        /*const authedUser = {
           id: user.id,
           username: user.username,
           email: user.email,
           roles: user.roles,
           forename: user.forename,
           surname: user.surname
-        };
+        };*/
+        const authedUser = {
+          id: user.id,
+          roles: user.roles
+        }
         return done(null, authedUser, { message: 'login successful'});
 
       } catch(e) {

@@ -35,6 +35,9 @@ describe('cookbookController', () => {
 
     authToken = goodToken.accessToken;
     failToken = badToken.accessToken;
+
+    goodRefreshToken = goodToken.refreshToken
+    badRefreshToken = badToken.refreshToken
   });
 
   describe('list', () => {
@@ -136,6 +139,10 @@ describe('cookbookController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [failUser]
+      })
+
       jest.spyOn(cookbookModel, 'findAll').mockImplementation(() => {
         return mockCookbooks;
       });
@@ -148,7 +155,8 @@ describe('cookbookController', () => {
       /* Execute the function */
       const res = await request(app)
         .get(`/cookbooks/`)
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -2989,6 +2997,10 @@ describe('cookbookController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementationOnce(() => {
+        return [failUser]
+      })
+
       jest.spyOn(cookbookModel, 'removeAll').mockImplementation(() => {
         return mockModelReturnData;
       });
@@ -3001,7 +3013,8 @@ describe('cookbookController', () => {
       /* Execute the function */
       const res = await request(app)
         .delete(`/cookbooks`)
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);

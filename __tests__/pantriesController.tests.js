@@ -37,6 +37,9 @@ describe('pantriesController', () => {
 
     authToken = goodToken.accessToken;
     failToken = badToken.accessToken;
+
+    goodRefreshToken = goodToken.refreshToken
+    badRefreshToken = badToken.refreshToken
   });
 
   afterEach(() => {
@@ -78,6 +81,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -94,7 +101,8 @@ describe('pantriesController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .get('/pantries')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
@@ -125,14 +133,18 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelreturnData;
       });
 
       // Set here the expected return values for the test
-      const returnStatus = 404;
+      const returnStatus = 401;
       const returnSuccess = false;
-      const returnMessage = 'There are no pantries to list';
+      const returnMessage = 'You are not authorized to access this resource, please login';
   
       /* Mock Express request and response */
       const mockRequest = {};
@@ -142,7 +154,7 @@ describe('pantriesController', () => {
       /* Perform the test */
       const response = await request(app)
         .get('/pantries')
-        .set('Authorization', `Bearer ${authToken}`);
+        
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
@@ -165,6 +177,9 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [failUser]
+      })
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelreturnData;
       });
@@ -177,7 +192,8 @@ describe('pantriesController', () => {
       /* Execute the function */
       const res = await request(app)
         .get('/pantries')
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -200,6 +216,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelreturnData;
       });
@@ -217,7 +237,8 @@ describe('pantriesController', () => {
       /* Perform the test */
       const response = await request(app)
         .get('/pantries')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
@@ -243,6 +264,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelreturnData;
       });
@@ -260,7 +285,8 @@ describe('pantriesController', () => {
       /* Perform the test */
       const response = await request(app)
         .get('/pantries')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
@@ -306,6 +332,10 @@ describe('pantriesController', () => {
         const pantryId = 2;
 
         // Mock any needed third party modules
+        jest.spyOn(userModel, 'findById').mockImplementation(() => {
+          return [user]
+        })
+
         jest.spyOn(pantryModel, 'list').mockImplementation(() => {
           return modelReturnData;
         });
@@ -322,7 +352,8 @@ describe('pantriesController', () => {
         //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
         const response = await request(app)
           .get('/pantries/:id')
-          .set('Authorization', `Bearer ${authToken}`);
+          .set('Authorization', `Bearer ${authToken}`)
+          .set('Cookie', `jwt=${goodRefreshToken}`)
 
         /* Test everything works as expected */
         expect(response.status).toBe(returnStatus);
@@ -351,6 +382,10 @@ describe('pantriesController', () => {
         const pantryId = 1234;
 
         // Mock any needed third party modules
+        jest.spyOn(userModel, 'findById').mockImplementation(() => {
+          return [user]
+        })
+
         jest.spyOn(pantryModel, 'list').mockImplementation(() => {
             return modelReturnData;
         });
@@ -384,6 +419,10 @@ describe('pantriesController', () => {
           const pantryId = 1234;
 
           // Mock any needed third party modules
+          jest.spyOn(userModel, 'findById').mockImplementation(() => {
+            return [user]
+          })
+
           jest.spyOn(pantryModel, 'list').mockImplementation(() => {
               return modelReturnData;
           });
@@ -402,7 +441,8 @@ describe('pantriesController', () => {
           //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
           const response = await request(app)
           .get('/pantries/:id')
-          .set('Authorization', `Bearer ${authToken}`);
+          .set('Authorization', `Bearer ${authToken}`)
+          .set('Cookie', `jwt=${goodRefreshToken}`)
 
           /* Test everything works as expected */
           expect(response.status).toBe(returnStatus);
@@ -426,6 +466,10 @@ describe('pantriesController', () => {
           let pantryId;
 
           // Mock any needed third party modules
+          jest.spyOn(userModel, 'findById').mockImplementation(() => {
+            return [user]
+          })
+
           jest.spyOn(pantryModel, 'list').mockImplementation(() => {
               return modelReturnData;
           });
@@ -444,7 +488,8 @@ describe('pantriesController', () => {
           //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
           const response = await request(app)
             .get(`/pantries/${pantryId}`)
-            .set('Authorization', `Bearer ${authToken}`);
+            .set('Authorization', `Bearer ${authToken}`)
+            .set('Cookie', `jwt=${goodRefreshToken}`)
 
           /* Test everything works as expected */
           expect(response.status).toBe(returnStatus);
@@ -471,6 +516,10 @@ describe('pantriesController', () => {
           const pantryId = 1234;
 
           // Mock any needed third party modules
+          jest.spyOn(userModel, 'findById').mockImplementation(() => {
+            return [user]
+          })
+
           jest.spyOn(pantryModel, 'list').mockImplementation(() => {
               return modelReturnData;
           });
@@ -489,7 +538,8 @@ describe('pantriesController', () => {
           //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
           const response = await request(app)
           .get('/pantries/:id')
-          .set('Authorization', `Bearer ${authToken}`);
+          .set('Authorization', `Bearer ${authToken}`)
+          .set('Cookie', `jwt=${goodRefreshToken}`)
 
           /* Test everything works as expected */
           expect(response.status).toBe(returnStatus);
@@ -530,6 +580,10 @@ describe('pantriesController', () => {
       const userId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel,'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -549,7 +603,8 @@ describe('pantriesController', () => {
       const response = await request(app)
         .post('/pantries')
         .send({ userId: userId})
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
       
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -579,6 +634,10 @@ describe('pantriesController', () => {
       const userId = 1;
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelreturnData;
       });
@@ -613,6 +672,10 @@ describe('pantriesController', () => {
       const userId = 1;
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [failUser]
+      })
+
       jest.spyOn(pantryModel, 'listAll').mockImplementation(() => {
         return modelreturnData;
       });
@@ -626,7 +689,8 @@ describe('pantriesController', () => {
       const res = await request(app)
         .post('/pantries')
         .send({ userId: userId})
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -650,6 +714,10 @@ describe('pantriesController', () => {
       const userId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel,'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -687,6 +755,10 @@ describe('pantriesController', () => {
       const userId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel,'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -727,6 +799,10 @@ describe('pantriesController', () => {
       const userId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel,'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -767,6 +843,10 @@ describe('pantriesController', () => {
       const userId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel,'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -827,6 +907,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -846,7 +930,8 @@ describe('pantriesController', () => {
       const response = await request(app)
         .post(`/pantries/${pantryId}`)
         .send(pantryItem)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -877,6 +962,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -914,6 +1003,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -968,6 +1061,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1019,6 +1116,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1071,6 +1172,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1120,6 +1225,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1170,6 +1279,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1223,6 +1336,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1276,6 +1393,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1329,6 +1450,10 @@ describe('pantriesController', () => {
       };
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'create').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1389,6 +1514,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1407,7 +1536,8 @@ describe('pantriesController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .delete('/pantries')
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toEqual(200);
@@ -1432,6 +1562,10 @@ describe('pantriesController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1458,6 +1592,10 @@ describe('pantriesController', () => {
       // Set Mocked data that models and controllers should return
       
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [failUser]
+      })
+
       jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1470,7 +1608,8 @@ describe('pantriesController', () => {
       /* Execute the function */
       const res = await request(app)
         .delete('/pantries')
-        .set('Authorization', `Bearer ${failToken}`);
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
@@ -1493,6 +1632,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1532,6 +1675,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryModel, 'removeAll').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1587,6 +1734,10 @@ describe('pantriesController', () => {
       const pantryId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1605,7 +1756,8 @@ describe('pantriesController', () => {
       //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
       const response = await request(app)
         .delete(`/pantries/${pantryId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
@@ -1630,6 +1782,10 @@ describe('pantriesController', () => {
       const pantryId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1658,6 +1814,10 @@ describe('pantriesController', () => {
       const pantryId = 2;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1694,6 +1854,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1730,6 +1894,10 @@ describe('pantriesController', () => {
       // Set any variables needed to be passed to controllers and or models
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1770,6 +1938,10 @@ describe('pantriesController', () => {
       const pantryId = 1;
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'removeByPantry').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1831,6 +2003,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1850,7 +2026,8 @@ describe('pantriesController', () => {
       const response = await request(app)
         .put(`/pantries/${id}`)
         .send(payload)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       /* Test everything works as expected */
       expect(response.status).toEqual(returnStatus);
@@ -1881,6 +2058,10 @@ describe('pantriesController', () => {
        }
  
        // Mock any needed third party modules
+       jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
        jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
          return modelReturnData;
        });
@@ -1916,6 +2097,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -1970,6 +2155,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2021,6 +2210,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2074,6 +2267,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2122,6 +2319,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2175,6 +2376,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2228,6 +2433,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2281,6 +2490,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2337,6 +2550,10 @@ describe('pantriesController', () => {
       }
 
       // Mock any needed third party modules
+      jest.spyOn(userModel, 'findById').mockImplementation(() => {
+        return [user]
+      })
+
       jest.spyOn(pantryIngredientsModel, 'update').mockImplementation(() => {
         return modelReturnData;
       });
@@ -2378,43 +2595,4 @@ describe('pantriesController', () => {
 
   });
 
-});
-
-
-
-xdescribe('<model>Controller.<method>', () => {
-
-    /*
-     * Steps to run before and after this test suite
-     */
-    beforeEach(async () => {
-  
-    });
-  
-    afterEach(() => {
-      jest.clearAllMocks();
-    })
-  
-    xit('returns ...', async () => {
-  
-      // Set Mocked data that models and controllers should return
-  
-      // Set any variables needed to be passed to controllers and or models
-  
-      // Mock any needed third party modules
-  
-      // Set here the expected return values for the test
-  
-      /* Mock Express request and response */
-      const mockRequest = {};
-      const mockResponse = {status: jest.fn().mockReturnThis(), json: jest.fn()};
-      const mockNext = jest.fn();
-  
-      /* Execute the function */
-      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
-  
-      /* Test everything works as expected */
-  
-    });
-  
 });
