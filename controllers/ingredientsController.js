@@ -131,8 +131,9 @@ const create = async (req, res, next) => {
         }
 
         /* Add the record to the database */
+        console.log(req.body.name)
         const result = await ingredientModel.create(req.body.name);
-
+        console.log(result)
         if(!result || result.length < 1 || result.success === false){
             throw {
                 status: 500,
