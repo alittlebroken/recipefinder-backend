@@ -58,7 +58,8 @@ const getById = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    const results = await cookbookModel.findById(req.params.id);
+    let id = parseInt(req.params.id)
+    const results = await cookbookModel.findById(id);
 
     if(!results || results.length < 1){
       res.status(404).json({
@@ -237,7 +238,7 @@ const update = async (req, res, next) => {
     if(validationErrors) return next(validationErrors);
 
     /* extra the data from the req body and parameters */
-    const { id } = req.params;
+    let id = parseInt(req.params.id)
     const {
       name,
       description,
@@ -288,7 +289,8 @@ const remove = async (req, res, next) => {
     }
 
     /* remove the specified record */
-    const result = await cookbookModel.remove(req.params.id);
+    let id = parseInt(req.params.id)
+    const result = await cookbookModel.remove(id);
 
     if(!result){
       let err = new Error('There was a problem with the resource, please try again later');
@@ -325,7 +327,8 @@ const recipes = async (req, res, next) => {
     if(validationErrors) return next(validationErrors);
 
     /* get the desired recipes */
-    let results = await cookbookModel.recipes(req.params.id);
+    let id = parseInt(req.params.id)
+    let results = await cookbookModel.recipes(id);
 
     if(results.length < 1){
       res.status(404).json({
