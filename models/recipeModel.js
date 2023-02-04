@@ -573,7 +573,7 @@ const findAll = async () => {
 
          for( let result of results) {
          //results.forEach( async result => {
-
+          
           let ingredientResults = await trx('recipe_ingredients as ri')
             .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
             .select(
@@ -582,21 +582,21 @@ const findAll = async () => {
               'ri.amount as amount',
               'ri.amount_type as amount_type'
             )
-            .where('ri.recipeId', result.id).transacting(trx);
+            .where('ri.recipeId', result.recipeId).transacting(trx);
 
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
-           .where('cr.recipeId', result.id).transacting(trx);
+           .where('cr.recipeId', result.recipeId).transacting(trx);
 
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
-           .where('recipeId', result.id).transacting(trx);
+           .where('recipeId', result.recipeId).transacting(trx);
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
-           .where('rc.recipeId', result.id).transacting(trx);
+           .where('rc.recipeId', result.recipeId).transacting(trx);
 
           let recipe = {
             ...result,
@@ -620,7 +620,7 @@ const findAll = async () => {
 
 
   } catch(e) {
-
+        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
