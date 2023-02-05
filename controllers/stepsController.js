@@ -86,7 +86,7 @@ const findById = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(results);
+        res.status(200).json(results[0]);
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -186,7 +186,8 @@ const removeById = async (req, res, next) => {
        /* Remove the steps from the recipe */
        let recipeId = parseInt(req.params.id);
        const results = await stepsModel.removeAllByRecipe(recipeId);
-       
+       console.log(results)
+
        if(!results || results.success === false){
         throw {
             status: 500,
