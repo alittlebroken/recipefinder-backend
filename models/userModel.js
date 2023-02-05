@@ -439,15 +439,18 @@ const generateTokens = async data => {
     };
 
     /* Generate the token and refresh token */
+    const accessTokenExpiry = process.env.ENVIRONMENT === "production" ? process.env.JWT_TOKEN_EXPIRY : "24h"
+    const refreshTokenExpiry = process.env.ENVIRONMENT === "production" ? process.env.JWT_REFRESH_TOKEN_EXPIRY : "24h"
+
     const accessToken = await jwt.sign(
         data, 
         process.env.JWT_TOKEN_SECRET,
-        { expiresIn: "14m" }
+        { expiresIn: accessTokenExpiry }
         );
     const refreshToken = await jwt.sign(
       data, 
       process.env.JWT_REFRESH_TOKEN_SECRET,
-      { expiresIn: "30d" }
+      { expiresIn: refreshTokenExpiry }
       );
 
 
