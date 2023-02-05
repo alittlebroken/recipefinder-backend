@@ -142,7 +142,7 @@ const listRecipeIngredients = async (req, res, next) => {
 
         /* Get the required data from the DB */
         let id = parseInt(req.params.id);
-        const results = await recipeIngredientsModel.findByRecipeId();
+        const results = await recipeIngredientsModel.findByRecipeId(id);
 
         if(!results || results.success === false){
             throw {
