@@ -349,11 +349,12 @@ const findById = async id => {
      };
 
     /* Gather the data from the DB */
-    const results = await db('recipe_ingredients ri')
-     .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
+    const results = await db('recipe_ingredients as ri')
+     .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
+     .join('recipes as r', 'r.id', '=', 'ri.recipeId')
      .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
      .where('ri.recipeId', id);
-
+     
     if(results && results.length > 0){
       return results;
     } else {
@@ -361,6 +362,7 @@ const findById = async id => {
     }
 
    } catch(e) {
+     console.log(e)
      /* Check for library errors and if found swap them out for a generic
         one to send back over the API for security */
      let message;
