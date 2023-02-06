@@ -13,7 +13,7 @@ const find = async (req, res, next) => {
 
         /* Get the records from the DB */
         const results = await stepsModel.findAll();
-
+        
         if(!results || results.success === false){
             throw {
                 status: 500,
@@ -21,7 +21,7 @@ const find = async (req, res, next) => {
                 message: 'There was a problem with the resource, please try again later'
             }
         }
-
+        
         if(results.length < 1){
             throw {
                 status: 404,
@@ -33,6 +33,7 @@ const find = async (req, res, next) => {
         res.status(200).json(results);
 
     } catch(e) {
+       
         /* Log out the issue(s) */
         appLogger.logMessage('error', `stepsController.get - Status Code ${e.status}: ${e.message}`);
 
@@ -89,6 +90,7 @@ const findById = async (req, res, next) => {
         res.status(200).json(results[0]);
 
     } catch(e) {
+        
         /* Log out the issue(s) */
         appLogger.logMessage('error', `stepsController.get - Status Code ${e.status}: ${e.message}`);
 
@@ -185,8 +187,7 @@ const removeById = async (req, res, next) => {
 
        /* Remove the steps from the recipe */
        let recipeId = parseInt(req.params.id);
-       const results = await stepsModel.removeAllByRecipe(recipeId);
-       console.log(results)
+       const results = await stepsModel.removeOneById(recipeId);
 
        if(!results || results.success === false){
         throw {
