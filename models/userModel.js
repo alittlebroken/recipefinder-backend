@@ -68,12 +68,14 @@ const insert = async (username, password, email, roles = 'Customer') => {
     return records;
 
   } catch(e) {
-   
+    console.log(e)
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message
+    } else if (e.code === '23505') {
+      message = 'That username is already taken'
     } else {
-      message = 'There was an issue using this resource, please try again later'
+        message = 'There was an issue using this resource, please try again later'
     }
 
     return {
