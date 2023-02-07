@@ -96,12 +96,12 @@ const listUser = async (req, res, next) => {
         }
 
         if(results.success === false){
-            res.status(500).json({
+            throw{
                 status: 500,
                 success: false,
-                message: 'There was a problem with the resource, please try again later',
+                message: results.message,
                 results: []
-            })
+            }
         }
 
         res.status(200).json({
@@ -146,7 +146,7 @@ const listUserRecipes = async (req, res, next) => {
 
         /* Gather the results from the DB */
         const results = await recipeModel.findByUserId(id);
-
+        console.log(results)
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
             res.status(404).json({
@@ -158,12 +158,12 @@ const listUserRecipes = async (req, res, next) => {
         }
 
         if(!results || results.success === false){
-            res.status(500).json({
+            throw{
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
                 results: []
-            });
+            };
         }
 
         /* Everything is OK, so send back the results */
@@ -1159,7 +1159,7 @@ const updateUser = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
-        if(!Array.isArray(req.body.roles)){
+        if(typeof req.body.roles !== 'string'){
             validationErrors = {
                 status: 400,
                 success: false,
