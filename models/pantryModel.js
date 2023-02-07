@@ -41,6 +41,7 @@ const create = async userId => {
     return result;
 
   } catch(e) {
+    console.log(e)
     /* Send back any error messages to the calling app. We wish to
        send back a generic message for SQL and system messages so we
       should check the name of the erro first and act accordingly. */
@@ -325,34 +326,56 @@ const list = async pantryId => {
     }
 
     /* Get the list if pantries from the DB */
-    const results = await db('pantries as p')
-     .join('users as u', 'p.userId', '=', 'u.id')
-     .count('pi.pantryId as numIngredients')
-     .select(
-      'p.id as id',
-      'u.id as userId',
-      'u.username as username',
-      db('pantry_ingredients as pi')
-       .count('*')
-       .whereRaw('?? == ??', ['pi.pantryId', 'p.id'])
-       .as('numIngredients')
-     )
-     .where({ pantryId: pantryId});
+     let pantry
 
-     if(!results){
+     /* Get the particular pantry we are interested in */
+     const pantryResults = await db('pantries as p')
+      .join('users as u', 'u.id', '=', 'p.userId')
+      .select(
+        'p.id as pantryId',
+        'u.username as username'
+      )
+      .where('p.id', pantryId)
+
+      /* Now find out how many ingredients the pantry has */
+      const pantryIngredientsCount = await db('pantry_ingredients as pi')
+       .count('pi.id')
+       .where('pi.pantryId', pantryResults[0].pantryId)
+
+      const ingredientResults = await db('pantry_ingredients as pi')
+       .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+       .select(
+        'pi.id as id',
+        'i.id as ingredientId',
+        'i.name',
+        'pi.amount',
+        'pi.amount_type'
+        )
+       .where('pi.pantryId', pantryResults[0].pantryId)
+
+      pantry = [
+        {
+         ...pantryResults[0],
+         numIngredients: Number.parseInt(pantryIngredientsCount[0].count),
+         ingredients: ingredientResults
+        }
+      ]
+
+     if(!pantry || pantry === undefined){
       throw {
         name: 'PANTRYMODEL_ERROR',
         message: 'There was a problem with the resource, please try again later'
       }
      }
 
-     if(results.length < 1){
+     if(pantry.length < 1){
       return [];
      }
 
-     return results;
+     return pantry;
 
   } catch(e) {
+    
     /* We only wish to have the errors specific to the model reported back others are caught as
     a generic error */
     let message;
