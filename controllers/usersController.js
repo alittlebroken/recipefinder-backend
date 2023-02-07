@@ -385,15 +385,15 @@ const createUser = async (req, res, next) => {
         if(validationErrors) return next(validationErrors);
 
         /* Add the user to the DB */
-        const result = await userModel.insert(req.body.username, req.body.email, req.body.password);
+        const result = await userModel.insert(req.body.username, req.body.password, req.body.email, );
 
         if(!result || result.success === false){
-            res.status(500).json({
+            throw {
                 status: 500,
                 success: false,
-                message: 'There was a problem with the resource, please try again later',
+                message: result.message,
                 results: []
-            });
+            };
         }
 
         /* No issues found send back the details of the newly created user */
@@ -406,6 +406,7 @@ const createUser = async (req, res, next) => {
 
 
     } catch(e) {
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
