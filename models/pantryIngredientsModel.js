@@ -133,10 +133,15 @@ const update = async data => {
 
     /* Update the data */
     const result = await db('pantry_ingredients')
-     .update(data)
-     .where('id', data.id);
+     .update({
+      pantryId: Number.parseInt(data.pantryId),
+      ingredientId: Number.parseInt(data.ingredientId),
+      amount: Number.parseInt(data.amount),
+      amount_type: data.amount_type
+     })
+     .where('id', Number.parseInt(data.id));
 
-     if(result && result.length > 0){
+     if(result && result > 0){
        return {
          success: true,
          message: messageHelper.INFO_RECORD_UPDATED
@@ -146,6 +151,7 @@ const update = async data => {
      }
 
   } catch(e) {
+    console.error(e)
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;
