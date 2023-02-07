@@ -99,6 +99,7 @@ const list = async (req, res, next) => {
         res.status(200).send(result);
 
     } catch(e) {
+        console.log(e)
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
@@ -249,7 +250,7 @@ const add = async (req, res, next) => {
         }
 
         const result = await pantryIngredientsModel.create(dataToAdd);
-
+        console.log(result)
         if(!result || result.success === false){
             if(result.message === 'There was a problem with the resource, please try again later'){
                 throw {
@@ -462,15 +463,15 @@ const update = async (req, res, next) => {
 
         /* Lets update the specified record in the database */
         let payload = {
-            id: parseInt(req.params.id),
-            pantryId: parseInt(req.body.pantryId),
+            id: parseInt(req.body.id),
+            pantryId: parseInt(req.params.id),
             ingredientId: parseInt(req.body.ingredientId),
             amount: parseInt(req.body.amount),
             amount_type: req.body.amount_type
         }
 
         const result = await pantryIngredientsModel.update(payload);
-
+        
         if(!result || result.success === false){
             throw {
                 status: 500,
@@ -478,7 +479,7 @@ const update = async (req, res, next) => {
                 message: 'There was a problem with the resource, please try again later'
             }
         }
-
+        
         if(result?.length < 1){
             throw {
                 status: 404,
@@ -496,6 +497,7 @@ const update = async (req, res, next) => {
         );
 
     } catch(e) {
+        console.log(e)
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
