@@ -449,7 +449,7 @@ const findByUserId = async id => {
     if(!id || typeof id !== 'number'){
       throw {
         name: 'COOKBOOKMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Missing user id'
       }
     }
 
