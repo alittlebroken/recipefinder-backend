@@ -260,7 +260,7 @@ const listUserPantry = async (req, res, next) => {
     try{
 
         /* Validate any passed in data */
-        let id = req.params.id;
+        let id = Number.parseInt(req.params.id);
 
         if(!id || id === 'undefined' || id == null){
             res.status(400).json({
@@ -276,7 +276,7 @@ const listUserPantry = async (req, res, next) => {
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'The user currently has no pantry ingredients',
@@ -285,7 +285,7 @@ const listUserPantry = async (req, res, next) => {
         }
 
         if(!results || results.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
@@ -776,25 +776,25 @@ const addUserPantry = async (req, res, next) => {
 
         /* Validation is ok, so lets get the users pantry and then add
            the ingredient to the desired pantry */
-        const pantryResult = await pantryIngredients.findByUser(req.params.id);
+        const pantryResult = await pantryIngredients.findByUser(Number.parseInt(req.params.id));
         if(!pantryResult || pantryResult.length < 1 || pantryResult.success === false){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'Unable to find pantry for user',
                 results: []
             })
         }
-
+        
         const results = await pantryIngredients.create({
-            pantryId: pantryResult.pantryId,
+            pantryId: pantryResult[0].pantryId,
             ingredientId: req.body.ingredientId,
             amount: req.body.amount,
             amount_type: req.body.amount_type
         });
 
         if(results.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
