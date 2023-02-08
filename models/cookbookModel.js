@@ -455,7 +455,7 @@ const findByUserId = async id => {
 
     /* gather the data from the database */
     const result = await db('cookbooks')
-     .where('id', id)
+     .where('userId', id)
      .select('*');
 
     if(!result || result.length === 0){
@@ -465,7 +465,7 @@ const findByUserId = async id => {
     return result;
 
   } catch(e) {
-
+    
     /* Non custom messages should be returned as a generic message to the front
        end */
     let message;
