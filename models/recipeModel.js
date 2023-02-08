@@ -971,9 +971,9 @@ const findByCategory = async terms => {
 const findByUserId = async id => {
 
   try {
-
+    
     /* Validate the passed in arguments */
-    if(!validation.validator(id, 'number')){
+    if(!validation.validator(Number.parseInt(id), 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
         message: messageHelper.ERROR_MISSING_VALUES
@@ -983,30 +983,14 @@ const findByUserId = async id => {
     let finalRecipe = [];
 
     /* Gather the required data from the database */
-    const result = await db('recipes')
+    const results = await db('recipes')
      .select('*')
      .where('userId', id);
 
-    /* Only if we have found a recipe should we then go ahead and retrieve from
-       the database all the supporting data like steps and categories */
-    if(result && result.length > 0){
 
-      /* build the recipe object we wish to return */
-      finalRecipe.push(
-        {
-          id: result[0].id,
-          userId: result[0].userId,
-          name: result[0].name,
-          description: result[0].description,
-          servings: result[0].servings,
-          calories_per_serving: result[0].calories_per_serving,
-          prep_time: result[0].prep_time,
-          cook_time: result[0].cook_time,
-          rating: result[0].rating,
-        }
-      );
-      return finalRecipe;
-
+    /* If we any results then send them back  */
+    if(results && results.length > 0){
+      return results;
     } else {
       return [];
     }
