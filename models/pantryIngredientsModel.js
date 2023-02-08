@@ -536,19 +536,17 @@ const findByUser = async id => {
 
     /* Update the data */
     const result = await db('pantry_ingredients as pi')
-     .join('users as u', 'pi.userId', '=', 'u.id')
+     .join('pantries as p', 'pi.pantryId', '=', 'p.id')
      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
      .select(
        'pi.id as id',
        'pi.pantryId as pantryId',
        'i.id as ingredientId',
-       'u.id as userId',
-       'u.username as username',
        'i.name as ingredientName',
        'pi.amount as amount',
        'pi.amount_type as amount_type'
      )
-     .where('pi.userId', id);
+     .where('p.userId', id);
 
      if(result && result.length > 0){
        return result;
@@ -557,6 +555,7 @@ const findByUser = async id => {
      }
 
   } catch(e) {
+
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;
