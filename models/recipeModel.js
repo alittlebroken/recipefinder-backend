@@ -1037,7 +1037,7 @@ const removeAllByUser  = async id => {
 
         const recipeCount = await db('recipes')
          .delete()
-         .where('userid', id)
+         .where('userId', id)
          .transacting(trx);
 
         if(recipeCount > 0){
@@ -1055,7 +1055,7 @@ const removeAllByUser  = async id => {
       });
 
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
