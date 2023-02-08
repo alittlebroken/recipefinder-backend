@@ -1329,7 +1329,7 @@ const updateUserRecipe = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
-        if(!recipe.name|| recipe.id === 'undefined'){
+        if(!recipe.name|| recipe.name === 'undefined'){
             validationErrors = {
                 status: 400,
                 success: false,
