@@ -146,7 +146,7 @@ const listUserRecipes = async (req, res, next) => {
 
         /* Gather the results from the DB */
         const results = await recipeModel.findByUserId(id);
-        console.log(results)
+        
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
             res.status(404).json({
@@ -955,12 +955,12 @@ const removeUserRecipes = async (req, res, next) => {
                     });
                     break;
                 default:
-                    res.status(500).json({
+                    throw {
                         status: 500,
                         success: false,
                         message: 'There was a problem with the resource, please try again later',
                         results: []
-                    });
+                    };
                     break;
             }
         }
