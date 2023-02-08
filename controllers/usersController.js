@@ -1791,13 +1791,13 @@ const updateUserPantry = async (req, res, next) => {
         const result = await pantryIngredients.update({
             id: req.body.id,
             pantryId: req.body.pantryId,
-            ingredientId: req.body.ingredientid,
-            amount: req.body.amount,
+            ingredientId: req.body.ingredientId,
+            amount:req.body.amount,
             amount_type: req.body.amount_type
         });
 
         if(!result || result.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
