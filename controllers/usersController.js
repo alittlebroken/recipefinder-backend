@@ -221,12 +221,12 @@ const listUserCookbooks = async (req, res, next) => {
         }
 
         if(!results || results.success === false){
-            res.status(500).json({
+            throw {
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
                 results: []
-            });
+            };
         }
 
         /* Everything is OK, so send back the results */
