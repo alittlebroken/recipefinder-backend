@@ -1288,6 +1288,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.recipeId || recipe.recipeId === 'undefined'){
             validationErrors = {
@@ -1308,6 +1309,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.userId || recipe.userId === 'undefined'){
             validationErrors = {
@@ -1328,6 +1330,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.name|| recipe.name === 'undefined'){
             validationErrors = {
@@ -1348,6 +1351,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+        
 
         if(!recipe.servings || recipe.servings === 'undefined'){
             validationErrors = {
@@ -1368,6 +1372,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+        
 
         if(!recipe.calories_per_serving || recipe.calories_per_serving === 'undefined'){
             validationErrors = {
@@ -1388,6 +1393,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.prep_time || recipe.prep_time === 'undefined'){
             validationErrors = {
@@ -1408,6 +1414,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+        
 
         if(!recipe.cook_time || recipe.cook_time === 'undefined'){
             validationErrors = {
@@ -1428,7 +1435,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+       
         if(steps){
             if(!Array.isArray(steps)){
                 validationErrors = {
@@ -1440,7 +1447,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+        
         if(ingredients){
             if(!Array.isArray(ingredients)){
                 validationErrors = {
@@ -1452,7 +1459,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+        
         if(cookbooks){
             if(!Array.isArray(cookbooks)){
                 validationErrors = {
@@ -1464,7 +1471,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+       
         if(categories){
             if(!Array.isArray(categories)){
                 validationErrors = {
@@ -1476,25 +1483,25 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+        
         /* Update the data within the database */
         const result = await recipeModel.update(
             {
-                recipe,
-                steps,
-                ingredients,
-                cookbooks,
-                categories
+                ...recipe,
+                steps: steps,
+                ingredients: ingredients,
+                cookbooks: cookbooks,
+                categories: categories
             }
         )
-
+        
         if(!result || result.success === false){
-            res.status(500).json({
+            throw{
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
                 results: []
-            })
+            }
         }
 
         res.status(200).json({
