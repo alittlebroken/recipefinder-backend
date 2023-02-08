@@ -288,61 +288,68 @@ const update = async recipe => {
   try{
 
     /* Validate the passed in values stored in the object */
-    if(!validation.validator(recipe.id, 'number')){
+    if(!validation.validator(recipe.recipeId, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for recipeId'
       }
     }
+   
 
     if(!validation.validator(recipe.name, 'string')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for name'
       }
     }
+    
 
     if(!validation.validator(recipe.userId, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for userId'
       }
     }
-
+    
     if(!validation.validator(recipe.servings, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for servings'
       }
     }
+    
 
     if(!validation.validator(recipe.calories_per_serving, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for calories_per_serving'
       }
     }
+    
 
     if(!validation.validator(recipe.prep_time, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for prep_time'
       }
     }
+    
 
     if(!validation.validator(recipe.cook_time, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for cook_time'
       }
     }
+    
 
     if(!validation.validator(recipe.rating, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for rating'
       }
     }
+    
 
     /* Update the specifed record with the new values passed in */
     return await db.transaction( async trx => {
@@ -360,7 +367,7 @@ const update = async recipe => {
           cook_time: recipe.cook_time,
           rating: recipe.rating
         })
-        .where('id', recipe.id);
+        .where('id', recipe.recipeId);
       
         if(recipe?.steps){
           await db('steps')
@@ -397,17 +404,9 @@ const update = async recipe => {
 
     });
 
-    /* Update the stored database entry now all is OK
-    const result = await db('recipes')
-     .update(recipe).where('id', recipe.id);
-
-    return {
-      success: true,
-      message: 'Recipe successfully updated'
-    } */
-
+  
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
