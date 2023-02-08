@@ -386,27 +386,8 @@ const removeToken = async (req, res, next) => {
 
     try{
 
-        /* Validate passed in parameters */
-        /*if(!req.body.refreshToken || req.body.refreshToken === undefined){
-            res.status(404).json({
-                status: 404,
-                success: false,
-                message: 'Undefined refresh token',
-                token: ''
-            })
-        }
-
-        if(typeof req.body.refreshToken !== 'string'){
-            res.status(400).json({
-                status: 400,
-                success: false,
-                message: 'Wrong format for refresh token',
-                token: ''
-            })
-        }*/
-        
         if(!req.cookies['jwt']){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'No refresh token found',
@@ -414,10 +395,8 @@ const removeToken = async (req, res, next) => {
             })
         }
 
-        let token = req.cookies['jwt']
-
         /* is this refresh token in the list of assigned refresh tokens */
-        const isAssigned = await tokenModel.findOne(token.id)
+        const isAssigned = await tokenModel.findOne(Number.parseInt(req.user.id))
         
         if(!isAssigned || isAssigned.success === false){
             if(isAssigned.message === 'There was a problem with the resource, please try again later'){
@@ -439,7 +418,7 @@ const removeToken = async (req, res, next) => {
         } 
 
         /* Remove the token if all OK so far */
-        const isRemoved = await tokenModel.removeOne(token.id)
+        const isRemoved = await tokenModel.removeOne(Number.parseInt(req.user.id))
         
         if(!isRemoved || isRemoved.success === false){
             if(isRemoved.message === 'No refresh tokens were found matching supplied data'){

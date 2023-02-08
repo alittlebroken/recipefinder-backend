@@ -96,12 +96,12 @@ const listUser = async (req, res, next) => {
         }
 
         if(results.success === false){
-            res.status(500).json({
+            throw{
                 status: 500,
                 success: false,
-                message: 'There was a problem with the resource, please try again later',
+                message: results.message,
                 results: []
-            })
+            }
         }
 
         res.status(200).json({
@@ -146,7 +146,7 @@ const listUserRecipes = async (req, res, next) => {
 
         /* Gather the results from the DB */
         const results = await recipeModel.findByUserId(id);
-
+        
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
             res.status(404).json({
@@ -158,12 +158,12 @@ const listUserRecipes = async (req, res, next) => {
         }
 
         if(!results || results.success === false){
-            res.status(500).json({
+            throw{
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
                 results: []
-            });
+            };
         }
 
         /* Everything is OK, so send back the results */
@@ -196,7 +196,7 @@ const listUserCookbooks = async (req, res, next) => {
     try{
 
         /* Validate any passed in data */
-        let id = req.params.id;
+        let id = Number.parseInt(req.params.id);
 
         if(!id || id === 'undefined' || id == null){
             res.status(400).json({
@@ -207,12 +207,13 @@ const listUserCookbooks = async (req, res, next) => {
             });
         }
 
+
         /* Gather the results from the DB */
         const results = await cookbookModel.findByUserId(id);
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'The user currently has no cookbooks',
@@ -221,12 +222,12 @@ const listUserCookbooks = async (req, res, next) => {
         }
 
         if(!results || results.success === false){
-            res.status(500).json({
+            throw {
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
                 results: []
-            });
+            };
         }
 
         /* Everything is OK, so send back the results */
@@ -259,7 +260,7 @@ const listUserPantry = async (req, res, next) => {
     try{
 
         /* Validate any passed in data */
-        let id = req.params.id;
+        let id = Number.parseInt(req.params.id);
 
         if(!id || id === 'undefined' || id == null){
             res.status(400).json({
@@ -275,7 +276,7 @@ const listUserPantry = async (req, res, next) => {
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'The user currently has no pantry ingredients',
@@ -284,7 +285,7 @@ const listUserPantry = async (req, res, next) => {
         }
 
         if(!results || results.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
@@ -385,15 +386,15 @@ const createUser = async (req, res, next) => {
         if(validationErrors) return next(validationErrors);
 
         /* Add the user to the DB */
-        const result = await userModel.insert(req.body.username, req.body.email, req.body.password);
+        const result = await userModel.insert(req.body.username, req.body.password, req.body.email, );
 
         if(!result || result.success === false){
-            res.status(500).json({
+            throw {
                 status: 500,
                 success: false,
-                message: 'There was a problem with the resource, please try again later',
+                message: result.message,
                 results: []
-            });
+            };
         }
 
         /* No issues found send back the details of the newly created user */
@@ -406,6 +407,7 @@ const createUser = async (req, res, next) => {
 
 
     } catch(e) {
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
@@ -774,25 +776,25 @@ const addUserPantry = async (req, res, next) => {
 
         /* Validation is ok, so lets get the users pantry and then add
            the ingredient to the desired pantry */
-        const pantryResult = await pantryIngredients.findByUser(req.params.id);
+        const pantryResult = await pantryIngredients.findByUser(Number.parseInt(req.params.id));
         if(!pantryResult || pantryResult.length < 1 || pantryResult.success === false){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'Unable to find pantry for user',
                 results: []
             })
         }
-
+        
         const results = await pantryIngredients.create({
-            pantryId: pantryResult.pantryId,
+            pantryId: pantryResult[0].pantryId,
             ingredientId: req.body.ingredientId,
             amount: req.body.amount,
             amount_type: req.body.amount_type
         });
 
         if(results.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
@@ -954,12 +956,12 @@ const removeUserRecipes = async (req, res, next) => {
                     });
                     break;
                 default:
-                    res.status(500).json({
+                    throw {
                         status: 500,
                         success: false,
                         message: 'There was a problem with the resource, please try again later',
                         results: []
-                    });
+                    };
                     break;
             }
         }
@@ -1006,9 +1008,9 @@ const removeUserCookbooks = async (req, res, next) => {
 
         /* remove the users cookbooks now validation has succeeded */
         const result = await cookbookModel.removeAllByUser(req.params.id);
-
+        console.log(result)
         if(!result || result.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
@@ -1158,7 +1160,7 @@ const updateUser = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
-        if(!Array.isArray(req.body.roles)){
+        if(typeof req.body.roles !== 'string'){
             validationErrors = {
                 status: 400,
                 success: false,
@@ -1287,6 +1289,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.recipeId || recipe.recipeId === 'undefined'){
             validationErrors = {
@@ -1307,6 +1310,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.userId || recipe.userId === 'undefined'){
             validationErrors = {
@@ -1327,8 +1331,9 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
-        if(!recipe.name|| recipe.id === 'undefined'){
+        if(!recipe.name|| recipe.name === 'undefined'){
             validationErrors = {
                 status: 400,
                 success: false,
@@ -1347,6 +1352,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+        
 
         if(!recipe.servings || recipe.servings === 'undefined'){
             validationErrors = {
@@ -1367,6 +1373,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+        
 
         if(!recipe.calories_per_serving || recipe.calories_per_serving === 'undefined'){
             validationErrors = {
@@ -1387,6 +1394,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+       
 
         if(!recipe.prep_time || recipe.prep_time === 'undefined'){
             validationErrors = {
@@ -1407,6 +1415,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
+        
 
         if(!recipe.cook_time || recipe.cook_time === 'undefined'){
             validationErrors = {
@@ -1427,7 +1436,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+       
         if(steps){
             if(!Array.isArray(steps)){
                 validationErrors = {
@@ -1439,7 +1448,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+        
         if(ingredients){
             if(!Array.isArray(ingredients)){
                 validationErrors = {
@@ -1451,7 +1460,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+        
         if(cookbooks){
             if(!Array.isArray(cookbooks)){
                 validationErrors = {
@@ -1463,7 +1472,7 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+       
         if(categories){
             if(!Array.isArray(categories)){
                 validationErrors = {
@@ -1475,25 +1484,25 @@ const updateUserRecipe = async (req, res, next) => {
             }
         }
         if(validationErrors) return next(validationErrors);
-
+        
         /* Update the data within the database */
         const result = await recipeModel.update(
             {
-                recipe,
-                steps,
-                ingredients,
-                cookbooks,
-                categories
+                ...recipe,
+                steps: steps,
+                ingredients: ingredients,
+                cookbooks: cookbooks,
+                categories: categories
             }
         )
-
+        
         if(!result || result.success === false){
-            res.status(500).json({
+            throw{
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
                 results: []
-            })
+            }
         }
 
         res.status(200).json({
@@ -1619,16 +1628,17 @@ const updateUserCookbook = async (req, res, next) => {
         if(validationErrors) return next(validationErrors);
 
         /* Now we can safely update the cookbook for the specified user */
+        
         const result = await cookbookModel.update(
-            req.body.cookbookId,
-            req.params.userId,
+            Number.parseInt(req.body.cookbookId),
+            Number.parseInt(req.params.id),
             req.body.name,
             req.body.description,
             req.body.image
         );
-
+        console.log(result)
         if(!result || result.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
@@ -1781,13 +1791,13 @@ const updateUserPantry = async (req, res, next) => {
         const result = await pantryIngredients.update({
             id: req.body.id,
             pantryId: req.body.pantryId,
-            ingredientId: req.body.ingredientid,
-            amount: req.body.amount,
+            ingredientId: req.body.ingredientId,
+            amount:req.body.amount,
             amount_type: req.body.amount_type
         });
 
         if(!result || result.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',

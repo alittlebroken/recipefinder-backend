@@ -122,17 +122,17 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
        .insert(recipe, 'id')
        .transacting(trx);
 
-      steps.forEach(step => step.recipeId = recipeId);
+      steps.forEach(step => step.recipeId = recipeId[0].id);
       await db('steps').insert(steps).transacting(trx);
 
-      ingredients.forEach(ingredient => ingredient.recipeId = recipeId);
+      ingredients.forEach(ingredient => ingredient.recipeId = recipeId[0].id);
       await db('recipe_ingredients').insert(ingredients).transacting(trx);
 
       await db('cookbook_recipes').insert(
-        { cookbookid: cookbookId, recipeid: recipeId}
+        { cookbookId: cookbookId, recipeId: recipeId[0].id}
       ).transacting(trx);
 
-      categories.forEach(cat => cat.recipeId = recipeId);
+      categories.forEach(cat => cat.recipeId = recipeId[0].id);
       await db('recipe_categories').insert(categories).transacting(trx);
 
       return {
@@ -143,6 +143,7 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
     });
 
   } catch(e) {
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
@@ -287,61 +288,68 @@ const update = async recipe => {
   try{
 
     /* Validate the passed in values stored in the object */
-    if(!validation.validator(recipe.id, 'number')){
+    if(!validation.validator(recipe.recipeId, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for recipeId'
       }
     }
+   
 
     if(!validation.validator(recipe.name, 'string')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for name'
       }
     }
+    
 
     if(!validation.validator(recipe.userId, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for userId'
       }
     }
-
+    
     if(!validation.validator(recipe.servings, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for servings'
       }
     }
+    
 
     if(!validation.validator(recipe.calories_per_serving, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for calories_per_serving'
       }
     }
+    
 
     if(!validation.validator(recipe.prep_time, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for prep_time'
       }
     }
+    
 
     if(!validation.validator(recipe.cook_time, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for cook_time'
       }
     }
+    
 
     if(!validation.validator(recipe.rating, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Validation failed for rating'
       }
     }
+    
 
     /* Update the specifed record with the new values passed in */
     return await db.transaction( async trx => {
@@ -359,7 +367,7 @@ const update = async recipe => {
           cook_time: recipe.cook_time,
           rating: recipe.rating
         })
-        .where('id', recipe.id);
+        .where('id', recipe.recipeId);
       
         if(recipe?.steps){
           await db('steps')
@@ -396,17 +404,9 @@ const update = async recipe => {
 
     });
 
-    /* Update the stored database entry now all is OK
-    const result = await db('recipes')
-     .update(recipe).where('id', recipe.id);
-
-    return {
-      success: true,
-      message: 'Recipe successfully updated'
-    } */
-
+  
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
@@ -572,7 +572,7 @@ const findAll = async () => {
 
          for( let result of results) {
          //results.forEach( async result => {
-
+          
           let ingredientResults = await trx('recipe_ingredients as ri')
             .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
             .select(
@@ -581,21 +581,21 @@ const findAll = async () => {
               'ri.amount as amount',
               'ri.amount_type as amount_type'
             )
-            .where('ri.recipeId', result.id).transacting(trx);
+            .where('ri.recipeId', result.recipeId).transacting(trx);
 
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
-           .where('cr.recipeId', result.id).transacting(trx);
+           .where('cr.recipeId', result.recipeId).transacting(trx);
 
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
-           .where('recipeId', result.id).transacting(trx);
+           .where('recipeId', result.recipeId).transacting(trx);
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
-           .where('rc.recipeId', result.id).transacting(trx);
+           .where('rc.recipeId', result.recipeId).transacting(trx);
 
           let recipe = {
             ...result,
@@ -619,7 +619,7 @@ const findAll = async () => {
 
 
   } catch(e) {
-
+        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
@@ -970,9 +970,9 @@ const findByCategory = async terms => {
 const findByUserId = async id => {
 
   try {
-
+    
     /* Validate the passed in arguments */
-    if(!validation.validator(id, 'number')){
+    if(!validation.validator(Number.parseInt(id), 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
         message: messageHelper.ERROR_MISSING_VALUES
@@ -982,30 +982,14 @@ const findByUserId = async id => {
     let finalRecipe = [];
 
     /* Gather the required data from the database */
-    const result = await db('recipes')
+    const results = await db('recipes')
      .select('*')
      .where('userId', id);
 
-    /* Only if we have found a recipe should we then go ahead and retrieve from
-       the database all the supporting data like steps and categories */
-    if(result && result.length > 0){
 
-      /* build the recipe object we wish to return */
-      finalRecipe.push(
-        {
-          id: result[0].id,
-          userId: result[0].userId,
-          name: result[0].name,
-          description: result[0].description,
-          servings: result[0].servings,
-          calories_per_serving: result[0].calories_per_serving,
-          prep_time: result[0].prep_time,
-          cook_time: result[0].cook_time,
-          rating: result[0].rating,
-        }
-      );
-      return finalRecipe;
-
+    /* If we any results then send them back  */
+    if(results && results.length > 0){
+      return results;
     } else {
       return [];
     }
@@ -1053,7 +1037,7 @@ const removeAllByUser  = async id => {
 
         const recipeCount = await db('recipes')
          .delete()
-         .where('userid', id)
+         .where('userId', id)
          .transacting(trx);
 
         if(recipeCount > 0){
@@ -1071,7 +1055,7 @@ const removeAllByUser  = async id => {
       });
 
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;

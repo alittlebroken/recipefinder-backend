@@ -141,7 +141,7 @@ const removeByCookbook = async id => {
       .where('cookbookId', id);
 
       /* Check we deleted a record */
-      if(result && result.length > 0){
+      if(result && result > 0){
         return {
             success: true,
             message: 'Cookbook recipes removed successfully'

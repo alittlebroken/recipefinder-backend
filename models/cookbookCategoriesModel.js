@@ -381,6 +381,8 @@ const findAll = async () => {
  */
 const findByCookbook = async id => {
 
+  console.log(id)
+
   try{
 
     /* Validate the passed in data */
@@ -393,17 +395,17 @@ const findByCookbook = async id => {
 
     /* Add the record to the database */
     const result = await db('cookbook_categories as cc')
-     .join('cookbooks as c', 'cc.cookbookId', '=', 'cookbooks.id')
+     //.join('cookbooks as c', 'cc.cookbookId', '=', 'cookbooks.id')
      .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
      .select(
        'cc.id',
-       'c.name as cookbookName',
-       'c.id as cookbookId',
+       //'c.name as cookbookName',
+       //'c.id as cookbookId',
        'cat.name as categoryName',
        'cat.id as categoryId'
      )
      .where('cookbookId', id);
-
+    
     if(result && result.length > 0){
       return result;
     } else {
@@ -411,7 +413,7 @@ const findByCookbook = async id => {
     }
 
   } catch(e) {
-
+    console.log(e)
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;

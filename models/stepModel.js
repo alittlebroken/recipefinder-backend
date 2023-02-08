@@ -148,7 +148,7 @@ const removeAllByRecipe = async recipeId => {
      }
 
   } catch(e) {
-
+    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
@@ -405,6 +405,73 @@ const findAll = async () => {
 
 };
 
+/*
+ * Remove one setp from the database
+ * @param {number} id - The id of the step to be removed
+ * @returns {object} Contains if the operation was a success or not, a message detailing why and a number of records affected
+ */
+const removeOneById = async id => {
+
+  try{
+
+    /* Validate the passed in parameter(s) */
+    if(!id || id === undefined){
+      return {
+        success: false,
+        message: 'Undefined step id',
+        count: 0
+      }
+    }
+
+    if(typeof id !== 'number'){
+      return {
+        success: false,
+        message: 'Wrong format for step id',
+        count: 0
+      }
+    }
+
+    /* Lets delete the record provided */
+    const result = await db('steps')
+     .delete()
+     .where('id', id)
+
+    if(result < 1){
+      /* No record deleted */
+      return {
+        success: false,
+        message: 'No records found matching the supplied id',
+        count: 0
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Specified step removed successfully',
+      count: result
+    }
+
+  } catch(e) {
+
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+    if(e.name === 'STEPMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = 'There was a problem with the resource, please try again later';
+    }
+
+    return {
+      success: false,
+      message: message,
+      count: 0
+    }
+
+  }
+
+};
+
 module.exports = {
   create,
   remove,
@@ -413,5 +480,6 @@ module.exports = {
   update,
   findById,
   findByRecipeId,
-  findAll
+  findAll,
+  removeOneById
 };

@@ -270,6 +270,154 @@ describe('stepModel.removeAllByRecipe', () => {
 
 });
 
+describe('stepModel.removeOneById', () => {
+
+  /*
+   * Steps to run before and after this test suite
+   */
+  beforeEach(async () => {
+    /* Initialize the tracker of the various commands */
+    tracker = getTracker();
+  });
+
+  afterEach(() => {
+    /* Reset the tracker */
+    tracker.reset();
+  })
+
+  it('should remove the specified step', async () => {
+
+    // setup
+    const numRecordsRemoved = 1
+    const id = 1;
+
+    tracker.on.delete('steps').responseOnce(numRecordsRemoved)
+
+    const returnCount = 1
+    const returnSuccess = true
+    const returnMessage = 'Specified step removed successfully'
+
+    // execute
+    const result = await stepModel.removeOneById(id)
+    
+    // assert
+    expect(typeof result).toBe('object')
+    expect(typeof result.success).toBe('boolean')
+    expect(typeof result.message).toBe('string')
+    expect(typeof result.count).toBe('number')
+
+    expect(result.success).toEqual(returnSuccess)
+    expect(result.message).toEqual(returnMessage)    
+    expect(result.count).toEqual(returnCount)
+
+  })
+
+  it('should error if the id is missing', async () => {
+
+    // setup
+    let id;
+
+    tracker.on.delete('steps').responseOnce([])
+
+    const returnSuccess = false
+    const returnMessage = 'Undefined step id'
+    const returnCount = 0;
+
+    // execute
+    const result = await stepModel.removeOneById(id)
+
+    // assert
+    expect(typeof result).toBe('object')
+    expect(typeof result.success).toBe('boolean')
+    expect(typeof result.message).toBe('string')
+    expect(typeof result.count).toBe('number')
+
+    expect(result.success).toEqual(returnSuccess)
+    expect(result.message).toEqual(returnMessage)    
+    expect(result.count).toEqual(returnCount)
+
+  })
+
+  it('should error if the id is of the wrong format', async () => {
+
+    // setup
+    let id = 'twelve';
+
+    tracker.on.delete('steps').responseOnce([])
+
+    const returnSuccess = false
+    const returnMessage = 'Wrong format for step id'
+    const returnCount = 0
+
+    // execute
+    const result = await stepModel.removeOneById(id)
+
+    // assert
+    expect(typeof result).toBe('object')
+    expect(typeof result.success).toBe('boolean')
+    expect(typeof result.message).toBe('string')
+    expect(typeof result.count).toBe('number')
+
+    expect(result.success).toEqual(returnSuccess)
+    expect(result.message).toEqual(returnMessage)    
+    expect(result.count).toEqual(returnCount)
+
+  })
+
+  it('should return a message if no record found matching the specified id', async () => {
+
+    // setup
+    let id = 256;
+
+    tracker.on.delete('steps').responseOnce([])
+
+    const returnSuccess = false
+    const returnMessage = 'No records found matching the supplied id'
+    const returnCount = 0
+
+    // execute
+    const result = await stepModel.removeOneById(id)
+
+    // assert
+    expect(typeof result).toBe('object')
+    expect(typeof result.success).toBe('boolean')
+    expect(typeof result.message).toBe('string')
+    expect(typeof result.count).toBe('number')
+
+    expect(result.success).toEqual(returnSuccess)
+    expect(result.message).toEqual(returnMessage)    
+    expect(result.count).toEqual(returnCount)
+
+  })
+
+  it('should return a generic message if the resource encountered any other issues', async () => {
+
+    // setup
+    let id = 256;
+
+    tracker.on.delete('steps').simulateError('Lost connection to the database')
+
+    const returnSuccess = false
+    const returnMessage = 'There was a problem with the resource, please try again later'
+    const returnCount = 0
+
+    // execute
+    const result = await stepModel.removeOneById(id)
+    
+    // assert
+    expect(typeof result).toBe('object')
+    expect(typeof result.success).toBe('boolean')
+    expect(typeof result.message).toBe('string')
+    expect(typeof result.count).toBe('number')
+
+    expect(result.success).toEqual(returnSuccess)
+    expect(result.message).toEqual(returnMessage)    
+    expect(result.count).toEqual(returnCount)
+
+  })
+
+})
+
 describe('stepModel.removeAll', () => {
 
   /*

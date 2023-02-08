@@ -92,51 +92,56 @@ const update = async data => {
     if(!validation.validator(data, 'object')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for passed in object'
       }
     };
 
     if(!validation.validator(data.id, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for id'
       }
     };
 
     if(!validation.validator(data.pantryId, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for pantryId'
       }
     };
 
     if(!validation.validator(data.ingredientId, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for ingredientId'
       }
     };
 
     if(!validation.validator(data.amount, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for amount'
       }
     };
 
     if(!validation.validator(data.amount_type, 'string')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for amount_type'
       }
     };
 
     /* Update the data */
     const result = await db('pantry_ingredients')
-     .update(data)
-     .where('id', data.id);
+     .update({
+      pantryId: Number.parseInt(data.pantryId),
+      ingredientId: Number.parseInt(data.ingredientId),
+      amount: Number.parseInt(data.amount),
+      amount_type: data.amount_type
+     })
+     .where('id', Number.parseInt(data.id));
 
-     if(result && result.length > 0){
+     if(result && result > 0){
        return {
          success: true,
          message: messageHelper.INFO_RECORD_UPDATED
@@ -530,19 +535,17 @@ const findByUser = async id => {
 
     /* Update the data */
     const result = await db('pantry_ingredients as pi')
-     .join('users as u', 'pi.userId', '=', 'u.id')
+     .join('pantries as p', 'pi.pantryId', '=', 'p.id')
      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
      .select(
        'pi.id as id',
        'pi.pantryId as pantryId',
        'i.id as ingredientId',
-       'u.id as userId',
-       'u.username as username',
        'i.name as ingredientName',
        'pi.amount as amount',
        'pi.amount_type as amount_type'
      )
-     .where('pi.userId', id);
+     .where('p.userId', id);
 
      if(result && result.length > 0){
        return result;
@@ -551,6 +554,7 @@ const findByUser = async id => {
      }
 
   } catch(e) {
+
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;

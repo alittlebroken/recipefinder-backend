@@ -13,7 +13,7 @@ router.post('/login', authController.loginUser);
 router.post('/register', authController.createUser);
 
 router.post('/refresh-token', authController.refreshToken);
-router.delete('/refresh-token', authController.removeToken);
+router.delete('/refresh-token', checkToken, authController.removeToken);
 
 router.post('/logout', checkToken, authController.logoutUser);
 /*

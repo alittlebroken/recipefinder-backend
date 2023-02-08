@@ -23,7 +23,7 @@ const listAll = async (req, res, next) => {
 
         /* Get a list of all recipes */
         const results = await recipeModel.findAll();
-
+        
         if(!results || results.success === false){
             throw {
                 status: 500,
@@ -31,7 +31,7 @@ const listAll = async (req, res, next) => {
                 message: 'There was a problem with the resource, please try again later'
             }
         }
-
+        
         if(results.length < 1){
             throw {
                 status: 404,
@@ -142,7 +142,7 @@ const listRecipeIngredients = async (req, res, next) => {
 
         /* Get the required data from the DB */
         let id = parseInt(req.params.id);
-        const results = await recipeIngredientsModel.findByRecipeId();
+        const results = await recipeIngredientsModel.findByRecipeId(id);
 
         if(!results || results.success === false){
             throw {
@@ -1162,7 +1162,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.userId || req.body.name === undefined){
+        if(!req.body.userId || req.body.userId === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -1263,12 +1263,14 @@ const update = async (req, res, next) => {
             id: parseInt(req.params.id),
             name: req.body.name,
             userId: parseInt(req.body.userId),
-            servings: parseInt(req.body.parseInt),
+            servings: parseInt(req.body.servings),
             calories_per_serving: parseInt(req.body.calories_per_serving),
             prep_time: parseInt(req.body.prep_time),
             cook_time: parseInt(req.body.cook_time),
             rating: parseInt(req.body.rating)
         });
+
+        
 
         if(!result || result.success === false){
             throw {
