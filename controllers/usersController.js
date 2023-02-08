@@ -1008,9 +1008,9 @@ const removeUserCookbooks = async (req, res, next) => {
 
         /* remove the users cookbooks now validation has succeeded */
         const result = await cookbookModel.removeAllByUser(req.params.id);
-
+        console.log(result)
         if(!result || result.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
@@ -1628,16 +1628,17 @@ const updateUserCookbook = async (req, res, next) => {
         if(validationErrors) return next(validationErrors);
 
         /* Now we can safely update the cookbook for the specified user */
+        
         const result = await cookbookModel.update(
-            req.body.cookbookId,
-            req.params.userId,
+            Number.parseInt(req.body.cookbookId),
+            Number.parseInt(req.params.id),
             req.body.name,
             req.body.description,
             req.body.image
         );
-
+        console.log(result)
         if(!result || result.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 status: 500,
                 success: false,
                 message: 'There was a problem with the resource, please try again later',
