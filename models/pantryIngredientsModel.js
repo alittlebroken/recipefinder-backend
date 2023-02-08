@@ -151,7 +151,6 @@ const update = async data => {
      }
 
   } catch(e) {
-    console.error(e)
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;
