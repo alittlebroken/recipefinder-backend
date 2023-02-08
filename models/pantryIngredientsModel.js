@@ -92,42 +92,42 @@ const update = async data => {
     if(!validation.validator(data, 'object')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for passed in object'
       }
     };
 
     if(!validation.validator(data.id, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for id'
       }
     };
 
     if(!validation.validator(data.pantryId, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for pantryId'
       }
     };
 
     if(!validation.validator(data.ingredientId, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for ingredientId'
       }
     };
 
     if(!validation.validator(data.amount, 'number')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for amount'
       }
     };
 
     if(!validation.validator(data.amount_type, 'string')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: messageHelper.ERROR_MISSING_VALUES
+        message: 'Validation failed for amount_type'
       }
     };
 
