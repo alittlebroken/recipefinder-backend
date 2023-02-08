@@ -196,7 +196,7 @@ const listUserCookbooks = async (req, res, next) => {
     try{
 
         /* Validate any passed in data */
-        let id = req.params.id;
+        let id = Number.parseInt(req.params.id);
 
         if(!id || id === 'undefined' || id == null){
             res.status(400).json({
@@ -207,12 +207,13 @@ const listUserCookbooks = async (req, res, next) => {
             });
         }
 
+
         /* Gather the results from the DB */
         const results = await cookbookModel.findByUserId(id);
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'The user currently has no cookbooks',
