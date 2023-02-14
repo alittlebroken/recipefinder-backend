@@ -883,8 +883,8 @@ const remove = async (req, res, next) => {
         /* Remove the recipe */
         let id = parseInt(req.params.id);
 
-        const result = recipeModel.remove(id);
-        
+        const result = await recipeModel.remove(id);
+
         if(!result || result.success === false){
             throw {
                 status: 500,
