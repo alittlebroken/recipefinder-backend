@@ -1,4 +1,4 @@
-# Categories
+# PANTRIES
 
 ## Unprotected Routes
 
