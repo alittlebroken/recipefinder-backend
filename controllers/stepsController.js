@@ -162,7 +162,7 @@ const create = async (req, res, next) => {
 };
 
 /*
- * Removes all steps for the specified recipe id
+ * Removes a step from the DB
  */
 const removeById = async (req, res, next) => {
 
@@ -181,14 +181,14 @@ const removeById = async (req, res, next) => {
         throw {
             status: 400,
             success: false,
-            message: 'Undefined recipeId'
+            message: 'Undefined stepId'
         }
        }
 
        /* Remove the steps from the recipe */
        let recipeId = parseInt(req.params.id);
        const results = await stepsModel.removeOneById(recipeId);
-
+       
        if(!results || results.success === false){
         throw {
             status: 500,
