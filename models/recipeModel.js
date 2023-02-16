@@ -791,7 +791,6 @@ const findByIngredients = async terms => {
       /* Get all ingredients which match first */
       const ingredientResults = await ingredientModel.findAllByName(terms);
 
-
       /* Check to see if the results contain any errors and handle
          them appropriately */
       if(!Array.isArray(ingredientResults)){
@@ -817,7 +816,6 @@ const findByIngredients = async terms => {
 
           let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id);
 
-
           if(recipeIngredients && recipeIngredients.length > 0){
 
               for ( recipeIngredient of recipeIngredients) {
@@ -837,10 +835,7 @@ const findByIngredients = async terms => {
           } else {
 
             if(!recipeIngredients.message){
-              throw {
-                name: 'RECIPEMODEL_ERROR',
-                message: recipeIngredients.message
-              }
+              return [];
             } else {
               throw {
                 name: 'LIBERROR',
@@ -862,7 +857,7 @@ const findByIngredients = async terms => {
     });
 
   } catch(e) {
-
+        
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
