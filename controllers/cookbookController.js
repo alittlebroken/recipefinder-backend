@@ -110,13 +110,6 @@ const create = async (req, res, next) => {
       throw err;
     }
 
-    if(typeof req.body.userId !== 'number'){
-      let err = new Error('Wrong format for userId');
-      err.status = 400;
-      err.success = false;
-      throw err;
-    }
-
     if(req.body.name === undefined){
       let err = new Error('Undefined name');
       err.status = 400;

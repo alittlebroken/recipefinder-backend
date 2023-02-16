@@ -883,8 +883,8 @@ const remove = async (req, res, next) => {
         /* Remove the recipe */
         let id = parseInt(req.params.id);
 
-        const result = recipeModel.remove(id);
-        
+        const result = await recipeModel.remove(id);
+
         if(!result || result.success === false){
             throw {
                 status: 500,
@@ -1260,7 +1260,7 @@ const update = async (req, res, next) => {
 
         /* Actually update the desired record now */
         const result = await recipeModel.update({
-            id: parseInt(req.params.id),
+            recipeId: parseInt(req.params.id),
             name: req.body.name,
             userId: parseInt(req.body.userId),
             servings: parseInt(req.body.servings),
@@ -1269,8 +1269,6 @@ const update = async (req, res, next) => {
             cook_time: parseInt(req.body.cook_time),
             rating: parseInt(req.body.rating)
         });
-
-        
 
         if(!result || result.success === false){
             throw {

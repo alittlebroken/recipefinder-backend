@@ -10,110 +10,37 @@ const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware')
 
 const userController = require('../../controllers/usersController');
 
-router.get(
-    '/',
-    checkToken,
-    checkRoles(['Admin']),
-    userController.listAll
-    );
+router.get('/', checkToken, checkRoles(['Admin']), userController.listAll);
+router.get('/:id', checkToken, userController.listUser);
+router.get('/:id/recipes', checkToken, userController.listUserRecipes);
+router.get('/:id/cookbooks',checkToken,userController.listUserCookbooks);
+router.get('/:id/pantry', checkToken, userController.listUserPantry);
+router.post('/', checkToken, checkRoles(['Admin']), userController.createUser);
+/*
+== Not needed covered by POST /recipes route ==
+router.post('/:id/recipes', checkToken,userController.createUserRecipe);
 
-router.get(
-    '/:id',
-    checkToken, 
-    userController.listUser
-    );
+== Not needed as created when a user is created ==
+router.post('/:id/pantry', checkToken, userController.addUserPantry);
 
-router.get(
-    '/:id/recipes',
-    checkToken,
-    userController.listUserRecipes
-    );
+*/
+router.delete('/', checkToken, checkRoles(['Admin']), userController.removeAllUsers);
+router.delete('/:id', checkToken, userController.removeUser);
+router.delete('/:id/recipes', checkToken, userController.removeUserRecipes);
+router.delete('/:id/cookbooks', checkToken, userController.removeUserCookbooks);
+/* Should this be removed? Should the remove user route do this instead. One less point of attack */ 
+router.delete('/:id/pantry', checkToken, userController.removeUserPantry);
+router.put('/:id', checkToken, userController.updateUser);
+/*
+== Not needed covered by PUT /recipes/:id route ==
+router.put('/:id/recipes', checkToken, userController.updateUserRecipe);
 
-router.get(
-    '/:id/cookbooks',
-    checkToken,
-     userController.listUserCookbooks
-     );
+== Not needed covered by PUT /cookbooks/:id route ==
+router.put('/:id/cookbooks', checkToken, userController.updateUserCookbook);
 
-router.get(
-    '/:id/pantry', 
-    checkToken,
-    userController.listUserPantry
-    );
-
-router.post(
-    '/', 
-    checkToken,
-    checkRoles(['Admin']),
-    userController.createUser
-    );
-
-router.post(
-    '/:id/recipes', 
-    checkToken,
-    userController.createUserRecipe
-    );
-
-router.post(
-    '/:id/pantry', 
-    checkToken,
-    userController.addUserPantry
-    );
-
-router.delete(
-    '/', 
-    checkToken,
-    checkRoles(['Admin']),
-    userController.removeAllUsers
-    );
-
-router.delete(
-    '/:id', 
-    checkToken,
-    userController.removeUser
-    );
-
-router.delete(
-    '/:id/recipes', 
-    checkToken,
-    userController.removeUserRecipes
-    );
-
-router.delete(
-    '/:id/cookbooks', 
-    checkToken,
-    userController.removeUserCookbooks
-    );
-
-router.delete(
-    '/:id/pantry', 
-    checkToken,
-    userController.removeUserPantry
-    );
-
-router.put(
-    '/:id', 
-    checkToken,
-    userController.updateUser
-    );
-
-router.put(
-    '/:id/recipes', 
-    checkToken,
-    userController.updateUserRecipe
-    );
-
-router.put(
-    '/:id/cookbooks', 
-    checkToken,
-    userController.updateUserCookbook
-    );
-
-router.put(
-    '/:id/pantry',
-    checkToken,
-    userController.updateUserPantry
-    );
+== Not needed covered by PUT /pantries/:id route ==
+router.put('/:id/pantry', checkToken, userController.updateUserPantry);
+*/
 
 /* Future expansion 
 router.get('/:id/comments', userController.listUserComments);
