@@ -400,8 +400,8 @@ const findById = async id => {
       };
 
      /* Gather the data from the DB */
-     const results = await db('recipe_ingredients ri')
-      .join('ingredients i', 'ri.ingredientId', '=', 'i.id')
+     const results = await db('recipe_ingredients as ri')
+      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
       .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type', 'ri.recipeId as recipeId')
       .where('ri.ingredientId', id);
 
@@ -415,7 +415,7 @@ const findById = async id => {
       /* Check for library errors and if found swap them out for a generic
          one to send back over the API for security */
       let message;
-
+      
       if(e.name === 'RECIPEINGREDIENTMODEL_ERROR'){
         message = e.message;
       } else {
