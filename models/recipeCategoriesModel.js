@@ -395,7 +395,12 @@ const findByRecipe = async id => {
  * @returns {object} Contains if the required action was successfull and a
  * supporting message to further explain the result of running this function
  */
-const findByCategory = async id => {
+const findByCategory = async (id, options) => {
+
+  let { page, size } = options;
+
+  if(size < 1) size = 1; 
+  if(page < 1) page = 1;
 
   try{
 
@@ -416,7 +421,9 @@ const findByCategory = async id => {
        'cat.id as categoryId',
        'cat.name as categoryName'
      )
-     .where('rc.categoryId', id);
+     .where('rc.categoryId', id)
+     .limit(parseInt(size))
+     .offset((page - 1) * size);
 
     if(result && result.length > 0){
       return result;
