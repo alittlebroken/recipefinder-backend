@@ -432,7 +432,7 @@ const update = async recipe => {
  * @returns {object} Contains the recipes and all it's related data like steps,
  * ingredients etc
  */
-const find = async terms => {
+const find = async (terms, options) => {
 
   try{
 
@@ -463,15 +463,15 @@ const find = async terms => {
          'cook_time',
          'rating'
        )
-       .whereILike('name',`%${terms}%`).transacting(trx);
+       .whereILike('name',`%${terms}%`).limit(options.size).offset(options.page).transacting(trx);
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
        {
 
-         for( let result of results) {
+         for(let result of results) {
          //results.forEach( async result => {
-
+          
           let ingredientResults = await trx('recipe_ingredients as ri')
             .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
             .select(
@@ -480,21 +480,24 @@ const find = async terms => {
               'ri.amount as amount',
               'ri.amount_type as amount_type'
             )
-            .where('ri.recipeId', result.id).transacting(trx);
-
+            .where('ri.recipeId', result.recipeId).transacting(trx);
+           
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
-           .where('cr.recipeId', result.id).transacting(trx);
+           .where('cr.recipeId', result.recipeId).transacting(trx);
+          
 
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
-           .where('recipeId', result.id).transacting(trx);
+           .where('recipeId', result.recipeId).transacting(trx);
+         
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
-           .where('rc.recipeId', result.id).transacting(trx);
+           .where('rc.recipeId', result.recipeId).transacting(trx);
+          
 
           let recipe = {
             ...result,
@@ -518,7 +521,7 @@ const find = async terms => {
 
 
   } catch(e) {
-
+        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
@@ -539,10 +542,11 @@ const find = async terms => {
 };
 
 /* Returns all recipes held in the database
+ * @options {object} Cpntains options for pagination of the record set
  * @returns {object} Contains the recipes and all it's related data like steps,
  * ingredients etc
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
@@ -564,7 +568,10 @@ const findAll = async () => {
          'prep_time',
          'cook_time',
          'rating'
-       ).transacting(trx);
+       )
+       .limit(options.size)
+       .offset(options.page)
+       .transacting(trx);
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
@@ -638,7 +645,7 @@ const findAll = async () => {
  * @returns {array} Contains the specified recipe if founf otherwise it returns
  * an empty array
  */
-const findByRecipe = async id => {
+const findByRecipe = async (id) => {
 
   try {
 
@@ -768,9 +775,10 @@ const findByRecipe = async id => {
 /*
  * Fetch all recipes within the database that contain the specified ingredients
  * @param {string} terms - Ingredients for a recipe to have
+ * @param {object} options - Contains options for formating the results like pagination
  * @returns {array} An array of recipe objects
  */
-const findByIngredients = async terms => {
+const findByIngredients = async (terms, options) => {
 
   try{
 
@@ -790,6 +798,7 @@ const findByIngredients = async terms => {
 
       /* Get all ingredients which match first */
       const ingredientResults = await ingredientModel.findAllByName(terms);
+      console.log('Ingredient results: ', ingredientResults)
 
       /* Check to see if the results contain any errors and handle
          them appropriately */
@@ -814,13 +823,14 @@ const findByIngredients = async terms => {
         /* Loop through each result and gather all supporting data */
         for ( let ingredient of ingredientResults ){
 
-          let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id);
+          let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id, options);
+          
 
           if(recipeIngredients && recipeIngredients.length > 0){
 
               for ( recipeIngredient of recipeIngredients) {
 
-                let foundRecipes = await findByRecipe(recipeIngredient.recipeId);
+                let foundRecipes = await findByRecipe(recipeIngredient.recipeId, options);
 
                 if(foundRecipes && foundRecipes.length > 0){
 
