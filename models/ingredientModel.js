@@ -32,7 +32,7 @@ const create = async name => {
     }
 
   } catch(e) {
-    console.log(e)
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;

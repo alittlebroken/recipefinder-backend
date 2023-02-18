@@ -362,7 +362,6 @@ const findById = async id => {
     }
 
    } catch(e) {
-     console.log(e)
      /* Check for library errors and if found swap them out for a generic
         one to send back over the API for security */
      let message;
@@ -395,8 +394,6 @@ const findById = async id => {
       let { page, size } = options;
       if(page < 1) page = 1;
       if(size < 1) size = 1;
-
-      console.log('Offset: ', (page - 1 ) * size)
 
       /* Validate the passed in data */
       if(!validation.validator(id, 'number')){

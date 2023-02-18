@@ -163,7 +163,7 @@ describe('ingredientsController', () => {
         .set('Authorization', `Bearer ${failToken}`)
         .set('Cookie', `jwt=${badRefreshToken}`)
 
-      console.log(res.body)
+      
   
       /* Test everything works as expected */
       expect(res.status).toEqual(returnStatus);
