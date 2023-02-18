@@ -395,7 +395,12 @@ const findByRecipe = async id => {
  * @returns {object} Contains if the required action was successfull and a
  * supporting message to further explain the result of running this function
  */
-const findByCategory = async id => {
+const findByCategory = async (id, options) => {
+
+  let { page, size } = options;
+
+  if(size < 1) size = 1; 
+  if(page < 1) page = 1;
 
   try{
 
@@ -416,16 +421,32 @@ const findByCategory = async id => {
        'cat.id as categoryId',
        'cat.name as categoryName'
      )
-     .where('rc.categoryId', id);
+     .where('rc.categoryId', id)
+     .limit(parseInt(size))
+     .offset((page - 1) * size);
+
+    const totalCount = await db('recipe_categories as rc')
+    .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+    .select(
+      'rc.id as id',
+    )
+    .where('rc.categoryId', id)
+    .count('rc.id')
+    .groupBy('rc.id')
 
     if(result && result.length > 0){
-      return result;
+      return {
+        data: result,
+        totalRecords: totalCount.length,
+        totalPages: parseInt(Math.floor(totalCount.length / size)) + 1,
+        currentPage: page
+      };
     } else {
       return [];
     }
 
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;

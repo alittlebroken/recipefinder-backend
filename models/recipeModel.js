@@ -432,9 +432,14 @@ const update = async recipe => {
  * @returns {object} Contains the recipes and all it's related data like steps,
  * ingredients etc
  */
-const find = async terms => {
+const find = async (terms, options) => {
 
   try{
+
+    let { page, size } = options;
+
+    if(page < 1) page = 1;
+    if(size < 1) size = 1;
 
     /* Validate the passed in arguments */
     if(!validation.validator(terms, 'string')){
@@ -463,15 +468,22 @@ const find = async terms => {
          'cook_time',
          'rating'
        )
-       .whereILike('name',`%${terms}%`).transacting(trx);
+       .whereILike('name',`%${terms}%`).limit(size).offset((page - 1) * size).transacting(trx);
+
+       const resultCount = await trx('recipes')
+        .select('id')
+        .whereILike('name',`%${terms}%`)
+        .count()
+        .groupBy('id')
+        .transacting(trx);
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
        {
 
-         for( let result of results) {
+         for(let result of results) {
          //results.forEach( async result => {
-
+          
           let ingredientResults = await trx('recipe_ingredients as ri')
             .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
             .select(
@@ -480,21 +492,24 @@ const find = async terms => {
               'ri.amount as amount',
               'ri.amount_type as amount_type'
             )
-            .where('ri.recipeId', result.id).transacting(trx);
-
+            .where('ri.recipeId', result.recipeId).transacting(trx);
+           
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
-           .where('cr.recipeId', result.id).transacting(trx);
+           .where('cr.recipeId', result.recipeId).transacting(trx);
+          
 
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
-           .where('recipeId', result.id).transacting(trx);
+           .where('recipeId', result.recipeId).transacting(trx);
+         
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
-           .where('rc.recipeId', result.id).transacting(trx);
+           .where('rc.recipeId', result.recipeId).transacting(trx);
+          
 
           let recipe = {
             ...result,
@@ -512,13 +527,18 @@ const find = async terms => {
          return [];
        }
 
-       return recipes;
+       return {
+         ...recipes,
+         totalRecords: resultCount.length,
+         totalPages: parseInt(Math.floor(resultCount.length / size)),
+         currentPage: page
+        };
 
     });
 
 
   } catch(e) {
-
+        
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
@@ -539,16 +559,23 @@ const find = async terms => {
 };
 
 /* Returns all recipes held in the database
+ * @options {object} Cpntains options for pagination of the record set
  * @returns {object} Contains the recipes and all it's related data like steps,
  * ingredients etc
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
     /* Gather the required data from the database, use a transaction for this
      * to keep it all nice and tidy ( IMHO )
     */
+
+    let { page, size } = options;
+
+    if(page < 1) page = 1;
+    if(size < 1) size = 1;
+
     return await db.transaction( async trx => {
 
       let recipes = [];
@@ -564,8 +591,13 @@ const findAll = async () => {
          'prep_time',
          'cook_time',
          'rating'
-       ).transacting(trx);
+       )
+       .limit(size)
+       .offset((page - 1) * size)
+       .transacting(trx);
 
+      const resultCount = await trx('recipes').select('id').count().groupBy('id').transacting(trx)
+      
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
        {
@@ -602,7 +634,10 @@ const findAll = async () => {
             ingredients: [...ingredientResults],
             cookbooks: [...cookbookResults],
             steps: [...stepResults],
-            categories: [...categoryResults]
+            categories: [...categoryResults],
+            totalRecords: resultCount.length,
+            totalPages: parseInt(Math.floor(resultCount.length / size)),
+            currentPage: page
           };
 
           recipes.push(recipe);
@@ -619,7 +654,7 @@ const findAll = async () => {
 
 
   } catch(e) {
-        console.log(e)
+        
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
@@ -638,10 +673,10 @@ const findAll = async () => {
  * @returns {array} Contains the specified recipe if founf otherwise it returns
  * an empty array
  */
-const findByRecipe = async id => {
+const findByRecipe = async (id) => {
 
   try {
-
+    
     /* Validate the passed in arguments */
     if(!validation.validator(id, 'number')){
       throw {
@@ -768,11 +803,20 @@ const findByRecipe = async id => {
 /*
  * Fetch all recipes within the database that contain the specified ingredients
  * @param {string} terms - Ingredients for a recipe to have
+ * @param {object} options - Contains options for formating the results like pagination
  * @returns {array} An array of recipe objects
  */
-const findByIngredients = async terms => {
+const findByIngredients = async (terms, options) => {
+
+  /* Keep track of the pagination options */
+  let totalPages;
+  let totalRecords;
+  let currentPage;
 
   try{
+
+    /* Store any recipes we found to be returned */
+    let recipes = [];
 
     /* Validate the passed in values */
     if(!validation.validator(terms, 'string')){
@@ -785,14 +829,11 @@ const findByIngredients = async terms => {
     /* Gather a list of recipes that match */
     return await db.transaction( async trx => {
 
-      /* Holds the final list of recipes to return */
-      let recipes  = [];
-
       /* Get all ingredients which match first */
       const ingredientResults = await ingredientModel.findAllByName(terms);
-
+     
       /* Check to see if the results contain any errors and handle
-         them appropriately */
+       them appropriately */
       if(!Array.isArray(ingredientResults)){
 
         if(!ingredientResults.message){
@@ -812,37 +853,47 @@ const findByIngredients = async terms => {
       if(ingredientResults && ingredientResults.length > 0){
 
         /* Loop through each result and gather all supporting data */
-        for ( let ingredient of ingredientResults ){
+        for ( ingredient of ingredientResults ){
 
-          let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id);
+          let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id, options);
+          
+          /* get the pagination options and any data returned*/
+          let { data } = recipeIngredients
+          totalPages = recipeIngredients.totalPages
+          totalRecords = recipeIngredients.totalRecords
+          currentPage = recipeIngredients.currentPage
 
-          if(recipeIngredients && recipeIngredients.length > 0){
+          /*
+            If we have any errors, just throw them back up to the calling
+            function
+          */
+          if(recipeIngredients?.message){
+            throw {
+              name: 'LIBERROR',
+              message: recipeIngredients.message
+            }
+          }
 
-              for ( recipeIngredient of recipeIngredients) {
-
-                let foundRecipes = await findByRecipe(recipeIngredient.recipeId);
-
-                if(foundRecipes && foundRecipes.length > 0){
-
-                  for ( found of foundRecipes ){
-                    recipes.push(found);
-                  }
-
-                }
-
-              }
+          /* 
+            For each recipeId found loop throught and get the actual
+            recipe and then assign to the recipe array we will be
+            returning and if none found then return an empty array
+          */
+            
+            if(data.length > 0){
+            
+              await Promise.all(data.map(async record => {
+                
+                let found = await findByRecipe(record.recipeId)
+               
+                await Promise.all(found.map(async findee => { 
+                  recipes.push(findee)
+                }))
+               
+              }))
 
           } else {
-
-            if(!recipeIngredients.message){
-              return [];
-            } else {
-              throw {
-                name: 'LIBERROR',
-                message: recipeIngredients.message
-              }
-            }
-
+            return []
           }
 
         }
@@ -851,8 +902,16 @@ const findByIngredients = async terms => {
         return [];
       }
 
-
-      return recipes;
+      /*
+        Return the found list of recipes and also the pagination data
+      */
+      
+      return {
+        results: recipes,
+        currentPage,
+        totalPages,
+        totalRecords
+      };
 
     });
 
@@ -881,7 +940,12 @@ const findByIngredients = async terms => {
  * @param {string} terms - The category names to find recipes by
  * @returns {array} An array of recipes in object form
  */
-const findByCategory = async terms => {
+const findByCategory = async (terms, options) => {
+
+  /* Keep track of the pagination options */
+  let totalPages;
+  let totalRecords;
+  let currentPage;
 
   try {
 
@@ -907,34 +971,40 @@ const findByCategory = async terms => {
       /* Get the ids of each recipe that has this category listed */
       for( let foundCategory of foundCategories){
 
-        let foundRecipeIds = await recipeCategoriesModel.findByCategory(foundCategory.id);
-        if(!foundRecipeIds || foundRecipeIds.length < 1){
-          recipes.push(null);
-        } else {
+        let foundRecipeIds = await recipeCategoriesModel.findByCategory(foundCategory.id, options);
 
-          /* Now get each recipe and it's details and then add to the final
-             recipes array */
-          for(let foundRecipeId of foundRecipeIds){
+        /* get the pagination options and any data returned*/
+        let { data } = foundRecipeIds
+        totalPages = foundRecipeIds.totalPages
+        totalRecords = foundRecipeIds.totalRecords
+        currentPage = foundRecipeIds.currentPage
 
-            /* Extract the recipes and it's supporting information based
-            on the ID passed in and add to the final array being returned */
-            let foundRecipes = await findByRecipe(foundRecipeId.recipeId);
+        /* Go through all the results from the findByCategory method */
+        await Promise.all(data.map(async entry => {
 
-            if(foundRecipes && foundRecipes.length > 0){
+          /* for each entry returned get the recipe details and assign to the results array we will
+             return later
+          */
+         let recipe = await findByRecipe(entry.recipeId);
+         if(recipe.length > 0){
+          
+          await Promise.all(recipe.map(item => {
+            recipes.push(item)
+          }))
 
-              for ( found of foundRecipes ){
-                recipes.push(found);
-              }
+         }
 
-            }
+        }))
 
-          }
-
-        }
-
+        
       }
 
-      return recipes;
+      return {
+        results: recipes,
+        totalRecords,
+        totalPages,
+        currentPage
+      };
 
     }
 
@@ -942,7 +1012,6 @@ const findByCategory = async terms => {
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
-
     if(e.name === 'RECIPEMODEL_ERROR'){
       message = e.message;
     } else {

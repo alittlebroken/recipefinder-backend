@@ -41,7 +41,7 @@ const create = async userId => {
     return result;
 
   } catch(e) {
-    console.log(e)
+    
     /* Send back any error messages to the calling app. We wish to
        send back a generic message for SQL and system messages so we
       should check the name of the erro first and act accordingly. */

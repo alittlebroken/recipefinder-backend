@@ -68,7 +68,7 @@ const insert = async (username, password, email, roles = 'Customer') => {
     return records;
 
   } catch(e) {
-    console.log(e)
+    
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message

@@ -99,7 +99,7 @@ const list = async (req, res, next) => {
         res.status(200).send(result);
 
     } catch(e) {
-        console.log(e)
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
@@ -250,7 +250,7 @@ const add = async (req, res, next) => {
         }
 
         const result = await pantryIngredientsModel.create(dataToAdd);
-        console.log(result)
+        
         if(!result || result.success === false){
             if(result.message === 'There was a problem with the resource, please try again later'){
                 throw {
@@ -497,7 +497,7 @@ const update = async (req, res, next) => {
         );
 
     } catch(e) {
-        console.log(e)
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 

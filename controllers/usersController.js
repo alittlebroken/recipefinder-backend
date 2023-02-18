@@ -1008,7 +1008,7 @@ const removeUserCookbooks = async (req, res, next) => {
 
         /* remove the users cookbooks now validation has succeeded */
         const result = await cookbookModel.removeAllByUser(req.params.id);
-        console.log(result)
+        
         if(!result || result.success === false){
             return res.status(500).json({
                 status: 500,
@@ -1636,7 +1636,7 @@ const updateUserCookbook = async (req, res, next) => {
             req.body.description,
             req.body.image
         );
-        console.log(result)
+        
         if(!result || result.success === false){
             return res.status(500).json({
                 status: 500,

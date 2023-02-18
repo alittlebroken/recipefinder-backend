@@ -616,8 +616,6 @@ describe('categoriesController', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${refreshToken}`)
 
-      console.log(response.body)
-
       /* Test everything works as expected */
       expect(response.status).toBe(returnStatus);
 

@@ -61,7 +61,7 @@ const checkToken = async (req,res,next) => {
                  */
                 let userid = user.user ? user.user.id : user.id;
                 const foundUser = await userModel.findById(userid)
-                //console.log('verifyMiddleware.checkToken - foundUser: ', foundUser)
+                
                 /* Assign the found user to the req object */
                 if(foundUser && foundUser.length > 0){
                     req.user = foundUser[0]
