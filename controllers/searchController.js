@@ -17,6 +17,10 @@ const performSearch = async (req, res, next) => {
 
     try{
 
+        /* Gather the query string variables */
+        let page = req.query.page ? parseInt(req.query.page) : 1;
+        let size = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+
         /* Validate any request variables */
         let validationErrors;
 
@@ -64,7 +68,7 @@ const performSearch = async (req, res, next) => {
         let results;
         /* If no search terms have been set then return all recipes */
         if(req.body.terms === '' || req.body.terms.length === 0){
-            results = await recipeModel.findAll();
+            results = await recipeModel.findAll({ page: page, size: size});
         } else {
             /* some terms have been set.
              * next we have to check if the search term is applicable to
@@ -73,19 +77,20 @@ const performSearch = async (req, res, next) => {
              */
             if(req.body.typeOfSearch === 'recipes'){
 
-                results = await recipeModel.find(req.body.terms);
+                results = await recipeModel.find(req.body.terms, { page: page, size: size});
 
             } else if (req.body.typeOfSearch === 'ingredients') {
 
-                results = await recipeModel.findByIngredients(req.body.terms);
-
+                results = await recipeModel.findByIngredients(req.body.terms,{ page: page, size: size});
+                
             } else {
 
-                results = await recipeModel.findByCategory(req.body.terms);
+                results = await recipeModel.findByCategory(req.body.terms, { page: page, size: size});
 
             }
         }
 
+        
         /* Run some checks against the results and determine what needs to be returned */
         if(results?.success === false){
             return next({

@@ -273,10 +273,11 @@ const findById = async id => {
 
 /* Find all occurances of the required search term
  * @param {string} term - The search term being looked for in the DB table
+ * @param {object} options - Contaisn various options for formatting the results like pagination
  * @returns {array} Set of results for the searched for term or an emtpy array
  * if nothing found
  */
-const findAllByName = async term => {
+const findAllByName = async (term) => {
 
   try{
 
@@ -291,7 +292,8 @@ const findAllByName = async term => {
     /* Search the table for the specified term */
     const result = await db('ingredients')
      .select('id', 'name')
-     .whereILike('name', `%${term}%`);
+     .whereILike('name', `%${term}%`)
+     
 
      if(!result || result.length < 1){
        return [];
