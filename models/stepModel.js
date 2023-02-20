@@ -369,20 +369,37 @@ const findByRecipeId = async recipeId => {
 
 /*
  * Get all steps from the DB
+ * @params {object} Contains pagination options like page number, records per page etc
  * @returns {array} An array containing all the steps
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
+    /* Exttract pagination values */
+    let {page, size, offset} = options;
+
+    /* Get a count of the records from thr DB */
+    const recordCount = await db('steps')
+    .select('id')
+    .count('id')
+    .groupBy('id')
+
     /* Get the steps from the DB */
     const result = await db('steps')
-     .select('*');
+     .select('*')
+     .limit(size)
+     .offset(offset)
 
      if(!result || result.length < 1){
        return [];
      } else {
-       return result;
+       return {
+        results: result,
+        currentPage: page,
+        totalRecords: recordCount.length,
+        totalPages: parseInt(Math.floor(recordCount.length / size) + 1)
+       };
      }
 
   } catch(e) {
