@@ -16,8 +16,24 @@ const listAll = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page;
+        let size = req.query.pageSize;
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* search the DB */
-        const result = await pantryModel.listAll();
+        const result = await pantryModel.listAll(options);
         
         if(!result || result.success === false){
             throw {
@@ -35,7 +51,12 @@ const listAll = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(result);
+        res.status(200).json({
+            results: result.results,
+            totalPages: result.totalPages,
+            totalRecords: result.totalRecords,
+            currentPage: result.currentPage
+        });
 
     } catch(e) {
         
@@ -59,6 +80,22 @@ const list = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page;
+        let size = req.query.pageSize;
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate any request parameters */
         if(!req.params || req.params === undefined){
             throw {
@@ -78,7 +115,7 @@ const list = async (req, res, next) => {
 
         /* Attempt to retrieve the record from the database */
         let id = parseInt(req.params.id);
-        const result = await pantryModel.list(id);
+        const result = await pantryModel.list(id, options);
 
         if(!result || result.success === false){
             throw {
@@ -96,7 +133,12 @@ const list = async (req, res, next) => {
             }
         }
 
-        res.status(200).send(result);
+        res.status(200).send({
+            results: result.results,
+            totalPages: result.totalPages,
+            totalRecords: result.totalRecords,
+            currentPage: result.currentPage
+        });
 
     } catch(e) {
         
