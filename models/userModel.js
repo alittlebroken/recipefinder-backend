@@ -393,15 +393,29 @@ const verify  = async (password, hash) => {
 
 /**
  * return all users in the DB
+ * 
+ * @param {object} Options for pagination and displaying the correct page
  * @returns {array} an array of user objects
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
+    /* Extract the pagination information passed in */
+    let { page, size, offset } = options
+
+
+    /* Get a count of all records affected */
+    const countRecords = await db('users')
+    .select('id')
+    .count()
+    .groupBy('id')
+
     /* Find the user by Id */
     const result = await db('users')
-     .select('id', 'username', 'email', 'roles', 'forename', 'surname');
+     .select('id', 'username', 'email', 'roles', 'forename', 'surname')
+     .limit(size)
+     .offset(offset)
 
     /* Check we have some results */
     if(!result || !result.length > 0){
@@ -409,7 +423,12 @@ const findAll = async () => {
     }
 
     /* All OK so return */
-    return result;
+    return {
+      results: result,
+      totalRecords: countRecords.length,
+      totalPages: parseInt(Math.floor(countRecords.length) / size) + 1,
+      currentPage: page
+    };
 
   } catch(e) {
     /* Check for library errors and if found swap them out for a generic

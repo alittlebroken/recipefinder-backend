@@ -521,9 +521,12 @@ const findByIngredient = async id => {
  * @returns {array} array of objects containing relationship data between a
  * users pantry and ingredients
 */
-const findByUser = async id => {
+const findByUser = async (id, options) => {
 
   try{
+
+    /* Pagination options */
+    let { page, offset, size } = options;
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -532,6 +535,18 @@ const findByUser = async id => {
         message: messageHelper.ERROR_MISSING_VALUES
       }
     };
+
+    /* Get the total count of records */
+    const recordCount = await db('pantry_ingredients as pi')
+     .join('pantries as p', 'pi.pantryId', '=', 'p.id')
+     .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .select(
+       'pi.id',
+     )
+     .where('p.userId', id)
+     .count('pi.id')
+     .groupBy('pi.id')
+
 
     /* Update the data */
     const result = await db('pantry_ingredients as pi')
@@ -545,16 +560,23 @@ const findByUser = async id => {
        'pi.amount as amount',
        'pi.amount_type as amount_type'
      )
-     .where('p.userId', id);
+     .where('p.userId', id)
+     .limit(size)
+     .offset(offset);
 
      if(result && result.length > 0){
-       return result;
+       return {
+        results: result,
+        currentPage: page,
+        totalPages: parseInt(Math.floor(recordCount.length / size)) + 1,
+        totalRecords: recordCount.length
+       };
      } else {
        return [];
      }
 
   } catch(e) {
-
+    
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;

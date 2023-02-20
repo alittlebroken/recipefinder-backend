@@ -441,9 +441,12 @@ const recipes = async cookbookId => {
  * @param {integer} id - ID of the user owing the cookbooks we are interested in
  * @returns {array} A list of cookbooks owned by the user
  */
-const findByUserId = async id => {
+const findByUserId = async (id, options) => {
 
   try {
+
+    /* Extract the pagination options */
+    let {page, size, offset} = options
 
     /* Validate the passed in values */
     if(!id || typeof id !== 'number'){
@@ -453,16 +456,30 @@ const findByUserId = async id => {
       }
     }
 
+    /* get a total of the records */
+    const recordCount = await db('cookbooks')
+    .where('userId', id)
+    .select('id')
+    .count()
+    .groupBy('id')
+
     /* gather the data from the database */
     const result = await db('cookbooks')
      .where('userId', id)
-     .select('*');
+     .select('*')
+     .limit(size)
+     .offset(offset)
 
     if(!result || result.length === 0){
       return [];
     }
 
-    return result;
+    return {
+      results: result,
+      totalPages: parseInt(Math.floor(recordCount.length / size)) + 1,
+      totalRecords: recordCount.length,
+      currentPage: page
+    };
 
   } catch(e) {
     
