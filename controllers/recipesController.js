@@ -21,8 +21,24 @@ const listAll = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page ? req.query.page : 1
+        let size = req.query.pageSize ? req.query.pageSize : 10
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* Get a list of all recipes */
-        const results = await recipeModel.findAll();
+        const results = await recipeModel.findAll(options);
         
         if(!results || results.success === false){
             throw {
@@ -40,7 +56,12 @@ const listAll = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(results);
+        res.status(200).json({
+            results: results.results,
+            totalRecords: results.totalRecords,
+            totalPages: results.totalPages,
+            currentPage: results.currentPage
+        });
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -123,6 +144,22 @@ const listRecipeIngredients = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page ? req.query.page : 1
+        let size = req.query.pageSize ? req.query.pageSize : 10
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* Verify any request parameters and or body values*/
         if(!req.params || req.params === undefined){
             throw {
@@ -142,7 +179,7 @@ const listRecipeIngredients = async (req, res, next) => {
 
         /* Get the required data from the DB */
         let id = parseInt(req.params.id);
-        const results = await recipeIngredientsModel.findByRecipeId(id);
+        const results = await recipeIngredientsModel.findByRecipeId(id, options);
 
         if(!results || results.success === false){
             throw {
@@ -160,7 +197,12 @@ const listRecipeIngredients = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(results);
+        res.status(200).json({
+            results: results.results,
+            totalRecords: results.totalRecords,
+            totalPages: results.totalPages,
+            currentPage: results.currentPage
+        });
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -183,6 +225,22 @@ const listRecipeSteps = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page ? req.query.page : 1
+        let size = req.query.pageSize ? req.query.pageSize : 10
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate request body and parameters */
         if(!req.params || req.params === undefined){
             throw {
@@ -202,7 +260,7 @@ const listRecipeSteps = async (req, res, next) => {
 
         /* Gather the steps from the DB */
         let id = parseInt(req.params.id);
-        const results = await stepModel.findByRecipeId(id);
+        const results = await stepModel.findByRecipeId(id, options);
 
         if(!results || results.success === false){
             throw {
@@ -220,7 +278,14 @@ const listRecipeSteps = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(results);
+        res.status(200).json(
+            {
+                results: results.results,
+                totalRecords: results.totalRecords,
+                totalPages: results.totalPages,
+                currentPage: results.currentPage
+            }
+        );
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -243,6 +308,22 @@ const listRecipeCategories = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page ? req.query.page : 1
+        let size = req.query.pageSize ? req.query.pageSize : 10
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate request body & parameters */
         if(!req.params || req.params === undefined){
             throw {
@@ -262,7 +343,7 @@ const listRecipeCategories = async (req, res, next) => {
 
         /* Get the data from the DB */
         let id = parseInt(req.params.id);
-        const results = await recipeCategoriesModel.findByRecipe(id);
+        const results = await recipeCategoriesModel.findByRecipe(id, options);
 
         if(!results || results.success === false){
             throw {
@@ -280,7 +361,12 @@ const listRecipeCategories = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(results);
+        res.status(200).json({
+            results: results.results,
+            totalPages: results.totalPages,
+            totalRecords: results.totalPages,
+            currentPage: results.currentPage
+        });
 
     } catch(e) {
         /* Log out the issue(s) */

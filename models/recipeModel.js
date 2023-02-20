@@ -571,10 +571,9 @@ const findAll = async (options) => {
      * to keep it all nice and tidy ( IMHO )
     */
 
-    let { page, size } = options;
+    let { page, size, offset } = options;
 
-    if(page < 1) page = 1;
-    if(size < 1) size = 1;
+   
 
     return await db.transaction( async trx => {
 
@@ -593,18 +592,21 @@ const findAll = async (options) => {
          'rating'
        )
        .limit(size)
-       .offset((page - 1) * size)
+       .offset(offset)
        .transacting(trx);
+
 
       const resultCount = await trx('recipes').select('id').count().groupBy('id').transacting(trx)
       
+
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
        {
 
          for( let result of results) {
          //results.forEach( async result => {
-          
+
+
           let ingredientResults = await trx('recipe_ingredients as ri')
             .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
             .select(
@@ -634,10 +636,7 @@ const findAll = async (options) => {
             ingredients: [...ingredientResults],
             cookbooks: [...cookbookResults],
             steps: [...stepResults],
-            categories: [...categoryResults],
-            totalRecords: resultCount.length,
-            totalPages: parseInt(Math.floor(resultCount.length / size)),
-            currentPage: page
+            categories: [...categoryResults]
           };
 
           recipes.push(recipe);
@@ -648,7 +647,12 @@ const findAll = async (options) => {
          return [];
        }
 
-       return recipes;
+       return {
+        results: results,
+        totalRecords: resultCount.length,
+        totalPages: parseInt(Math.floor(resultCount.length / size)),
+        currentPage: page
+       };
 
     });
 
