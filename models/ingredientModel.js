@@ -187,22 +187,34 @@ const findOne = async term => {
 };
 
 /* Retrieve all ingredients from the DB
- * @param {string} term - The search term being looked for in the DB table
+ * @param {object} options - Contains pagination settings
  * @returns {array} All ingredients from the DB
  * if nothing found
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
+    /* Extract the pagination settings */
+    let {page, size, offset} = options
+
+    /* get the total count of records */
+    const recordCount = await db('ingredients')
+    .select('id').count('id').groupBy('id')
+
     /* Search the table for the specified term */
     const results = await db('ingredients')
-     .select('*');
+     .select('*').limit(size).offset(offset)
 
      if(!results || results.length < 1){
        return [];
      } else {
-       return results;
+       return {
+        results: results,
+        currentPage: page,
+        totalRecords: recordCount.length,
+        totalPages: parseInt(Math.floor(recordCount.length / size))
+       };
      }
 
   } catch(e) {
@@ -243,7 +255,7 @@ const findById = async id => {
        pass back an empty array */
     const results = await db('ingredients')
      .select('*')
-     .where('id', id);
+     .where('id', id)
 
     if(!results || results.length < 1){
       return [];
@@ -252,7 +264,7 @@ const findById = async id => {
     }
 
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;

@@ -12,8 +12,24 @@ const get = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page ? req.query.page : 1;
+        let size = req.query.pageSize ? req.query.pageSize : 10;
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* Get the ingredients from the DB */
-        const results = await ingredientModel.findAll();
+        const results = await ingredientModel.findAll(options);
 
         if(!results || results.length < 1){
             res.status(404).json([]);
@@ -29,7 +45,12 @@ const get = async (req, res, next) => {
             throw err;
         }
 
-        res.status(200).json(results);
+        res.status(200).json({
+            results: results.results,
+            totalPages: results.totalPages,
+            totalRecords: results.totalRecords,
+            currentPage: results.currentPage
+        });
 
     } catch(e) {
         return next(e);
