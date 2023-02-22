@@ -12,8 +12,11 @@ const checkRoles = (roles) => (req, res, next) => {
         })
     }
 
-    /* Check the specified roles against any the user has */
-    const rolesFound = roles.includes(req?.user?.roles);
+    /* Check the specified roles against any the user has, convert both to lowercase before comparing */
+    let userRole = req.user.roles.toLowerCase()
+    
+    //const rolesFound = roles.includes(userRole);
+    const rolesFound = roles.some(role => role.toLowerCase() == userRole)
     
     if(!rolesFound){
         return next({
