@@ -1,6 +1,6 @@
 /* Packages needed */
 require('dotenv').config();
-const { off } = require('..');
+
 const db = require('../database');
 
 /**
@@ -190,20 +190,37 @@ const update = async (cookbookId, userId, name, description, image) => {
 
 /*
  * Return all cookbooks stored in the database
+ * @param {object} options  - Settings for pagination
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
+    /* extract the pagination settings */
+    let { page, size, offset } = options
+
+    if(!page || page < 1) page = 1
+    if(!size || size < 1) size = 10
+    if(!offset) offset = parseInt(Math.floor((page -1) * size))
+
+    /* Get a count of all the records we are interested in */
+    const recordCount = await db('cookbooks')
+    .select('id').count('id').groupBy('id')
+
     /* No need for validation so return all cookbooks */
     const results = await db('cookbooks')
-     .select('*')
+     .select('*').limit(size).offset(offset)
 
     /* Check if any results have been returned */
     if(!results || results.length == 0){
       return [];
     } else {
-      return results;
+      return {
+        results: results,
+        totalPages: parseInt(Math.floor(recordCount.length / size)),
+        totalRecords: recordCount.length,
+        currentPage: parseInt(page)
+      };
     }
 
   } catch(e) {
@@ -371,11 +388,19 @@ const findAllByName = async terms => {
 /*
  * gets all recipes associated with a cookbook
  * @param {integer} cookbookId - The cookbooks identifier within the db
+ * @param {object} options - The settings used for pagination
  * @returns {array} Array of recipes
  */
-const recipes = async cookbookId => {
+const recipes = async (cookbookId, options) => {
 
   try{
+
+    /* Extract the pagination settings */
+    let { page, size, offset } = options
+
+    if(!page || page < 1) page = 1
+    if(!size || size < 1) size = 10
+    if(!offset) offset = parseInt(Math.floor((page - 1) * size))
 
     /* array of recipe objects to return */
     let recipes = [];
@@ -389,11 +414,21 @@ const recipes = async cookbookId => {
     }
 
 
+  /* Get the record count for the recipes we are interested in */
+  const recordCount = await db('cookbook_recipes as cbr')
+  .join('recipes as r', 'r.id', 'cbr.recipeId')
+  .select('r.id')
+  .where('cbr.cookbookId', cookbookId)
+  .count('r.id')
+  .groupBy('r.id')
+
   /* Extract a list of categories and recipes */
   const results = await db('cookbook_recipes as cbr')
    .join('recipes as r', 'r.id', 'cbr.recipeId')
    .select('r.id as recipeId', 'r.name', 'r.rating')
-   .where('cbr.cookbookId', cookbookId);
+   .where('cbr.cookbookId', cookbookId)
+   .limit(size)
+   .offset(offset)
 
   const cats = await db('recipe_categories as rcat')
      .join('categories as cat', 'cat.id', 'rcat.categoryId')
@@ -416,9 +451,16 @@ const recipes = async cookbookId => {
     );
   })
 
-  return recipes;
+
+  return {
+    results: recipes,
+    currentPage: page,
+    totalPages: parseInt(Math.floor(recordCount.length / size)),
+    totalRecords: recordCount.length
+  };
 
   } catch(e) {
+
     /* Determine if we have a custom or module produced error. We hide away
       module based messages produced by the DB for security */
     let message;
