@@ -12,8 +12,24 @@ const list = async (req, res, next) => {
 
   try{
 
+    /* Get the pagination values */
+    let page = req.query.page ? req.query.page : 1;
+    let size = req.query.pageSize ? req.query.pageSize : 10;
+
+    if(page < 1) page = 1
+    if(size < 1) size = 1
+
+    let offset = parseInt((page - 1) * size)
+
+    /* Pagination options to send to the method that requires it */
+    let options = {
+        page,
+        size,
+        offset
+    }
+
     /* Get the cookbooks from the database */
-    const results = await cookbookModel.findAll();
+    const results = await cookbookModel.findAll(options);
 
     if(!results || results.length < 1) {
       let err = new Error('There were no cookbooks to find');
@@ -29,7 +45,12 @@ const list = async (req, res, next) => {
       throw err;
     }
 
-    res.status(200).json(results);
+    res.status(200).json({
+      results: results.results,
+      totalPages: results.totalPages,
+      totalRecords: results.totalRecords,
+      currentPage: results.currentPage
+    });
 
   } catch(e) {
     /* Log out the issue(s) */
@@ -308,6 +329,22 @@ const recipes = async (req, res, next) => {
 
   try{
 
+    /* Get the pagination values */
+    let page = req.query.page ? parseInt(req.query.page) : 1;
+    let size = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+
+    if(page < 1) page = 1
+    if(size < 1) size = 1
+
+    let offset = parseInt((page - 1) * size)
+
+    /* Pagination options to send to the method that requires it */
+    let options = {
+        page,
+        size,
+        offset
+    }
+
     /* Validate the request object values we need */
     let validationErrors;
     if(!req.params.id || req.params.id === 'undefined'){
@@ -321,7 +358,7 @@ const recipes = async (req, res, next) => {
 
     /* get the desired recipes */
     let id = parseInt(req.params.id)
-    let results = await cookbookModel.recipes(id);
+    let results = await cookbookModel.recipes(id, options);
 
     if(results.length < 1){
       res.status(404).json({
@@ -339,7 +376,12 @@ const recipes = async (req, res, next) => {
       })
     }
 
-    res.status(200).json(results);
+    res.status(200).json({
+      results: results.results,
+      totalPages: results.totalPages,
+      totalRecords: results.totalRecords,
+      currentPage: results.currentPage
+    });
 
   } catch(e) {
     /* Log out the issue(s) */
@@ -355,6 +397,22 @@ const getCategories = async (req, res, next) => {
 
   try{
 
+    /* Get the pagination values */
+    let page = req.query.page ? parseInt(req.query.page) : 1;
+    let size = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+
+    if(page < 1) page = 1
+    if(size < 1) size = 1
+
+    let offset = parseInt((page - 1) * size)
+
+    /* Pagination options to send to the method that requires it */
+    let options = {
+        page,
+        size,
+        offset
+    }
+
     /* Validate the request object values we need */
     let validationErrors;
     if(!req.params.id || req.params.id === 'undefined'){
@@ -369,7 +427,7 @@ const getCategories = async (req, res, next) => {
     let id = parseInt(req.params.id);
 
     /* get the desired recipes */
-    let results = await cookbookCategoriesModel.findByCookbook(id);
+    let results = await cookbookCategoriesModel.findByCookbook(id, options);
     
     if(results.length < 1) {
       res.status(404).json({
@@ -388,7 +446,12 @@ const getCategories = async (req, res, next) => {
     }
 
 
-    res.status(200).json(results);
+    res.status(200).json({
+      results: results.results,
+      totalPages: results.totalPages,
+      totalrecords: results.totalPages,
+      currentPage: results.currentPage
+    });
 
   } catch(e) {
     /* Log out the issue(s) */

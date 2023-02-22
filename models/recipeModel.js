@@ -571,10 +571,9 @@ const findAll = async (options) => {
      * to keep it all nice and tidy ( IMHO )
     */
 
-    let { page, size } = options;
+    let { page, size, offset } = options;
 
-    if(page < 1) page = 1;
-    if(size < 1) size = 1;
+   
 
     return await db.transaction( async trx => {
 
@@ -593,18 +592,21 @@ const findAll = async (options) => {
          'rating'
        )
        .limit(size)
-       .offset((page - 1) * size)
+       .offset(offset)
        .transacting(trx);
+
 
       const resultCount = await trx('recipes').select('id').count().groupBy('id').transacting(trx)
       
+
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
        {
 
          for( let result of results) {
          //results.forEach( async result => {
-          
+
+
           let ingredientResults = await trx('recipe_ingredients as ri')
             .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
             .select(
@@ -634,10 +636,7 @@ const findAll = async (options) => {
             ingredients: [...ingredientResults],
             cookbooks: [...cookbookResults],
             steps: [...stepResults],
-            categories: [...categoryResults],
-            totalRecords: resultCount.length,
-            totalPages: parseInt(Math.floor(resultCount.length / size)),
-            currentPage: page
+            categories: [...categoryResults]
           };
 
           recipes.push(recipe);
@@ -648,7 +647,12 @@ const findAll = async (options) => {
          return [];
        }
 
-       return recipes;
+       return {
+        results: results,
+        totalRecords: resultCount.length,
+        totalPages: parseInt(Math.floor(resultCount.length / size)),
+        currentPage: page
+       };
 
     });
 
@@ -1031,10 +1035,13 @@ const findByCategory = async (terms, options) => {
  * @returns {array} Contains the specified recipes if found otherwise it returns
  * an empty array
  */
-const findByUserId = async id => {
+const findByUserId = async (id, options) => {
 
   try {
     
+    /* get the pagination options */
+    let { page, size, offset } = options
+
     /* Validate the passed in arguments */
     if(!validation.validator(Number.parseInt(id), 'number')){
       throw {
@@ -1043,17 +1050,28 @@ const findByUserId = async id => {
       }
     }
 
-    let finalRecipe = [];
+    /* Get a count of all records being affected */
+    const recordCount = await db('recipes')
+    .select('id')
+    .where('userId', id)
+    .count()
+    .groupBy('id');
 
     /* Gather the required data from the database */
     const results = await db('recipes')
      .select('*')
-     .where('userId', id);
-
+     .where('userId', id)
+     .limit(size)
+     .offset(offset);
 
     /* If we any results then send them back  */
     if(results && results.length > 0){
-      return results;
+      return {
+        results, 
+        totalRecords: recordCount.length,
+        totalPages: parseInt(Math.floor(recordCount.length / size)) + 1,
+        currentPage: page
+      };
     } else {
       return [];
     }

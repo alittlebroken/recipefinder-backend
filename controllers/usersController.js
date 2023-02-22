@@ -18,10 +18,26 @@ const listAll = async (req, res, next) => {
 
     try{
 
+        /* Pagination Options */
+        let size = req.query.pageSize ? req.query.pageSize : 10
+        let page = req.query.page ? req.querypage : 1
+
+        if( size < 1) size = 1
+        if( page < 1) page = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* The pagination options to pass into the method returning results */
+        const options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate any request headers or body parameters, if any */
 
         /* Extract the users from the DB */
-        const results = await userModel.findAll();
+        const results = await userModel.findAll(options);
 
         if(!results || results.length < 1){
             res.status(404).json({
@@ -45,7 +61,10 @@ const listAll = async (req, res, next) => {
             status: 200,
             success: true,
             message: '',
-            results: results
+            results: results.results,
+            totalRecords: results.totalRecords,
+            totalPages: results.totalPages,
+            currentPage: results.currentPage
         });
 
     } catch(e) {
@@ -132,6 +151,22 @@ const listUserRecipes = async (req, res, next) => {
 
     try{
 
+        /* Pagination Options */
+        let size = req.query.pageSize ? req.query.pageSize : 10
+        let page = req.query.page ? req.query.page : 1
+
+        if( size < 1) size = 1
+        if( page < 1) page = 1
+
+        let offset = parseInt((page - 1) * size)
+
+       /* The pagination options to pass into the method returning results */
+        const options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate any passed in data */
         let id = req.params.id;
 
@@ -145,7 +180,7 @@ const listUserRecipes = async (req, res, next) => {
         }
 
         /* Gather the results from the DB */
-        const results = await recipeModel.findByUserId(id);
+        const results = await recipeModel.findByUserId(id, options);
         
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
@@ -171,7 +206,10 @@ const listUserRecipes = async (req, res, next) => {
             status: 200,
             success: true,
             message: '',
-            results: results
+            results: results.results,
+            totalRecords: results.totalRecords,
+            totalPages: results.totalPages,
+            currentPage: results.currentPage
         });
 
     } catch(e) {
@@ -195,6 +233,22 @@ const listUserCookbooks = async (req, res, next) => {
 
     try{
 
+        /* Pagination Options */
+        let size = req.query.pageSize ? req.query.pageSize : 10
+        let page = req.query.page ? req.query.page : 1
+
+        if( size < 1) size = 1
+        if( page < 1) page = 1
+
+        let offset = parseInt((page - 1) * size)
+
+       /* The pagination options to pass into the method returning results */
+        const options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate any passed in data */
         let id = Number.parseInt(req.params.id);
 
@@ -209,7 +263,7 @@ const listUserCookbooks = async (req, res, next) => {
 
 
         /* Gather the results from the DB */
-        const results = await cookbookModel.findByUserId(id);
+        const results = await cookbookModel.findByUserId(id, options);
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
@@ -235,7 +289,10 @@ const listUserCookbooks = async (req, res, next) => {
             status: 200,
             success: true,
             message: '',
-            results: results
+            results: results.results,
+            totalPages: results.totalPages,
+            totalRecords: results.totalRecords,
+            currentPage: results.currentPage
         });
 
     } catch(e) {
@@ -259,6 +316,22 @@ const listUserPantry = async (req, res, next) => {
 
     try{
 
+        /* Pagination Options */
+        let size = req.query.pageSize ? req.query.pageSize : 10
+        let page = req.query.page ? req.query.page : 1
+
+        if( size < 1) size = 1
+        if( page < 1) page = 1
+
+        let offset = parseInt((page - 1) * size)
+
+       /* The pagination options to pass into the method returning results */
+        const options = {
+            page,
+            size,
+            offset
+        }
+
         /* Validate any passed in data */
         let id = Number.parseInt(req.params.id);
 
@@ -272,7 +345,7 @@ const listUserPantry = async (req, res, next) => {
         }
 
         /* Gather the results from the DB */
-        const results = await pantryIngredients.findByUser(id);
+        const results = await pantryIngredients.findByUser(id, options);
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
@@ -298,7 +371,10 @@ const listUserPantry = async (req, res, next) => {
             status: 200,
             success: true,
             message: '',
-            results: results
+            results: results.results,
+            totalRecords: results.totalRecords,
+            totalPages: results.totalPages,
+            currentPage: results.currentPage
         });
 
     } catch(e) {

@@ -334,11 +334,15 @@ const findById = async id => {
  * Retrieve all ingredients associated with a specific recipe
  * @param {number} id The unique identifier for the recipe whose ingredients
  * we are extracting
+ * @param {object} options The list of pagination options
  * @returns {array} Array of objects with details on each ingredient found
  */
- const findByRecipeId = async id => {
+ const findByRecipeId = async (id, options) => {
 
    try{
+
+     /* get the pagination values */
+     let {page, size, offset} = options; 
 
      /* Validate the passed in data */
      if(!validation.validator(id, 'number')){
@@ -348,15 +352,31 @@ const findById = async id => {
        }
      };
 
+     /* Get a record count */
+    const recordCount = await db('recipe_ingredients as ri')
+    .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
+    .join('recipes as r', 'r.id', '=', 'ri.recipeId')
+    .select('ri.id')
+    .where('ri.recipeId', id)
+    .count('ri.id')
+    .groupBy('ri.id')
+
     /* Gather the data from the DB */
     const results = await db('recipe_ingredients as ri')
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .join('recipes as r', 'r.id', '=', 'ri.recipeId')
      .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
-     .where('ri.recipeId', id);
+     .where('ri.recipeId', id)
+     .limit(size)
+     .offset(offset)
      
     if(results && results.length > 0){
-      return results;
+      return {
+        results: results,
+        totalRecords: recordCount.length,
+        totalPages: parseInt(Math.floor(recordCount.length /size )),
+        currentPage: page
+      };
     } else {
       return [];
     }

@@ -335,12 +335,16 @@ const findAll = async () => {
  * Return all entries in the table that have a recipe Id matching the passed in
  * function argument
  * @param {number} id - The id of the recipe
+ * @param {object} options The pagination settings
  * @returns {object} Contains if the required action was successfull and a
  * supporting message to further explain the result of running this function
  */
-const findByRecipe = async id => {
+const findByRecipe = async (id, options) => {
 
   try{
+
+    /* extract the pagination settings */
+    let {page, size, offset} = options;
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -349,6 +353,14 @@ const findByRecipe = async id => {
         message: 'One or more required values are missing or incorrect'
       }
     };
+
+    /* Generate a total count of the data we are insterested in */
+    const recordCount = await db('recipe_categories as rc')
+    .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+    .select('rc.id',)
+    .where('rc.recipeId', id)
+    .count('rc.id')
+    .groupBy('rc.id')
 
     /* Retrieve the specified record(s) */
     const result = await db('recipe_categories as rc')
@@ -362,7 +374,12 @@ const findByRecipe = async id => {
      .where('rc.recipeId', id);
 
     if(result && result.length > 0){
-      return result;
+      return {
+        results: result,
+        currentPage: page,
+        totalRecords: recordCount.length,
+        totalPages: parseInt(Math.floor(recordCount.length/size))
+      };
     } else {
       return [];
     }

@@ -321,12 +321,16 @@ const findById = async stepId => {
  * find all steps which belong to a particular recipe
  * @param {number} recipeId - The unique identifier of the recipe to get the
  * steps for
+ * @param {object} options The settings to be used for pagination
  * @returns {array} An array containing all steps for a recipe or empty if
  * the recipe has none yet
  */
-const findByRecipeId = async recipeId => {
+const findByRecipeId = async (recipeId, options) => {
 
   try{
+
+    /* Extract the pagination values */
+    let {page, size, offset} = options
 
     /* validate the values passed into the function */
     if(!recipeId || typeof recipeId !== 'number'){
@@ -336,15 +340,29 @@ const findByRecipeId = async recipeId => {
       }
     }
 
+    /* get a count of the total records we have */
+    const recordCount = await db('steps')
+    .select('id')
+    .where('recipeId', recipeId)
+    .count('id')
+    .groupBy('id')
+
     /* Get the steps from the DB */
     const result = await db('steps')
      .select('*')
-     .where('recipeId', recipeId);
+     .where('recipeId', recipeId)
+     .limit(size)
+     .offset(offset)
 
      if(!result || result.length < 1){
        return [];
      } else {
-       return result;
+       return {
+        results: result,
+        totalPages: parseInt(Math.floor(recordCount.length / size)),
+        totalRecords: recordCount.length,
+        currentPage: page
+       };
      }
 
   } catch(e) {
@@ -369,20 +387,37 @@ const findByRecipeId = async recipeId => {
 
 /*
  * Get all steps from the DB
+ * @params {object} Contains pagination options like page number, records per page etc
  * @returns {array} An array containing all the steps
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
+    /* Exttract pagination values */
+    let {page, size, offset} = options;
+
+    /* Get a count of the records from thr DB */
+    const recordCount = await db('steps')
+    .select('id')
+    .count('id')
+    .groupBy('id')
+
     /* Get the steps from the DB */
     const result = await db('steps')
-     .select('*');
+     .select('*')
+     .limit(size)
+     .offset(offset)
 
      if(!result || result.length < 1){
        return [];
      } else {
-       return result;
+       return {
+        results: result,
+        currentPage: page,
+        totalRecords: recordCount.length,
+        totalPages: parseInt(Math.floor(recordCount.length / size) + 1)
+       };
      }
 
   } catch(e) {

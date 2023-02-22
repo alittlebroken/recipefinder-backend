@@ -377,12 +377,20 @@ const findAll = async () => {
 /*
  * Returns all cookbook/category relationships for a particular cookbook
  * @param {number} id - The identifier of the record(s) to be removed
+ * @param {object} options - The various settings for pagination
  * @returns {array} Array of cookbook/category objects
  */
-const findByCookbook = async id => {
+const findByCookbook = async (id, options) => {
 
 
   try{
+
+    /* Extract the pagination settings */
+    let { page, size, offset } = options
+
+    if(!page || page < 1) page = 1
+    if(!size || size < 1) size = 10
+    if(!offset) offset = parseInt(Math.floor((page - 1) * size))
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -392,21 +400,40 @@ const findByCookbook = async id => {
       }
     };
 
-    /* Add the record to the database */
+    /* get a total count of all records we are interested in */
+    const recordCount = await db('cookbook_categories as cc')
+    .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
+    .select(
+      'cc.id'
+    )
+    .where('cookbookId', id)
+    .count('cc.id')
+    .groupBy('cc.id')
+
+    /* Select the records we are interested in */
     const result = await db('cookbook_categories as cc')
-     //.join('cookbooks as c', 'cc.cookbookId', '=', 'cookbooks.id')
      .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
      .select(
        'cc.id',
-       //'c.name as cookbookName',
-       //'c.id as cookbookId',
        'cat.name as categoryName',
        'cat.id as categoryId'
      )
-     .where('cookbookId', id);
+     .where('cookbookId', id)
+     .limit(size)
+     .offset(offset)
     
     if(result && result.length > 0){
-      return result;
+
+      /* generate any extra data to send back */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+
+      return {
+        results: result,
+        totalPages: numPages,
+        totalRecords: recordCount.length,
+        currentPage: page
+      };
     } else {
       return [];
     }

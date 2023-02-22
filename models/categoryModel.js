@@ -301,19 +301,45 @@ const findById = async id => {
 
 /*
  * Returns all occurances of a category matching the passed in name
- * @param {string} name - Text to match on
+ * @param {object} options - Pagination settings
  * @returns {array} Array of objects for each match found
  */
-const findAll = async () => {
+const findAll = async (options) => {
 
   try{
 
+    /* Extract the pagination options */
+    let { size, page, offset } = options
+
+    if(!page || page < 1) page = 1
+    if(!size || size < 1) size = 10
+
+    if(!offset) offset = parseInt(Math.floor((page - 1) * size))
+
+
+    /* Count the records we are interested in */
+    const recordCount = await db('categories')
+    .select('id').count('id').groupBy('id')
+
     /* Extract data from the database */
     const results = await db('categories')
-     .select('*');
+     .select('*').limit(size).offset(offset)
 
      if(results.length >= 1){
-       return results;
+      /* gather the various resulst we need to send back */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1){
+        numPages = 1
+      } else {
+        numPages = numPages + 1
+      }
+
+       return {
+        results: results,
+        totalPages: numPages,
+        totalRecords: recordCount.length,
+        currentPage: page
+       };
      } else {
        return [];
      }

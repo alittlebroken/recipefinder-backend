@@ -258,11 +258,25 @@ const updateItem = async pantryItem => {
 };
 
 /* Returns a list of all pantries stored in the database
+ * @param {object} options Settings for pagination
  * @returns {array} A list of pantry objects
  */
-const listAll = async () => {
+const listAll = async (options) => {
 
   try{
+
+    /* Extract the pagination options */
+    let {page,size,offset} = options
+
+    /* Get a total count of the records we are interested in */
+    const recordCount = await db('pantries as p')
+    .join('users as u', 'p.userId', '=', 'u.id')
+    //.count('pi.pantryId as numIngredients')
+    .select(
+     'p.id'
+    )
+    .count('p.id')
+    .groupBy('p.id')
 
     /* Get the list if pantries from the DB */
     const results = await db('pantries as p')
@@ -276,7 +290,9 @@ const listAll = async () => {
        .count('*')
        .whereRaw('?? = ??', ['pi.pantryId', 'p.id'])
        .as('numIngredients')
-     );
+     )
+     .limit(size)
+     .offset(offset)
 
      if(!results){
       throw {
@@ -289,7 +305,12 @@ const listAll = async () => {
       return [];
      }
 
-     return results;
+     return {
+      results: results,
+      totalRecords: recordCount.length,
+      totalPages: parseInt(Math.floor(recordCount.length/size)),
+      currentPage: page
+     };
 
   } catch(e) {
     /* We only wish to have the errors specific to the model reported back others are caught as
@@ -311,11 +332,15 @@ const listAll = async () => {
 };
 
 /* Returns a list of a particular pantry
+ * @param {object} options Contains the pagination settings
  * @returns {array} A pantry object
  */
-const list = async pantryId => {
+const list = async (pantryId, options) => {
 
   try{
+
+    /* Extract the pagination options */
+    let {page,size,offset} = options
 
     /* Validate the passed in value(s) */
     if(!pantryId || pantryId === undefined || typeof pantryId !== 'number'){
@@ -342,6 +367,14 @@ const list = async pantryId => {
        .count('pi.id')
        .where('pi.pantryId', pantryResults[0].pantryId)
 
+      /* Get a total count of the records we will get */
+      const recordCount = await db('pantry_ingredients as pi')
+      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+      .select('pi.id')
+      .where('pi.pantryId', pantryResults[0].pantryId)
+      .count('pi.id')
+      .groupBy('pi.id')
+
       const ingredientResults = await db('pantry_ingredients as pi')
        .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
        .select(
@@ -352,6 +385,8 @@ const list = async pantryId => {
         'pi.amount_type'
         )
        .where('pi.pantryId', pantryResults[0].pantryId)
+       .limit(size)
+       .offset(offset)
 
       pantry = [
         {
@@ -361,7 +396,7 @@ const list = async pantryId => {
         }
       ]
 
-     if(!pantry || pantry === undefined){
+      if(!pantry || pantry === undefined){
       throw {
         name: 'PANTRYMODEL_ERROR',
         message: 'There was a problem with the resource, please try again later'
@@ -372,7 +407,12 @@ const list = async pantryId => {
       return [];
      }
 
-     return pantry;
+     return {
+      results: pantry,
+      totalRecords: recordCount.length,
+      totalPages: parseInt(Math.floor(recordCount.length/size)),
+      currentPage: page
+     };
 
   } catch(e) {
     
