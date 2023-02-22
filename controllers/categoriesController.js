@@ -18,8 +18,24 @@ const list = async (req, res, next) => {
 
     try{
 
+        /* Get the pagination values */
+        let page = req.query.page ? req.query.page : 1;
+        let size = req.query.pageSize ? req.query.pageSize : 10;
+
+        if(page < 1) page = 1
+        if(size < 1) size = 1
+
+        let offset = parseInt((page - 1) * size)
+
+        /* Pagination options to send to the method that requires it */
+        let options = {
+            page,
+            size,
+            offset
+        }
+
         /* List all the categories we have */
-        const results = await categoryModel.findAll();
+        const results = await categoryModel.findAll(options);
 
         if(!results || results.success === false){
             res.status(500).json(
@@ -39,7 +55,12 @@ const list = async (req, res, next) => {
             })
         }
 
-        res.status(200).json(results);
+        res.status(200).json({
+            results: results.results,
+            totalRecords: results.totalRecords,
+            totalPages: results.totalPages,
+            currentPage: results.currentPage
+        });
 
     } catch(e) {
         /* Log out the issue(s) */
