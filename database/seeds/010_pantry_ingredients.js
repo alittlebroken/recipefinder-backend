@@ -17,4 +17,6 @@ exports.seed = async function(knex) {
     {id: 9, pantryId: 2, ingredientId: 18, amount: 300, amount_type: 'grams'},
     {id: 10, pantryId: 2, ingredientId: 11, amount: 50, amount_type: 'grams'}
   ]);
+
+  await knex.raw('select setval(\'pantry_ingredients_id_seq\', max(id)) from pantry_ingredients');
 };

@@ -15,4 +15,6 @@ exports.seed = async function(knex) {
       name: 'My Favorite Recipes',
     },
   ]);
+
+  await knex.raw('select setval(\'cookbooks_id_seq\', max(id)) from cookbooks');
 };

@@ -11,4 +11,6 @@ exports.seed = async function(knex) {
     {id: 3, cookbookId: 2, categoryId: 4},
     {id: 4, cookbookId: 2, categoryId: 3}
   ]);
+
+  await knex.raw('select setval(\'cookbook_categories_id_seq\', max(id)) from cookbook_categories');
 };

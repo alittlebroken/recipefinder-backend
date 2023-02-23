@@ -40,4 +40,6 @@ exports.seed = async function(knex) {
     {id: 32, recipeId: 2, ingredientId: 5, amount: 1, amount_type: ''},
     {id: 33, recipeId: 2, ingredientId: 29, amount: 1, amount_type: ''},
   ]);
+
+  await knex.raw('select setval(\'recipe_ingredients_id_seq\', max(id)) from recipe_ingredients');
 };
