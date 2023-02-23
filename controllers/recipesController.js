@@ -1329,7 +1329,7 @@ const update = async (req, res, next) => {
                 message: 'Wrong format for cook_time'
             }
         }
-
+        /*
         if(!req.body.rating || req.body.rating === undefined){
             throw {
                 status: 400,
@@ -1345,6 +1345,7 @@ const update = async (req, res, next) => {
                 message: 'Wrong format for rating'
             }
         }
+        */
 
         /* Actually update the desired record now */
         const result = await recipeModel.update({
@@ -1355,8 +1356,7 @@ const update = async (req, res, next) => {
             servings: parseInt(req.body.servings),
             calories_per_serving: parseInt(req.body.calories_per_serving),
             prep_time: parseInt(req.body.prep_time),
-            cook_time: parseInt(req.body.cook_time),
-            rating: parseInt(req.body.rating)
+            cook_time: parseInt(req.body.cook_time)
         });
 
         if(!result || result.success === false){
