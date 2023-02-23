@@ -6,12 +6,12 @@ exports.up = function(knex) {
   return knex.schema
    .createTable('recipes', table => {
      table.increments('id').primary();
-     table.integer('userId').unsigned().notNullable();
+     table.integer('userId').unsigned().nullable();
      table.foreign('userId')
       .references('id')
       .inTable('users')
       .onUpdate('CASCADE')
-      .onDelete('CASCADE');
+      .onDelete('set null');
      table.string('name', 255).notNullable();
      table.string('description');
      table.integer('servings').unsigned().notNullable();
