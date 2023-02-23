@@ -294,12 +294,12 @@ const removeAll = async () => {
   try{
 
     /* Remove the user */
-    await db('users').del().whereNot('username', 'admin');
+    await db('users').del().where('roles', '=', 'customer');
 
     /* Check the user was deleted */
     const userCheck = await db('users')
      .select('*')
-     .whereNot('username', 'admin');
+     .where('roles', '=', 'customer');
 
     if(userCheck?.length < 1){
       return {
@@ -314,6 +314,7 @@ const removeAll = async () => {
     }
 
   } catch(e) {
+    console.log(e)
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message;
