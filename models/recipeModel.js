@@ -351,13 +351,14 @@ const update = async recipe => {
       }
     }
     
-
+    /*
     if(!validation.validator(recipe.rating, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
         message: 'Validation failed for rating'
       }
     }
+    */
     
 
     /* Update the specifed record with the new values passed in */
@@ -373,8 +374,7 @@ const update = async recipe => {
           servings: recipe.servings,
           calories_per_serving: recipe.calories_per_serving,
           prep_time: recipe.prep_time,
-          cook_time: recipe.cook_time,
-          rating: recipe.rating
+          cook_time: recipe.cook_time
         })
         .where('id', recipe.recipeId);
       
