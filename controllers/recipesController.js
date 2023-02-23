@@ -1348,6 +1348,7 @@ const update = async (req, res, next) => {
         const result = await recipeModel.update({
             recipeId: parseInt(req.params.id),
             name: req.body.name,
+            description: req.body.description ? req.body.description : null,
             userId: parseInt(req.body.userId),
             servings: parseInt(req.body.servings),
             calories_per_serving: parseInt(req.body.calories_per_serving),
