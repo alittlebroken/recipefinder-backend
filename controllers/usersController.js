@@ -100,6 +100,21 @@ const listUser = async (req, res, next) => {
             });
         }
 
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            console.log('User id before switch: ', id)
+            id = req.user.id
+            console.log('User id after switch:', id)
+        }
+
         /* All appears correct in the request parameters, now actually extract the
          * record from the database */
         const results = await userModel.findById(parseInt(id));
@@ -177,6 +192,21 @@ const listUserRecipes = async (req, res, next) => {
                 message: 'Undefined userId',
                 results: []
             });
+        }
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            console.log('User id before switch: ', id)
+            id = req.user.id
+            console.log('User id after switch:', id)
         }
 
         /* Gather the results from the DB */
@@ -261,6 +291,20 @@ const listUserCookbooks = async (req, res, next) => {
             });
         }
 
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            console.log('User id before switch: ', id)
+            id = req.user.id
+            console.log('User id after switch:', id)
+        }
 
         /* Gather the results from the DB */
         const results = await cookbookModel.findByUserId(id, options);
@@ -342,6 +386,21 @@ const listUserPantry = async (req, res, next) => {
                 message: 'Undefined userId',
                 results: []
             });
+        }
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            console.log('User id before switch: ', id)
+            id = req.user.id
+            console.log('User id after switch:', id)
         }
 
         /* Gather the results from the DB */
@@ -966,8 +1025,23 @@ const removeUser = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
+        let id = req.params.id
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            id = req.user.id
+        }
+
         /* Remove the user */
-        const result = await userModel.remove(req.params.id);
+        const result = await userModel.remove(id);
 
         if(result?.success === false){
             res.status(500).json({
@@ -1018,8 +1092,23 @@ const removeUserRecipes = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
+        let id = req.params.id
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            id = req.user.id
+        }
+
         /* remove the recipes for the user */
-        const result = await recipeModel.removeAllByUser(req.params.id);
+        const result = await recipeModel.removeAllByUser(id);
 
         if(result.success === false){
             switch(result.message){
@@ -1082,8 +1171,23 @@ const removeUserCookbooks = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
+        let id = req.params.id
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            id = req.user.id
+        }
+
         /* remove the users cookbooks now validation has succeeded */
-        const result = await cookbookModel.removeAllByUser(req.params.id);
+        const result = await cookbookModel.removeAllByUser(id);
         
         if(!result || result.success === false){
             return res.status(500).json({
@@ -1134,8 +1238,23 @@ const removeUserPantry = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
+        let id = req.param.id
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            id = req.user.id
+        }
+
         /* Attempt to remove the users pantries */
-        const result  = await pantryModel.removeAllByUser(req.params.id);
+        const result  = await pantryModel.removeAllByUser(id);
 
         if(!result || result.success === false){
             res.status(500).json({
@@ -1286,9 +1405,24 @@ const updateUser = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors);
 
+        let id = req.params.id
+
+        /* For non admin users we need to ensure that whenever a route requires an id
+         * that we use the id for the current logged in user.
+         * 
+         * This ensure that a customer can't access or see another users details. Of course
+         * admin roles do not have this restriction
+        */
+        if(req.user.roles !== 'admin'){
+            /* Good, we are not an admin user so we can substitue out the id with the logged in
+             * users id
+             */
+            id = req.user.id
+        }
+
         /* Now update the specified user */
         const result  = await userModel.update(
-            req.params.id,
+            id,
             req.body.username,
             req.body.email,
             req.body.roles,
