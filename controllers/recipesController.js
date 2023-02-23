@@ -510,7 +510,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.steps || req.body.steps === undefined){
+        /* if(!req.body.steps || req.body.steps === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -573,13 +573,15 @@ const create = async (req, res, next) => {
                 message: 'Wrong format for categories'
             }
         }
+        */
+
 
         /* Add the recipe and supporting data to the database */
         let recipe = req.body.recipe;
-        let steps = req.body.steps;
-        let ingredients = req.body.ingredients;
-        let cookbookId = req.body.cookbookId;
-        let categories = req.body.categories;
+        let steps = req.body.steps ? req.body.steps : null;
+        let ingredients = req.body.ingredients ? req.body.ingredients : null;
+        let cookbookId = req.body.cookbookId ? req.body.cookbookId : null;
+        let categories = req.body.categories ? req.body.categories : null;
 
         const result = await recipeModel.create(recipe, steps, ingredients, cookbookId, categories);
 
