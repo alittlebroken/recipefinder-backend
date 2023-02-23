@@ -7,7 +7,7 @@ exports.up = function(knex) {
    .createTable('cookbooks', table => {
      table.increments('id').primary();
      table.integer('userId').unsigned().notNullable();
-     table.foreign('userId').references('id').inTable('users');
+     table.foreign('userId').references('id').inTable('users').onUpdate('CASCADE').onDelete('CASCADE');
      table.string('name', 255).notNullable();
      table.string('description');
      table.string('image');
