@@ -36,53 +36,53 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
     if(!validation.validator(recipe, 'object')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'Recipe object is missing or incorrect'
       }
     };
 
     if(!validation.validator(recipe.userId, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'recipe userId is missing or incorrect'
       }
     };
 
     if(!validation.validator(recipe.name, 'string')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'recipe name is missing or incorrect'
       }
     };
 
     if(!validation.validator(recipe.servings, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'recipe servimgs is missing or incorrect'
       }
     };
 
     if(!validation.validator(recipe.calories_per_serving, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'recipe calories_per_serving is missing or incorrect'
       }
     };
 
     if(!validation.validator(recipe.prep_time, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'recipe prep_time is missing or incorrect'
       }
     };
 
     if(!validation.validator(recipe.cook_time, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
+        message: 'recipe cook_time is missing or incorrect'
       }
     };
 
-    /* steps data */
+    /* steps data 
     if(!validation.validator(steps, 'array')){
       throw {
         name: 'RECIPEMODEL_ERROR',
@@ -90,7 +90,7 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
       }
     };
 
-    /* ingredients data */
+    /* ingredients data 
     if(!validation.validator(ingredients, 'array')){
       throw {
         name: 'RECIPEMODEL_ERROR',
@@ -98,7 +98,7 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
       }
     };
 
-    /* cookbook id */
+    /* cookbook id 
     if(!validation.validator(cookbookId, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',
@@ -106,13 +106,14 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
       }
     };
 
-    /* categories data */
+    /* categories data 
     if(!validation.validator(categories, 'array')){
       throw {
         name: 'RECIPEMODEL_ERROR',
         message: 'One or more required values are missing or incorrect'
       }
     };
+    */
 
     /* Add the recipe and related data via a transaction */
     return await db.transaction( async trx => {
@@ -122,19 +123,27 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
        .insert(recipe, 'id')
        .transacting(trx);
 
-      steps.forEach(step => step.recipeId = recipeId[0].id);
-      await db('steps').insert(steps).transacting(trx);
+      if(steps){
+        steps.forEach(step => step.recipeId = recipeId[0].id);
+        await db('steps').insert(steps).transacting(trx);
+      }
 
-      ingredients.forEach(ingredient => ingredient.recipeId = recipeId[0].id);
-      await db('recipe_ingredients').insert(ingredients).transacting(trx);
+      if(ingredients){
+        ingredients.forEach(ingredient => ingredient.recipeId = recipeId[0].id);
+        await db('recipe_ingredients').insert(ingredients).transacting(trx);
+      }
 
-      await db('cookbook_recipes').insert(
-        { cookbookId: cookbookId, recipeId: recipeId[0].id}
-      ).transacting(trx);
+      if(cookbookId){
+        await db('cookbook_recipes').insert(
+          { cookbookId: cookbookId, recipeId: recipeId[0].id}
+        ).transacting(trx);
+      }
 
-      categories.forEach(cat => cat.recipeId = recipeId[0].id);
-      await db('recipe_categories').insert(categories).transacting(trx);
-
+      if(categories){
+        categories.forEach(cat => cat.recipeId = recipeId[0].id);
+        await db('recipe_categories').insert(categories).transacting(trx);
+      }
+      
       return {
         success: true,
         message: 'Recipe successfully added'
@@ -143,7 +152,7 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
     });
 
   } catch(e) {
-    
+    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
