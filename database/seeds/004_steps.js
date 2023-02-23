@@ -43,4 +43,6 @@ exports.seed = async function(knex) {
       content: 'Light the barbecue. When the flames have died down, place a large, well-oiled non-stick frying pan or sturdy baking tray on top of the bars. Cook the burgers in the pan or on the tray for 10 mins each side until nicely browned. Alternatively, heat oven to 220C/200C fan/gas 7 and cook on oiled baking trays for 15 mins. Serve in buns with a dollop of salsa, some onion and salad leaves.'
     }
   ]);
+
+  await knex.raw('select setval(\'steps_id_seq\', max(id)) from steps');
 };

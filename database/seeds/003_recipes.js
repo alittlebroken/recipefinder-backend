@@ -29,4 +29,6 @@ exports.seed = async function(knex) {
       rating: 90
     }
   ]);
+
+  await knex.raw('select setval(\'recipes_id_seq\', max(id)) from recipes');
 };

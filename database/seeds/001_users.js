@@ -32,4 +32,6 @@ exports.seed = async function(knex) {
       roles: 'customer'
     }
   ]);
+
+  await knex.raw('select setval(\'users_id_seq\', max(id)) from users');
 };
