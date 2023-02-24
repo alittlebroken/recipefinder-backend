@@ -199,8 +199,8 @@ const create = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
-            status: 200,
+        res.status(201).json({
+            status: 201,
             success: true,
             message: 'Pantry successfully created'
         });
@@ -309,8 +309,8 @@ const add = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
-            status: 200,
+        res.status(201).json({
+            status: 201,
             success: true,
             message: 'Ingredient successfully added to pantry'
         });

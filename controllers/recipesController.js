@@ -593,7 +593,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(result);
+        res.status(201).json(result);
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -707,8 +707,8 @@ const addRecipeIngredients = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
-            status: 200,
+        res.status(201).json({
+            status: 201,
             success: true,
             message: 'Ingredient successfully added to recipe'
         });
@@ -806,7 +806,7 @@ const addRecipeSteps = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
+        res.status(201).json({
             success: true,
             message: 'Step has been successfully added to the recipe'
         });
@@ -882,7 +882,7 @@ const addRecipeCategories = async (req, res, next) => {
             }
         }
 
-        res.status(200).json(result);
+        res.status(201).json(result);
 
     } catch(e) {
         /* Log out the issue(s) */

@@ -261,8 +261,8 @@ const createUser = async (req, res, next) => {
 
             if(passportError) return next(passportError)
 
-            res.json({
-                status: 200,
+            res.status(201).json({
+                status: 201,
                 message: 'Signup successful',
                 success: true,
                 user: user
