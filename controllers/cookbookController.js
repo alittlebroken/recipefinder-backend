@@ -171,7 +171,7 @@ const create = async (req, res, next) => {
       });
     }
 
-    res.status(200).json(results);
+    res.status(201).json(results);
 
   }catch(e){
     /* Log out the issue(s) */
@@ -514,8 +514,8 @@ const addRecipe = async (req, res, next) => {
       })
     }
 
-    res.status(200).json({
-      status: 200,
+    res.status(201).json({
+      status: 201,
       success: true,
       message: 'Recipe added to cookbook successfully'
     });
@@ -594,7 +594,7 @@ const addCategory = async (req, res, next) => {
       });
     }
 
-    res.status(200).json(results);
+    res.status(201).json(results);
 
   } catch(e) {
     /* Log out the issue(s) */

@@ -533,8 +533,8 @@ const createUser = async (req, res, next) => {
         }
 
         /* No issues found send back the details of the newly created user */
-        res.status(200).json({
-            status: 200,
+        res.status(201).json({
+            status: 201,
             success: true,
             message: '',
             results: result
@@ -809,8 +809,8 @@ const createUserRecipe = async (req, res, next) => {
         }
 
         /* Send back any results */
-        res.status(200).json({
-            status: 200,
+        res.status(201).json({
+            status: 201,
             success: true,
             message: 'Recipe successfully added',
             results: []
@@ -938,8 +938,8 @@ const addUserPantry = async (req, res, next) => {
         }
 
         /* All is OK at this point so lets return the users success */
-        res.status(200).json({
-            status: 200,
+        res.status(201).json({
+            status: 201,
             success: true,
             message: 'Record successfully created',
             results: []
