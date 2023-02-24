@@ -32,7 +32,12 @@ const get = async (req, res, next) => {
         const results = await ingredientModel.findAll(options);
 
         if(!results || results.length < 1){
-            res.status(404).json([]);
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No ingredients have been found',
+                results: []
+            });
         } 
 
         if(results.success === false){
@@ -88,7 +93,12 @@ const getById = async (req, res, next) => {
         const result = await ingredientModel.findById(id);
 
         if(!result || result.length < 1){
-            res.status(404).json([]);
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No ingredients have been found',
+                results: []
+            });
         }
 
         if(result.success === false){
@@ -190,7 +200,12 @@ const remove = async (req, res, next) => {
         }
 
         if(result.count < 1){
-            res.status(404).json({ count: 0});
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'We found no ingredients to remove',
+                count: 0
+            });
         }
 
         res.status(200).json({
