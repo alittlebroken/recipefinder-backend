@@ -390,31 +390,7 @@ const create = async (req, res, next) => {
     try{
 
         /* Validate the Request parameters and body values */
-        if(!req.body || req.body === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined request body'
-            }
-        }
-
-        if(!req.body.recipe || req.body.recipe === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined recipe'
-            }
-        }
-
-        if(typeof req.body.recipe !== 'object'){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Wrong format for recipe'
-            }
-        }
-
-        if(!req.body.recipe.userId || req.body.recipe.userId === undefined){
+        if(!req.body.userId || req.body.userId === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -422,7 +398,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.recipe.userId !== 'number'){
+        if(typeof req.body.userId !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -430,7 +406,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.recipe.name || req.body.recipe.name === undefined){
+        if(!req.body.name || req.body.name === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -438,7 +414,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.recipe.name !== 'string'){
+        if(typeof req.body.name !== 'string'){
             throw {
                 status: 400,
                 success: false,
@@ -446,7 +422,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.recipe.servings || req.body.recipe.servings === undefined){
+        if(!req.body.servings || req.body.servings === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -454,7 +430,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.recipe.servings !== 'number'){
+        if(typeof req.body.servings !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -462,7 +438,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.recipe.calories_per_serving || req.body.recipe.calories_per_serving === undefined){
+        if(!req.body.calories_per_serving || req.body.calories_per_serving === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -470,7 +446,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.recipe.calories_per_serving !== 'number'){
+        if(typeof req.body.calories_per_serving !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -478,7 +454,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.recipe.prep_time || req.body.recipe.prep_time === undefined){
+        if(!req.body.prep_time || req.body.prep_time === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -486,7 +462,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.recipe.prep_time !== 'number'){
+        if(typeof req.body.prep_time !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -494,7 +470,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.recipe.cook_time || req.body.recipe.cook_time === undefined){
+        if(!req.body.cook_time || req.body.cook_time === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -502,7 +478,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.recipe.cook_time !== 'number'){
+        if(typeof req.body.cook_time !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -510,74 +486,19 @@ const create = async (req, res, next) => {
             };
         }
 
-        /* if(!req.body.steps || req.body.steps === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined steps'
-            };
-        }
-
-        if(Array.isArray(req.body.steps) !== true){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Wrong format for steps'
-            }
-        }
-
-        if(!req.body.ingredients || req.body.ingredients === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined ingredients'
-            };
-        }
-
-        if(Array.isArray(req.body.ingredients) !== true){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Wrong format for ingredients'
-            }
-        }
-
-        if(!req.body.cookbookId || req.body.cookbookId === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined cookbookId'
-            }
-        }
-
-        if(typeof req.body.cookbookId !== 'number'){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Wrong format for cookbookId'
-            };
-        }
-
-        if(!req.body.categories || req.body.categories === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined categories'
-            };
-        }
-
-        if(Array.isArray(req.body.categories) === false){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Wrong format for categories'
-            }
-        }
-        */
+        
 
 
         /* Add the recipe and supporting data to the database */
-        let recipe = req.body.recipe;
+        let recipe = {
+            userId: req.body.userId,
+            name: req.body.name,
+            servings: req.body.servings,
+            calories_per_serving: req.body.calories_per_serving,
+            prep_time: req.body.prep_time,
+            cook_time: req.body.cook_time
+        };
+
         let steps = req.body.steps ? req.body.steps : null;
         let ingredients = req.body.ingredients ? req.body.ingredients : null;
         let cookbookId = req.body.cookbookId ? req.body.cookbookId : null;
