@@ -38,6 +38,7 @@ const checkToken = async (req,res,next) => {
         'jwt',
         { session: false },
         async (err, user, info) => {
+         
             if(err || !user){
                 if(info?.message === 'jwt expired'){
                     return res.status(401).json({ 
@@ -63,6 +64,7 @@ const checkToken = async (req,res,next) => {
                  * Use the userModel to retrieve the data
                  */
                 let userid = user.user ? user.user.id : user.id;
+                
                 const foundUser = await userModel.findById(userid)
                 
                 /* Assign the found user to the req object */
@@ -76,7 +78,7 @@ const checkToken = async (req,res,next) => {
                     })
                 }
                 
-                return next()
+               return next()
 
             }
 
