@@ -123,7 +123,8 @@ passport.use(
         ExtractJWT.fromUrlQueryParameter('secret_token'),
         ExtractJWT.fromHeader('auth_token'),
         ExtractJWT.fromAuthHeaderAsBearerToken(),
-        ExtractJWT.fromAuthHeaderWithScheme('Authentication')
+        ExtractJWT.fromAuthHeaderWithScheme('Authentication'),
+        ExtractJWT.fromHeader('token')
       ])
     },
     /* Callback used to process the strategy */

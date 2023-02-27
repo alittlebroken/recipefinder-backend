@@ -9,7 +9,6 @@ const passport = require('passport');
 const morgan = require('morgan');
 const rfs = require('rotating-file-stream');
 const path = require('path');
-const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
 /*
@@ -17,8 +16,13 @@ const cookieParser = require('cookie-parser');
  */
  app.use(express.json()); 
  app.use(express.urlencoded({ extended: true }));
- app.use(cors());
  app.use(cookieParser());
+ app.use(cors({
+  //origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: 'http://localhost:3000',
+  credentials: true,
+  allowedHeaders: "authorisation,Authorisation,Content-Type,content-type,Content-type,token"
+ }));
  app.use(passport.initialize());
  require('./config/passport');
 

@@ -147,9 +147,13 @@ const loginUser = async (req, res, next) => {
                     })
                 }
 
-                return res.cookie('jwt', refreshToken, { httpOnly: true, secure: false })
-                 .status(200)
-                 .json({ accessToken})
+                const cookieOptions = {
+                    httpOnly: true,
+                    secure: false, 
+                }
+
+                res.cookie('jwt', refreshToken, cookieOptions);
+                res.status(200).json({ accessToken });
                 //return res.json({ accessToken, refreshToken });
 
             });
@@ -478,9 +482,9 @@ const logoutUser = async (req, res, next) => {
     const moduleMethod = 'logoutUser';
 
     try{
-        
+
         if(!req.cookies['jwt']){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: 'Missing refresh token'
@@ -515,6 +519,7 @@ const logoutUser = async (req, res, next) => {
          })
 
     } catch(e) {
+       
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
