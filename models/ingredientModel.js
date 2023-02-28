@@ -216,10 +216,14 @@ const findAll = async (options) => {
           queryBuilder.whereILike(filterBy, `%${filterValues}%`)
         }
       })
-     .select('*')
-     .limit(size)
-     .offset(offset)
-     .orderBy(sortBy, sortOrder)
+      .modify((queryBuilder) => {
+        if(sortBy !== undefined || sortOrder !== undefined){
+          queryBuilder.orderBy(sortBy, sortOrder)
+        }   
+      })
+      .select('*')
+      .limit(size)
+      .offset(offset)
 
       /* Calculate number of pages */
       let numPages = parseInt(Math.floor(recordCount.length / size))
