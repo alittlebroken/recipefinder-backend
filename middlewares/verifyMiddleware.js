@@ -16,7 +16,7 @@ const checkRoles = (roles) => (req, res, next) => {
     let userRole = req.user.roles
     
     //const rolesFound = roles.includes(userRole);
-    const rolesFound = roles.some(role => role.toLowerCase() == userRole.toLowercase)
+    const rolesFound = roles.some(role => role.toLowerCase() == userRole.toLowerCase())
     
     if(!rolesFound){
         return next({
