@@ -196,15 +196,34 @@ const findAll = async (options) => {
   try{
 
     /* Extract the pagination settings */
-    let {page, size, offset} = options
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* get the total count of records */
     const recordCount = await db('ingredients')
-    .select('id').count('id').groupBy('id')
+    .modify((queryBuilder) => {
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
+    .select('id')
+    .count('id')
+    .groupBy('id')
 
     /* Search the table for the specified term */
     const results = await db('ingredients')
-     .select('*').limit(size).offset(offset)
+      .modify((queryBuilder) => {
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
+     .select('*')
+     .limit(size)
+     .offset(offset)
+     .orderBy(sortBy, sortOrder)
+
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
 
      if(!results || results.length < 1){
        return [];
@@ -213,12 +232,12 @@ const findAll = async (options) => {
         results: results,
         currentPage: page,
         totalRecords: recordCount.length,
-        totalPages: parseInt(Math.floor(recordCount.length / size))
+        totalPages: numPages
        };
      }
 
   } catch(e) {
-
+    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
