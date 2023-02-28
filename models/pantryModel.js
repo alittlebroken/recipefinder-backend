@@ -266,10 +266,17 @@ const listAll = async (options) => {
   try{
 
     /* Extract the pagination options */
-    let {page,size,offset} = options
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+
 
     /* Get a total count of the records we are interested in */
     const recordCount = await db('pantries as p')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .join('users as u', 'p.userId', '=', 'u.id')
     //.count('pi.pantryId as numIngredients')
     .select(
@@ -281,6 +288,12 @@ const listAll = async (options) => {
     /* Get the list if pantries from the DB */
     const results = await db('pantries as p')
      .join('users as u', 'p.userId', '=', 'u.id')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      //.count('pi.pantryId as numIngredients')
      .select(
       'p.id as id',
@@ -291,6 +304,12 @@ const listAll = async (options) => {
        .whereRaw('?? = ??', ['pi.pantryId', 'p.id'])
        .as('numIngredients')
      )
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+          queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset)
 
@@ -305,10 +324,14 @@ const listAll = async (options) => {
       return [];
      }
 
+     /* Calculate number of pages */
+     let numPages = parseInt(Math.floor(recordCount.length / size))
+     if(numPages < 1) numPages = 1
+
      return {
       results: results,
       totalRecords: recordCount.length,
-      totalPages: parseInt(Math.floor(recordCount.length/size)),
+      totalPages: numPages,
       currentPage: page
      };
 
