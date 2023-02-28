@@ -197,27 +197,49 @@ const findAll = async (options) => {
   try{
 
     /* extract the pagination settings */
-    let { page, size, offset } = options
-
-    if(!page || page < 1) page = 1
-    if(!size || size < 1) size = 10
-    if(!offset) offset = parseInt(Math.floor((page -1) * size))
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Get a count of all the records we are interested in */
     const recordCount = await db('cookbooks')
-    .select('id').count('id').groupBy('id')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
+      .select('id')
+      .count('id')
+      .groupBy('id')
 
     /* No need for validation so return all cookbooks */
     const results = await db('cookbooks')
-     .select('*').limit(size).offset(offset)
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+      })
+      .select('*')
+      .limit(size)
+      .offset(offset)
+      .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
 
     /* Check if any results have been returned */
     if(!results || results.length == 0){
       return [];
     } else {
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1 
+
       return {
         results: results,
-        totalPages: parseInt(Math.floor(recordCount.length / size)),
+        totalPages: numPages,
         totalRecords: recordCount.length,
         currentPage: parseInt(page)
       };
