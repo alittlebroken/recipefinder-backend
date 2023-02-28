@@ -418,11 +418,7 @@ const recipes = async (cookbookId, options) => {
   try{
 
     /* Extract the pagination settings */
-    let { page, size, offset } = options
-
-    if(!page || page < 1) page = 1
-    if(!size || size < 1) size = 10
-    if(!offset) offset = parseInt(Math.floor((page - 1) * size))
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* array of recipe objects to return */
     let recipes = [];
@@ -439,6 +435,12 @@ const recipes = async (cookbookId, options) => {
   /* Get the record count for the recipes we are interested in */
   const recordCount = await db('cookbook_recipes as cbr')
   .join('recipes as r', 'r.id', 'cbr.recipeId')
+  .modify((queryBuilder) => {
+    // Where clause
+    if(filterBy !== undefined || filterValues !== undefined){
+      queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+    }
+  })
   .select('r.id')
   .where('cbr.cookbookId', cookbookId)
   .count('r.id')
@@ -446,11 +448,23 @@ const recipes = async (cookbookId, options) => {
 
   /* Extract a list of categories and recipes */
   const results = await db('cookbook_recipes as cbr')
-   .join('recipes as r', 'r.id', 'cbr.recipeId')
-   .select('r.id as recipeId', 'r.name', 'r.rating')
-   .where('cbr.cookbookId', cookbookId)
-   .limit(size)
-   .offset(offset)
+    .join('recipes as r', 'r.id', 'cbr.recipeId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
+    .select('r.id as recipeId', 'r.name', 'r.rating')
+    .where('cbr.cookbookId', cookbookId)
+    .modify((queryBuilder) => {
+      // order by clause
+      if(sortBy !== undefined || sortOrder !== undefined){
+          queryBuilder.orderBy(sortBy, sortOrder)
+      }
+    })
+    .limit(size)
+    .offset(offset)
 
   const cats = await db('recipe_categories as rcat')
      .join('categories as cat', 'cat.id', 'rcat.categoryId')
@@ -473,11 +487,14 @@ const recipes = async (cookbookId, options) => {
     );
   })
 
+  /* Calculate number of pages */
+  let numPages = parseInt(Math.floor(recordCount.length / size))
+  if(numPages < 1) numPages = 1
 
   return {
     results: recipes,
     currentPage: page,
-    totalPages: parseInt(Math.floor(recordCount.length / size)),
+    totalPages: numPages,
     totalRecords: recordCount.length
   };
 
