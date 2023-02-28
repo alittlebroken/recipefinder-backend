@@ -42,7 +42,7 @@ const setQueryOpts = async (req, res, next) => {
         if(filterBy){
             if(filterValue){
                 req.filterBy = filterBy
-                req.filterValue = filterValue 
+                req.filterValues = filterValue 
             }
         }
 
