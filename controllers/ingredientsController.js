@@ -12,15 +12,6 @@ const get = async (req, res, next) => {
 
     try{
 
-        /* Get the pagination values */
-        let page = req.query.page ? req.query.page : 1;
-        let size = req.query.pageSize ? req.query.pageSize : 10;
-
-        if(page < 1) page = 1
-        if(size < 1) size = 1
-
-        let offset = parseInt((page - 1) * size)
-
         /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
             page: req.page,
