@@ -386,11 +386,7 @@ const findByCookbook = async (id, options) => {
   try{
 
     /* Extract the pagination settings */
-    let { page, size, offset } = options
-
-    if(!page || page < 1) page = 1
-    if(!size || size < 1) size = 10
-    if(!offset) offset = parseInt(Math.floor((page - 1) * size))
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -403,6 +399,12 @@ const findByCookbook = async (id, options) => {
     /* get a total count of all records we are interested in */
     const recordCount = await db('cookbook_categories as cc')
     .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select(
       'cc.id'
     )
@@ -412,15 +414,27 @@ const findByCookbook = async (id, options) => {
 
     /* Select the records we are interested in */
     const result = await db('cookbook_categories as cc')
-     .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
-     .select(
-       'cc.id',
-       'cat.name as categoryName',
-       'cat.id as categoryId'
-     )
-     .where('cookbookId', id)
-     .limit(size)
-     .offset(offset)
+      .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
+      .select(
+        'cc.id',
+        'cat.name as categoryName',
+        'cat.id as categoryId'
+      )
+      .where('cookbookId', id)
+      .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
+      .limit(size)
+      .offset(offset)
     
     if(result && result.length > 0){
 

@@ -342,7 +342,8 @@ const findById = async id => {
    try{
 
      /* get the pagination values */
-     let {page, size, offset} = options; 
+     let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+
 
      /* Validate the passed in data */
      if(!validation.validator(id, 'number')){
@@ -356,6 +357,12 @@ const findById = async id => {
     const recordCount = await db('recipe_ingredients as ri')
     .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
     .join('recipes as r', 'r.id', '=', 'ri.recipeId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select('ri.id')
     .where('ri.recipeId', id)
     .count('ri.id')
@@ -365,16 +372,32 @@ const findById = async id => {
     const results = await db('recipe_ingredients as ri')
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .join('recipes as r', 'r.id', '=', 'ri.recipeId')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
      .where('ri.recipeId', id)
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset)
      
     if(results && results.length > 0){
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+
       return {
         results: results,
         totalRecords: recordCount.length,
-        totalPages: parseInt(Math.floor(recordCount.length /size )),
+        totalPages: numPages,
         currentPage: page
       };
     } else {
@@ -411,9 +434,7 @@ const findById = async id => {
 
     try{
 
-      let { page, size } = options;
-      if(page < 1) page = 1;
-      if(size < 1) size = 1;
+      let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
       /* Validate the passed in data */
       if(!validation.validator(id, 'number')){
@@ -426,23 +447,45 @@ const findById = async id => {
      /* Gather the data from the DB */
      const results = await db('recipe_ingredients as ri')
       .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
       .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type', 'ri.recipeId as recipeId')
       .where('ri.ingredientId', id)
+      .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
       .limit(size)
       .offset((page - 1) * size);
 
     const resultCount = await db('recipe_ingredients as ri')
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select('ri.id')
      .where('ri.ingredientId', id)
      .count()
      .groupBy('ri.id')
 
      if(results && results.length > 0){
+      /* Calculate number of pages */
+        let numPages = parseInt(Math.floor(recordCount.length / size))
+        if(numPages < 1) numPages = 1
+
        return {
         data: results,
         totalRecords: resultCount.length,
-        totalPages: parseInt((Math.floor(resultCount.length / size)) + 1),
+        totalPages: numPages,
         currentPage: page
        }
      } else {

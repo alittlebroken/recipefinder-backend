@@ -2,6 +2,8 @@
 require('dotenv').config();
 
 const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
+const { setQueryOpts } = require('../../middlewares/queriesMiddleware')
+
 
 const express = require('express');
 const router = express.Router();
@@ -10,10 +12,10 @@ const passport = require('passport');
 const cookbookController = require('../../controllers/cookbookController');
 
 /* Add the various routes */
-router.get('/', checkToken, checkRoles(['Admin']), cookbookController.list);
+router.get('/', checkToken, checkRoles(['Admin']), setQueryOpts, cookbookController.list);
 router.get('/:id', checkToken, cookbookController.getById);
-router.get('/:id/recipes', checkToken, cookbookController.recipes);
-router.get('/:id/categories', checkToken, cookbookController.getCategories);
+router.get('/:id/recipes', checkToken, setQueryOpts, cookbookController.recipes);
+router.get('/:id/categories', checkToken, setQueryOpts, cookbookController.getCategories);
 router.post('/', checkToken, cookbookController.create);
 router.post('/:id/recipe', checkToken, cookbookController.addRecipe);
 router.post('/:id/categories', checkToken, cookbookController.addCategory);

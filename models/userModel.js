@@ -403,18 +403,35 @@ const findAll = async (options) => {
   try{
 
     /* Extract the pagination information passed in */
-    let { page, size, offset } = options
-
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Get a count of all records affected */
-    const countRecords = await db('users')
+    const recordCount = await db('users')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select('id')
     .count()
     .groupBy('id')
 
     /* Find the user by Id */
     const result = await db('users')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select('id', 'username', 'email', 'roles', 'forename', 'surname')
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset)
 
@@ -424,10 +441,15 @@ const findAll = async (options) => {
     }
 
     /* All OK so return */
+    
+    /* Calculate number of pages */
+    let numPages = parseInt(Math.floor(recordCount.length / size))
+    if(numPages < 1) numPages = 1
+
     return {
       results: result,
-      totalRecords: countRecords.length,
-      totalPages: parseInt(Math.floor(countRecords.length) / size) + 1,
+      totalRecords: recordCount.length,
+      totalPages: numPages,
       currentPage: page
     };
 

@@ -3,8 +3,8 @@ require('dotenv').config();
 
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
+const { setQueryOpts } = require('../../middlewares/queriesMiddleware')
 
 const pantriesController = require('../../controllers/pantriesController');
 
@@ -12,6 +12,7 @@ router.get(
     '/', 
     checkToken, 
     checkRoles(['Admin']),
+    setQueryOpts,
     pantriesController.listAll);
 router.get(
     '/:id', 

@@ -344,7 +344,7 @@ const findByRecipe = async (id, options) => {
   try{
 
     /* extract the pagination settings */
-    let {page, size, offset} = options;
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -357,6 +357,12 @@ const findByRecipe = async (id, options) => {
     /* Generate a total count of the data we are insterested in */
     const recordCount = await db('recipe_categories as rc')
     .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+     })
     .select('rc.id',)
     .where('rc.recipeId', id)
     .count('rc.id')
@@ -365,20 +371,36 @@ const findByRecipe = async (id, options) => {
     /* Retrieve the specified record(s) */
     const result = await db('recipe_categories as rc')
      .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select(
        'rc.id as id',
        'rc.recipeId as recipeId',
        'cat.id as categoryId',
        'cat.name as categoryName'
      )
-     .where('rc.recipeId', id);
+     .where('rc.recipeId', id)
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      });
 
     if(result && result.length > 0){
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+
       return {
         results: result,
         currentPage: page,
         totalRecords: recordCount.length,
-        totalPages: parseInt(Math.floor(recordCount.length/size))
+        totalPages: numPages
       };
     } else {
       return [];
@@ -414,10 +436,7 @@ const findByRecipe = async (id, options) => {
  */
 const findByCategory = async (id, options) => {
 
-  let { page, size } = options;
-
-  if(size < 1) size = 1; 
-  if(page < 1) page = 1;
+  let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
   try{
 
@@ -432,6 +451,12 @@ const findByCategory = async (id, options) => {
     /* Retrieve the specified record(s) */
     const result = await db('recipe_categories as rc')
      .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select(
        'rc.id as id',
        'rc.recipeId as recipeId',
@@ -439,11 +464,23 @@ const findByCategory = async (id, options) => {
        'cat.name as categoryName'
      )
      .where('rc.categoryId', id)
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(parseInt(size))
      .offset((page - 1) * size);
 
     const totalCount = await db('recipe_categories as rc')
     .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select(
       'rc.id as id',
     )
@@ -452,6 +489,10 @@ const findByCategory = async (id, options) => {
     .groupBy('rc.id')
 
     if(result && result.length > 0){
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+      
       return {
         data: result,
         totalRecords: totalCount.length,

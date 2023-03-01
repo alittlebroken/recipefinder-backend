@@ -526,7 +526,7 @@ const findByUser = async (id, options) => {
   try{
 
     /* Pagination options */
-    let { page, offset, size } = options;
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -540,6 +540,12 @@ const findByUser = async (id, options) => {
     const recordCount = await db('pantry_ingredients as pi')
      .join('pantries as p', 'pi.pantryId', '=', 'p.id')
      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select(
        'pi.id',
      )
@@ -552,6 +558,12 @@ const findByUser = async (id, options) => {
     const result = await db('pantry_ingredients as pi')
      .join('pantries as p', 'pi.pantryId', '=', 'p.id')
      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select(
        'pi.id as id',
        'pi.pantryId as pantryId',
@@ -561,14 +573,24 @@ const findByUser = async (id, options) => {
        'pi.amount_type as amount_type'
      )
      .where('p.userId', id)
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset);
 
      if(result && result.length > 0){
+       /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+
        return {
         results: result,
         currentPage: page,
-        totalPages: parseInt(Math.floor(recordCount.length / size)) + 1,
+        totalPages: numPages,
         totalRecords: recordCount.length
        };
      } else {

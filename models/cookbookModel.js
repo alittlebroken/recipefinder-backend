@@ -197,27 +197,49 @@ const findAll = async (options) => {
   try{
 
     /* extract the pagination settings */
-    let { page, size, offset } = options
-
-    if(!page || page < 1) page = 1
-    if(!size || size < 1) size = 10
-    if(!offset) offset = parseInt(Math.floor((page -1) * size))
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Get a count of all the records we are interested in */
     const recordCount = await db('cookbooks')
-    .select('id').count('id').groupBy('id')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
+      .select('id')
+      .count('id')
+      .groupBy('id')
 
     /* No need for validation so return all cookbooks */
     const results = await db('cookbooks')
-     .select('*').limit(size).offset(offset)
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+      })
+      .select('*')
+      .limit(size)
+      .offset(offset)
+      .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
 
     /* Check if any results have been returned */
     if(!results || results.length == 0){
       return [];
     } else {
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1 
+
       return {
         results: results,
-        totalPages: parseInt(Math.floor(recordCount.length / size)),
+        totalPages: numPages,
         totalRecords: recordCount.length,
         currentPage: parseInt(page)
       };
@@ -396,11 +418,7 @@ const recipes = async (cookbookId, options) => {
   try{
 
     /* Extract the pagination settings */
-    let { page, size, offset } = options
-
-    if(!page || page < 1) page = 1
-    if(!size || size < 1) size = 10
-    if(!offset) offset = parseInt(Math.floor((page - 1) * size))
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* array of recipe objects to return */
     let recipes = [];
@@ -417,6 +435,12 @@ const recipes = async (cookbookId, options) => {
   /* Get the record count for the recipes we are interested in */
   const recordCount = await db('cookbook_recipes as cbr')
   .join('recipes as r', 'r.id', 'cbr.recipeId')
+  .modify((queryBuilder) => {
+    // Where clause
+    if(filterBy !== undefined || filterValues !== undefined){
+      queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+    }
+  })
   .select('r.id')
   .where('cbr.cookbookId', cookbookId)
   .count('r.id')
@@ -424,11 +448,23 @@ const recipes = async (cookbookId, options) => {
 
   /* Extract a list of categories and recipes */
   const results = await db('cookbook_recipes as cbr')
-   .join('recipes as r', 'r.id', 'cbr.recipeId')
-   .select('r.id as recipeId', 'r.name', 'r.rating')
-   .where('cbr.cookbookId', cookbookId)
-   .limit(size)
-   .offset(offset)
+    .join('recipes as r', 'r.id', 'cbr.recipeId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
+    .select('r.id as recipeId', 'r.name', 'r.rating')
+    .where('cbr.cookbookId', cookbookId)
+    .modify((queryBuilder) => {
+      // order by clause
+      if(sortBy !== undefined || sortOrder !== undefined){
+          queryBuilder.orderBy(sortBy, sortOrder)
+      }
+    })
+    .limit(size)
+    .offset(offset)
 
   const cats = await db('recipe_categories as rcat')
      .join('categories as cat', 'cat.id', 'rcat.categoryId')
@@ -451,11 +487,14 @@ const recipes = async (cookbookId, options) => {
     );
   })
 
+  /* Calculate number of pages */
+  let numPages = parseInt(Math.floor(recordCount.length / size))
+  if(numPages < 1) numPages = 1
 
   return {
     results: recipes,
     currentPage: page,
-    totalPages: parseInt(Math.floor(recordCount.length / size)),
+    totalPages: numPages,
     totalRecords: recordCount.length
   };
 
@@ -488,7 +527,7 @@ const findByUserId = async (id, options) => {
   try {
 
     /* Extract the pagination options */
-    let {page, size, offset} = options
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in values */
     if(!id || typeof id !== 'number'){
@@ -500,6 +539,12 @@ const findByUserId = async (id, options) => {
 
     /* get a total of the records */
     const recordCount = await db('cookbooks')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .where('userId', id)
     .select('id')
     .count()
@@ -507,8 +552,20 @@ const findByUserId = async (id, options) => {
 
     /* gather the data from the database */
     const result = await db('cookbooks')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .where('userId', id)
      .select('*')
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset)
 
@@ -516,9 +573,13 @@ const findByUserId = async (id, options) => {
       return [];
     }
 
+    /* Calculate number of pages */
+    let numPages = parseInt(Math.floor(recordCount.length / size))
+    if(numPages < 1) numPages = 1
+
     return {
       results: result,
-      totalPages: parseInt(Math.floor(recordCount.length / size)) + 1,
+      totalPages: numPages,
       totalRecords: recordCount.length,
       currentPage: page
     };

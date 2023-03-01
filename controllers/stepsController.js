@@ -11,20 +11,15 @@ const find = async (req, res, next) => {
 
     try{
 
-        /* Get the pagination values */
-        let page = req.query.page;
-        let size = req.query.pageSize;
-
-        if(page < 1) page = 1
-        if(size < 1) size = 1
-
-        let offset = parseInt((page - 1) * size)
-
-        /* Pagination options to send to the method that requires it */
+        /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
-            page,
-            size,
-            offset
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Get the records from the DB */
