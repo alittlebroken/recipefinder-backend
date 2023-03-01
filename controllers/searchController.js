@@ -17,9 +17,16 @@ const performSearch = async (req, res, next) => {
 
     try{
 
-        /* Gather the query string variables */
-        let page = req.query.page ? parseInt(req.query.page) : 1;
-        let size = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
+        }
 
         /* Validate any request variables */
         let validationErrors;
@@ -68,7 +75,7 @@ const performSearch = async (req, res, next) => {
         let results;
         /* If no search terms have been set then return all recipes */
         if(req.body.terms === '' || req.body.terms.length === 0){
-            results = await recipeModel.findAll({ page: page, size: size});
+            results = await recipeModel.findAll(options);
         } else {
             /* some terms have been set.
              * next we have to check if the search term is applicable to
@@ -77,15 +84,15 @@ const performSearch = async (req, res, next) => {
              */
             if(req.body.typeOfSearch === 'recipes'){
 
-                results = await recipeModel.find(req.body.terms, { page: page, size: size});
+                results = await recipeModel.find(req.body.terms, options);
 
             } else if (req.body.typeOfSearch === 'ingredients') {
 
-                results = await recipeModel.findByIngredients(req.body.terms,{ page: page, size: size});
+                results = await recipeModel.findByIngredients(req.body.terms, options);
                 
             } else {
 
-                results = await recipeModel.findByCategory(req.body.terms, { page: page, size: size});
+                results = await recipeModel.findByCategory(req.body.terms, options);
 
             }
         }

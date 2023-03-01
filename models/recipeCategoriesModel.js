@@ -436,10 +436,7 @@ const findByRecipe = async (id, options) => {
  */
 const findByCategory = async (id, options) => {
 
-  let { page, size } = options;
-
-  if(size < 1) size = 1; 
-  if(page < 1) page = 1;
+  let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
   try{
 
@@ -454,6 +451,12 @@ const findByCategory = async (id, options) => {
     /* Retrieve the specified record(s) */
     const result = await db('recipe_categories as rc')
      .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+     .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select(
        'rc.id as id',
        'rc.recipeId as recipeId',
@@ -461,11 +464,23 @@ const findByCategory = async (id, options) => {
        'cat.name as categoryName'
      )
      .where('rc.categoryId', id)
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(parseInt(size))
      .offset((page - 1) * size);
 
     const totalCount = await db('recipe_categories as rc')
     .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select(
       'rc.id as id',
     )
@@ -474,6 +489,10 @@ const findByCategory = async (id, options) => {
     .groupBy('rc.id')
 
     if(result && result.length > 0){
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+      
       return {
         data: result,
         totalRecords: totalCount.length,

@@ -445,10 +445,7 @@ const find = async (terms, options) => {
 
   try{
 
-    let { page, size } = options;
-
-    if(page < 1) page = 1;
-    if(size < 1) size = 1;
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in arguments */
     if(!validation.validator(terms, 'string')){
@@ -467,6 +464,12 @@ const find = async (terms, options) => {
 
       /* Find all the recipes which match first */
       const results = await trx('recipes')
+        .modify((queryBuilder) => {
+          // Where clause
+          if(filterBy !== undefined || filterValues !== undefined){
+            queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+          }
+        })
        .select(
          'id as recipeId',
          'name',
@@ -477,9 +480,24 @@ const find = async (terms, options) => {
          'cook_time',
          'rating'
        )
-       .whereILike('name',`%${terms}%`).limit(size).offset((page - 1) * size).transacting(trx);
+       .whereILike('name',`%${terms}%`)
+       .modify((queryBuilder) => {
+          // order by clause
+          if(sortBy !== undefined || sortOrder !== undefined){
+              queryBuilder.orderBy(sortBy, sortOrder)
+          }
+        })
+       .limit(size)
+       .offset((page - 1) * size)
+       .transacting(trx);
 
        const resultCount = await trx('recipes')
+        .modify((queryBuilder) => {
+          // Where clause
+          if(filterBy !== undefined || filterValues !== undefined){
+            queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+          }
+        })
         .select('id')
         .whereILike('name',`%${terms}%`)
         .count()
@@ -536,10 +554,14 @@ const find = async (terms, options) => {
          return [];
        }
 
+       /* Calculate number of pages */
+       let numPages = parseInt(Math.floor(recordCount.length / size))
+       if(numPages < 1) numPages = 1
+
        return {
          ...recipes,
          totalRecords: resultCount.length,
-         totalPages: parseInt(Math.floor(resultCount.length / size)),
+         totalPages: numPages,
          currentPage: page
         };
 
