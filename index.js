@@ -21,7 +21,7 @@ const cookieParser = require('cookie-parser');
   //origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   origin: 'http://localhost:3000',
   credentials: true,
-  allowedHeaders: "authorisation,Authorisation,Content-Type,content-type,Content-type,token"
+  allowedHeaders: "authorisation,Authorisation,Content-Type,content-type,Content-type,token,Content-Range"
  }));
  app.use(passport.initialize());
  require('./config/passport');
