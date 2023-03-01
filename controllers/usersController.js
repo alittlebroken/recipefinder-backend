@@ -18,20 +18,15 @@ const listAll = async (req, res, next) => {
 
     try{
 
-        /* Pagination Options */
-        let size = req.query.pageSize ? req.query.pageSize : 10
-        let page = req.query.page ? req.querypage : 1
-
-        if( size < 1) size = 1
-        if( page < 1) page = 1
-
-        let offset = parseInt((page - 1) * size)
-
-        /* The pagination options to pass into the method returning results */
-        const options = {
-            page,
-            size,
-            offset
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Validate any request headers or body parameters, if any */
@@ -166,20 +161,15 @@ const listUserRecipes = async (req, res, next) => {
 
     try{
 
-        /* Pagination Options */
-        let size = req.query.pageSize ? req.query.pageSize : 10
-        let page = req.query.page ? req.query.page : 1
-
-        if( size < 1) size = 1
-        if( page < 1) page = 1
-
-        let offset = parseInt((page - 1) * size)
-
-       /* The pagination options to pass into the method returning results */
-        const options = {
-            page,
-            size,
-            offset
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Validate any passed in data */
@@ -204,9 +194,7 @@ const listUserRecipes = async (req, res, next) => {
             /* Good, we are not an admin user so we can substitue out the id with the logged in
              * users id
              */
-            console.log('User id before switch: ', id)
             id = req.user.id
-            console.log('User id after switch:', id)
         }
 
         /* Gather the results from the DB */
@@ -263,20 +251,15 @@ const listUserCookbooks = async (req, res, next) => {
 
     try{
 
-        /* Pagination Options */
-        let size = req.query.pageSize ? req.query.pageSize : 10
-        let page = req.query.page ? req.query.page : 1
-
-        if( size < 1) size = 1
-        if( page < 1) page = 1
-
-        let offset = parseInt((page - 1) * size)
-
-       /* The pagination options to pass into the method returning results */
-        const options = {
-            page,
-            size,
-            offset
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Validate any passed in data */
@@ -301,9 +284,7 @@ const listUserCookbooks = async (req, res, next) => {
             /* Good, we are not an admin user so we can substitue out the id with the logged in
              * users id
              */
-            console.log('User id before switch: ', id)
             id = req.user.id
-            console.log('User id after switch:', id)
         }
 
         /* Gather the results from the DB */
@@ -360,20 +341,15 @@ const listUserPantry = async (req, res, next) => {
 
     try{
 
-        /* Pagination Options */
-        let size = req.query.pageSize ? req.query.pageSize : 10
-        let page = req.query.page ? req.query.page : 1
-
-        if( size < 1) size = 1
-        if( page < 1) page = 1
-
-        let offset = parseInt((page - 1) * size)
-
-       /* The pagination options to pass into the method returning results */
-        const options = {
-            page,
-            size,
-            offset
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Validate any passed in data */
@@ -398,9 +374,7 @@ const listUserPantry = async (req, res, next) => {
             /* Good, we are not an admin user so we can substitue out the id with the logged in
              * users id
              */
-            console.log('User id before switch: ', id)
             id = req.user.id
-            console.log('User id after switch:', id)
         }
 
         /* Gather the results from the DB */

@@ -7,14 +7,15 @@ const router = express.Router();
 const passport = require('passport');
 
 const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
+const { setQueryOpts } = require('../../middlewares/queriesMiddleware')
 
 const userController = require('../../controllers/usersController');
 
-router.get('/', checkToken, checkRoles(['Admin']), userController.listAll);
+router.get('/', checkToken, checkRoles(['Admin']), setQueryOpts, userController.listAll);
 router.get('/:id', checkToken, userController.listUser);
-router.get('/:id/recipes', checkToken, userController.listUserRecipes);
-router.get('/:id/cookbooks',checkToken,userController.listUserCookbooks);
-router.get('/:id/pantry', checkToken, userController.listUserPantry);
+router.get('/:id/recipes', checkToken, setQueryOpts, userController.listUserRecipes);
+router.get('/:id/cookbooks',checkToken, setQueryOpts, userController.listUserCookbooks);
+router.get('/:id/pantry', checkToken, setQueryOpts, userController.listUserPantry);
 router.post('/', checkToken, checkRoles(['Admin']), userController.createUser);
 /*
 == Not needed covered by POST /recipes route ==

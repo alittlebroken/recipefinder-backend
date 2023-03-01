@@ -1095,7 +1095,7 @@ const findByUserId = async (id, options) => {
   try {
     
     /* get the pagination options */
-    let { page, size, offset } = options
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in arguments */
     if(!validation.validator(Number.parseInt(id), 'number')){
@@ -1107,6 +1107,12 @@ const findByUserId = async (id, options) => {
 
     /* Get a count of all records being affected */
     const recordCount = await db('recipes')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select('id')
     .where('userId', id)
     .count()
@@ -1114,17 +1120,33 @@ const findByUserId = async (id, options) => {
 
     /* Gather the required data from the database */
     const results = await db('recipes')
+      .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select('*')
      .where('userId', id)
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset);
 
     /* If we any results then send them back  */
     if(results && results.length > 0){
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+
       return {
         results, 
         totalRecords: recordCount.length,
-        totalPages: parseInt(Math.floor(recordCount.length / size)) + 1,
+        totalPages: numPages,
         currentPage: page
       };
     } else {
