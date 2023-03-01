@@ -6,6 +6,7 @@ const router = express.Router();
 const passport = require('passport');
 
 const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
+const { setQueryOpts } = require('../../middlewares/queriesMiddleware')
 
 const stepsController = require('../../controllers/stepsController');
 
@@ -13,6 +14,7 @@ router.get(
     '/', 
     checkToken,
     checkRoles(['Admin']),
+    setQueryOpts,
     stepsController.find
     );
 

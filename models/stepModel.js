@@ -416,29 +416,51 @@ const findAll = async (options) => {
 
   try{
 
-    /* Exttract pagination values */
-    let {page, size, offset} = options;
+    /* Extract pagination values */
+    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Get a count of the records from thr DB */
     const recordCount = await db('steps')
+    .modify((queryBuilder) => {
+      // Where clause
+      if(filterBy !== undefined || filterValues !== undefined){
+        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      }
+    })
     .select('id')
     .count('id')
     .groupBy('id')
 
     /* Get the steps from the DB */
     const result = await db('steps')
+    .modify((queryBuilder) => {
+        // Where clause
+        if(filterBy !== undefined || filterValues !== undefined){
+          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        }
+      })
      .select('*')
+     .modify((queryBuilder) => {
+        // order by clause
+        if(sortBy !== undefined || sortOrder !== undefined){
+            queryBuilder.orderBy(sortBy, sortOrder)
+        }
+      })
      .limit(size)
      .offset(offset)
 
      if(!result || result.length < 1){
        return [];
      } else {
+      /* Calculate number of pages */
+      let numPages = parseInt(Math.floor(recordCount.length / size))
+      if(numPages < 1) numPages = 1
+
        return {
         results: result,
         currentPage: page,
         totalRecords: recordCount.length,
-        totalPages: parseInt(Math.floor(recordCount.length / size) + 1)
+        totalPages: numPages
        };
      }
 
