@@ -617,7 +617,7 @@ const findAll = async (options) => {
           }
         })
        .select(
-         'id as recipeId',
+         'id',
          'name',
          'description',
          'servings',
@@ -666,21 +666,21 @@ const findAll = async (options) => {
               'ri.amount as amount',
               'ri.amount_type as amount_type'
             )
-            .where('ri.recipeId', result.recipeId).transacting(trx);
+            .where('ri.recipeId', result.id).transacting(trx);
 
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
-           .where('cr.recipeId', result.recipeId).transacting(trx);
+           .where('cr.recipeId', result.id).transacting(trx);
 
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
-           .where('recipeId', result.recipeId).transacting(trx);
+           .where('recipeId', result.id).transacting(trx);
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
-           .where('rc.recipeId', result.recipeId).transacting(trx);
+           .where('rc.recipeId', result.id).transacting(trx);
 
           let recipe = {
             ...result,
