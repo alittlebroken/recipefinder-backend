@@ -309,7 +309,7 @@ const findAll = async (options) => {
   try{
 
     /* Extract the pagination options */
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
     /* Count the records we are interested in */
     const recordCount = await db('categories')

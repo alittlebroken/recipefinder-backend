@@ -196,7 +196,7 @@ const findAll = async (options) => {
   try{
 
     /* Extract the pagination settings */
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
     /* get the total count of records */
     const recordCount = await db('ingredients')
