@@ -602,7 +602,7 @@ const findAll = async (options) => {
      * to keep it all nice and tidy ( IMHO )
     */
 
-    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
     return await db.transaction( async trx => {
 
@@ -611,13 +611,37 @@ const findAll = async (options) => {
       /* Find all the recipes which match first */
       const results = await trx('recipes')
         .modify((queryBuilder) => {
-          // Where clause
-          if(filterBy !== undefined || filterValues !== undefined){
-            queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+          /* 
+          * We now use a singular filter passed via the request query params that 
+          * is an object where each key is the filed to filter by and the values 
+          * are the values to filter by. 
+          */
+          if(filter !== undefined){
+    
+            /* parse the filter so we can work with it easier */
+            let rawFilter = JSON.parse(filter)
+    
+            /* Gte the number of filters we need to apply */
+            let numFilters = Object.getOwnPropertyNames(rawFilter)
+    
+            /* Go through each entry and apply the filter to the query */
+            numFilters.map(item => {
+    
+              /* Now check if we have multiple values to filter by */
+              if(rawFilter[item].length > 1){
+                /* use whereIn to filter on multiples */
+                queryBuilder.whereIn('id', rawFilter[item])
+              } else {
+                /* Only one value to filter by */
+                queryBuilder.where('id', rawFilter[item][0])
+              }
+    
+            })
+    
           }
         })
        .select(
-         'id as recipeId',
+         'id',
          'name',
          'description',
          'servings',
@@ -639,11 +663,35 @@ const findAll = async (options) => {
 
       const recordCount = await trx('recipes')
         .modify((queryBuilder) => {
-            // Where clause
-            if(filterBy !== undefined || filterValues !== undefined){
-              queryBuilder.whereILike(filterBy, `%${filterValues}%`)
-            }
-         })
+          /* 
+          * We now use a singular filter passed via the request query params that 
+          * is an object where each key is the filed to filter by and the values 
+          * are the values to filter by. 
+          */
+          if(filter !== undefined){
+    
+            /* parse the filter so we can work with it easier */
+            let rawFilter = JSON.parse(filter)
+    
+            /* Gte the number of filters we need to apply */
+            let numFilters = Object.getOwnPropertyNames(rawFilter)
+    
+            /* Go through each entry and apply the filter to the query */
+            numFilters.map(item => {
+    
+              /* Now check if we have multiple values to filter by */
+              if(rawFilter[item].length > 1){
+                /* use whereIn to filter on multiples */
+                queryBuilder.whereIn('id', rawFilter[item])
+              } else {
+                /* Only one value to filter by */
+                queryBuilder.where('id', rawFilter[item][0])
+              }
+    
+            })
+    
+          }
+        })
         .select('id')
         .count()
         .groupBy('id')
@@ -666,21 +714,21 @@ const findAll = async (options) => {
               'ri.amount as amount',
               'ri.amount_type as amount_type'
             )
-            .where('ri.recipeId', result.recipeId).transacting(trx);
+            .where('ri.recipeId', result.id).transacting(trx);
 
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
-           .where('cr.recipeId', result.recipeId).transacting(trx);
+           .where('cr.recipeId', result.id).transacting(trx);
 
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
-           .where('recipeId', result.recipeId).transacting(trx);
+           .where('recipeId', result.id).transacting(trx);
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
-           .where('rc.recipeId', result.recipeId).transacting(trx);
+           .where('rc.recipeId', result.id).transacting(trx);
 
           let recipe = {
             ...result,
@@ -752,7 +800,14 @@ const findByRecipe = async (id) => {
 
     /* Gather the required data from the database */
     const result = await db('recipes')
-     .select('*')
+     .select('id',
+     'name',
+     'description',
+     'servings',
+     'calories_per_serving',
+     'prep_time',
+     'cook_time',
+     'rating')
      .where('id', id);
 
     /* Only if we have found a recipe should we then go ahead and retrieve from
@@ -1095,7 +1150,7 @@ const findByUserId = async (id, options) => {
   try {
     
     /* get the pagination options */
-    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, filter, sortBy, sortOrder} = options
 
     /* Validate the passed in arguments */
     if(!validation.validator(Number.parseInt(id), 'number')){
@@ -1108,9 +1163,33 @@ const findByUserId = async (id, options) => {
     /* Get a count of all records being affected */
     const recordCount = await db('recipes')
     .modify((queryBuilder) => {
-      // Where clause
-      if(filterBy !== undefined || filterValues !== undefined){
-        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
       }
     })
     .select('id')
@@ -1121,9 +1200,33 @@ const findByUserId = async (id, options) => {
     /* Gather the required data from the database */
     const results = await db('recipes')
       .modify((queryBuilder) => {
-        // Where clause
-        if(filterBy !== undefined || filterValues !== undefined){
-          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        /* 
+        * We now use a singular filter passed via the request query params that 
+        * is an object where each key is the filed to filter by and the values 
+        * are the values to filter by. 
+        */
+        if(filter !== undefined){
+
+          /* parse the filter so we can work with it easier */
+          let rawFilter = JSON.parse(filter)
+
+          /* Gte the number of filters we need to apply */
+          let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+          /* Go through each entry and apply the filter to the query */
+          numFilters.map(item => {
+
+            /* Now check if we have multiple values to filter by */
+            if(rawFilter[item].length > 1){
+              /* use whereIn to filter on multiples */
+              queryBuilder.whereIn('id', rawFilter[item])
+            } else {
+              /* Only one value to filter by */
+              queryBuilder.where('id', rawFilter[item][0])
+            }
+
+          })
+
         }
       })
      .select('*')

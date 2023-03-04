@@ -12,16 +12,17 @@ const list = async (req, res, next) => {
 
   try{
 
-    /* Pagination, filter and sort  options to send to the method that requires it */
-    let options = {
-      page: req.page,
-      size: req.limit,
-      offset: req.offset,
-      filterBy: req.filterBy,
-      filterValues: req.filterValues,
-      sortBy: req.sortBy,
-      sortOrder: req.sortOrder
-    }
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+          page: req.page,
+          size: req.limit,
+          offset: req.offset,
+          filterBy: req.filterBy,
+          filterValues: req.filterValues,
+          filter: req.filter,
+          sortBy: req.sortBy,
+          sortOrder: req.sortOrder
+        }
 
     /* Get the cookbooks from the database */
     const results = await cookbookModel.findAll(options);
@@ -331,6 +332,7 @@ const recipes = async (req, res, next) => {
       offset: req.offset,
       filterBy: req.filterBy,
       filterValues: req.filterValues,
+      filter: req.filter,
       sortBy: req.sortBy,
       sortOrder: req.sortOrder
     }
@@ -394,6 +396,7 @@ const getCategories = async (req, res, next) => {
       offset: req.offset,
       filterBy: req.filterBy,
       filterValues: req.filterValues,
+      filter: req.filter,
       sortBy: req.sortBy,
       sortOrder: req.sortOrder
     }

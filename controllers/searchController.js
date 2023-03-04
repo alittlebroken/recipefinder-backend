@@ -24,9 +24,10 @@ const performSearch = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Validate any request variables */
         let validationErrors;

@@ -28,9 +28,10 @@ const listAll = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Get a list of all recipes */
         const results = await recipeModel.findAll(options);
@@ -139,15 +140,17 @@ const listRecipeIngredients = async (req, res, next) => {
 
     try{
 
+        /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
             page: req.page,
             size: req.limit,
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Verify any request parameters and or body values*/
         if(!req.params || req.params === undefined){
@@ -214,16 +217,17 @@ const listRecipeSteps = async (req, res, next) => {
 
     try{
 
-        /* Pagination, filter and sort  options to send to the method that requires it */
-        let options = {
+         /* Pagination, filter and sort  options to send to the method that requires it */
+         let options = {
             page: req.page,
             size: req.limit,
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Validate request body and parameters */
         if(!req.params || req.params === undefined){
@@ -299,9 +303,10 @@ const listRecipeCategories = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Validate request body & parameters */
         if(!req.params || req.params === undefined){

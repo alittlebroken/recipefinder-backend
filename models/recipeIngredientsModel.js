@@ -342,7 +342,7 @@ const findById = async id => {
    try{
 
      /* get the pagination values */
-     let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+     let {page, size, offset, filterBy, filterValues, filter, sortBy, sortOrder} = options
 
 
      /* Validate the passed in data */
@@ -358,11 +358,35 @@ const findById = async id => {
     .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
     .join('recipes as r', 'r.id', '=', 'ri.recipeId')
     .modify((queryBuilder) => {
-      // Where clause
-      if(filterBy !== undefined || filterValues !== undefined){
-        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
       }
-    })
+      })
     .select('ri.id')
     .where('ri.recipeId', id)
     .count('ri.id')
@@ -373,10 +397,34 @@ const findById = async id => {
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .join('recipes as r', 'r.id', '=', 'ri.recipeId')
      .modify((queryBuilder) => {
-        // Where clause
-        if(filterBy !== undefined || filterValues !== undefined){
-          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
-        }
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
+      }
       })
      .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
      .where('ri.recipeId', id)
@@ -434,7 +482,7 @@ const findById = async id => {
 
     try{
 
-      let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+      let {page, size, offset, filterBy, filterValues, result, sortBy, sortOrder} = options
 
       /* Validate the passed in data */
       if(!validation.validator(id, 'number')){
@@ -455,23 +503,71 @@ const findById = async id => {
       })
       .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type', 'ri.recipeId as recipeId')
       .where('ri.ingredientId', id)
-      .modify((queryBuilder) => {
-        // order by clause
-        if(sortBy !== undefined || sortOrder !== undefined){
-            queryBuilder.orderBy(sortBy, sortOrder)
-        }
-      })
+        .modify((queryBuilder) => {
+          /* 
+          * We now use a singular filter passed via the request query params that 
+          * is an object where each key is the filed to filter by and the values 
+          * are the values to filter by. 
+          */
+          if(filter !== undefined){
+    
+            /* parse the filter so we can work with it easier */
+            let rawFilter = JSON.parse(filter)
+    
+            /* Gte the number of filters we need to apply */
+            let numFilters = Object.getOwnPropertyNames(rawFilter)
+    
+            /* Go through each entry and apply the filter to the query */
+            numFilters.map(item => {
+    
+              /* Now check if we have multiple values to filter by */
+              if(rawFilter[item].length > 1){
+                /* use whereIn to filter on multiples */
+                queryBuilder.whereIn('id', rawFilter[item])
+              } else {
+                /* Only one value to filter by */
+                queryBuilder.where('id', rawFilter[item][0])
+              }
+    
+            })
+    
+          }
+        })
       .limit(size)
       .offset((page - 1) * size);
 
     const resultCount = await db('recipe_ingredients as ri')
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .modify((queryBuilder) => {
-        // Where clause
-        if(filterBy !== undefined || filterValues !== undefined){
-          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
-        }
-      })
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
+      }
+     })
      .select('ri.id')
      .where('ri.ingredientId', id)
      .count()

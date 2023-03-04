@@ -18,9 +18,10 @@ const find = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Get the records from the DB */
         const results = await stepsModel.findAll(options);

@@ -18,6 +18,7 @@ const setQueryOpts = async (req, res, next) => {
         /* Extract the filter options if set */
         let filterBy = req.query.filter_by ? req.query.filter_by : null
         let filterValue = req.query.filter_values ? req.query.filter_values : null
+        let filter = req.query.filter ? req.query.filter : null
 
         /* ensure that the pagination options are set within desired ranges */
         if(limit < 1) limit = 10
@@ -39,10 +40,13 @@ const setQueryOpts = async (req, res, next) => {
         }
 
         /* Only add the filter to the query if a value has been set as well */
+        if(filter){
+            req.filter = filter
+        }
         if(filterBy){
             if(filterValue){
                 req.filterBy = filterBy
-                req.filterValues = filterValue 
+                req.filterValues = JSON.parse(filterValue) 
             }
         }
 

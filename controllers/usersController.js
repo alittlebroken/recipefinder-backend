@@ -25,6 +25,7 @@ const listAll = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
         }
@@ -35,7 +36,7 @@ const listAll = async (req, res, next) => {
         const results = await userModel.findAll(options);
 
         if(!results || results.length < 1){
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: "There currently no users in the system",
@@ -44,7 +45,7 @@ const listAll = async (req, res, next) => {
         }
 
         if(results.success === false){
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 status: 500,
                 message: 'There was a problem with the resource, please try again later',
@@ -52,6 +53,8 @@ const listAll = async (req, res, next) => {
             })
         }
 
+        let header = `users ${(options.page*options.size)}-${((options.page*options.size)+options.size)-1}/${results.totalRecords}`
+        res.setHeader('Content-Range', header)
         res.status(200).json({
             status: 200,
             success: true,
@@ -64,6 +67,7 @@ const listAll = async (req, res, next) => {
 
     } catch(e) {
         /* Log out the issue(s) */
+        console.log(e)
         appLogger.logMessage(
             'error', 
             `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
@@ -168,6 +172,7 @@ const listUserRecipes = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
         }
@@ -258,6 +263,7 @@ const listUserCookbooks = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
         }
@@ -348,6 +354,7 @@ const listUserPantry = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
         }
