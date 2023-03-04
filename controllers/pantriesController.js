@@ -23,9 +23,10 @@ const listAll = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* search the DB */
         const result = await pantryModel.listAll(options);
