@@ -19,9 +19,10 @@ const get = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* Get the ingredients from the DB */
         const results = await ingredientModel.findAll(options);
