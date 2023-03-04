@@ -25,9 +25,10 @@ const list = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
+            filter: req.filter,
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
-        }
+          }
 
         /* List all the categories we have */
         const results = await categoryModel.findAll(options);
