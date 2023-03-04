@@ -602,7 +602,7 @@ const findAll = async (options) => {
      * to keep it all nice and tidy ( IMHO )
     */
 
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
     return await db.transaction( async trx => {
 
