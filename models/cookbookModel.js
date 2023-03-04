@@ -197,15 +197,39 @@ const findAll = async (options) => {
   try{
 
     /* extract the pagination settings */
-    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
 
     /* Get a count of all the records we are interested in */
     const recordCount = await db('cookbooks')
-      .modify((queryBuilder) => {
-        // Where clause
-        if(filterBy !== undefined || filterValues !== undefined){
-          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
-        }
+    .modify((queryBuilder) => {
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
+      }
       })
       .select('id')
       .count('id')
@@ -214,9 +238,33 @@ const findAll = async (options) => {
     /* No need for validation so return all cookbooks */
     const results = await db('cookbooks')
     .modify((queryBuilder) => {
-      // Where clause
-      if(filterBy !== undefined || filterValues !== undefined){
-        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
       }
       })
       .select('*')
@@ -418,7 +466,7 @@ const recipes = async (cookbookId, options) => {
   try{
 
     /* Extract the pagination settings */
-    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
 
     /* array of recipe objects to return */
     let recipes = [];
@@ -436,9 +484,33 @@ const recipes = async (cookbookId, options) => {
   const recordCount = await db('cookbook_recipes as cbr')
   .join('recipes as r', 'r.id', 'cbr.recipeId')
   .modify((queryBuilder) => {
-    // Where clause
-    if(filterBy !== undefined || filterValues !== undefined){
-      queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+    /* 
+     * We now use a singular filter passed via the request query params that 
+     * is an object where each key is the filed to filter by and the values 
+     * are the values to filter by. 
+     */
+    if(filter !== undefined){
+
+      /* parse the filter so we can work with it easier */
+      let rawFilter = JSON.parse(filter)
+
+      /* Gte the number of filters we need to apply */
+      let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+      /* Go through each entry and apply the filter to the query */
+      numFilters.map(item => {
+
+        /* Now check if we have multiple values to filter by */
+        if(rawFilter[item].length > 1){
+          /* use whereIn to filter on multiples */
+          queryBuilder.whereIn('id', rawFilter[item])
+        } else {
+          /* Only one value to filter by */
+          queryBuilder.where('id', rawFilter[item][0])
+        }
+
+      })
+
     }
   })
   .select('r.id')
@@ -450,9 +522,33 @@ const recipes = async (cookbookId, options) => {
   const results = await db('cookbook_recipes as cbr')
     .join('recipes as r', 'r.id', 'cbr.recipeId')
     .modify((queryBuilder) => {
-      // Where clause
-      if(filterBy !== undefined || filterValues !== undefined){
-        queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
+
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
+
+          /* Now check if we have multiple values to filter by */
+          if(rawFilter[item].length > 1){
+            /* use whereIn to filter on multiples */
+            queryBuilder.whereIn('id', rawFilter[item])
+          } else {
+            /* Only one value to filter by */
+            queryBuilder.where('id', rawFilter[item][0])
+          }
+
+        })
+
       }
     })
     .select('r.id as recipeId', 'r.name', 'r.rating')
