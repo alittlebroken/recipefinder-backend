@@ -367,22 +367,31 @@ const findById = async id => {
 
         /* parse the filter so we can work with it easier */
         let rawFilter = JSON.parse(filter)
-
         /* Gte the number of filters we need to apply */
         let numFilters = Object.getOwnPropertyNames(rawFilter)
-
+        
         /* Go through each entry and apply the filter to the query */
         numFilters.map(item => {
 
-          /* Now check if we have multiple values to filter by */
-          if(rawFilter[item].length > 1){
-            /* use whereIn to filter on multiples */
-            queryBuilder.whereIn('id', rawFilter[item])
+          /* Need to check if multiple ids have been passed in or not */
+          if(item === 'id' || item === 'ids' || item === 'userId'){
+            /* Now check if we have multiple values to filter by */
+            if(rawFilter[item].length > 1){
+              /* use whereIn to filter on multiples */
+              queryBuilder.whereIn('id', rawFilter[item])
+            } else {
+              /* Only one value to filter by */
+              /* First check if we have an array of vaues, even 1 */
+              if(Array.isArray(rawFilter[item])){
+                queryBuilder.where('id', rawFilter[item][0])
+              } else {
+                queryBuilder.where('id', rawFilter[item])
+              }
+            }
           } else {
-            /* Only one value to filter by */
-            queryBuilder.where('id', rawFilter[item][0])
+            /* Just use a normal where filter for this */
+            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
           }
-
         })
 
       }
@@ -406,22 +415,31 @@ const findById = async id => {
 
         /* parse the filter so we can work with it easier */
         let rawFilter = JSON.parse(filter)
-
         /* Gte the number of filters we need to apply */
         let numFilters = Object.getOwnPropertyNames(rawFilter)
-
+        
         /* Go through each entry and apply the filter to the query */
         numFilters.map(item => {
 
-          /* Now check if we have multiple values to filter by */
-          if(rawFilter[item].length > 1){
-            /* use whereIn to filter on multiples */
-            queryBuilder.whereIn('id', rawFilter[item])
+          /* Need to check if multiple ids have been passed in or not */
+          if(item === 'id' || item === 'ids' || item === 'userId'){
+            /* Now check if we have multiple values to filter by */
+            if(rawFilter[item].length > 1){
+              /* use whereIn to filter on multiples */
+              queryBuilder.whereIn('id', rawFilter[item])
+            } else {
+              /* Only one value to filter by */
+              /* First check if we have an array of vaues, even 1 */
+              if(Array.isArray(rawFilter[item])){
+                queryBuilder.where('id', rawFilter[item][0])
+              } else {
+                queryBuilder.where('id', rawFilter[item])
+              }
+            }
           } else {
-            /* Only one value to filter by */
-            queryBuilder.where('id', rawFilter[item][0])
+            /* Just use a normal where filter for this */
+            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
           }
-
         })
 
       }
@@ -496,11 +514,44 @@ const findById = async id => {
      const results = await db('recipe_ingredients as ri')
       .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
       .modify((queryBuilder) => {
-        // Where clause
-        if(filterBy !== undefined || filterValues !== undefined){
-          queryBuilder.whereILike(filterBy, `%${filterValues}%`)
+        /* 
+         * We now use a singular filter passed via the request query params that 
+         * is an object where each key is the filed to filter by and the values 
+         * are the values to filter by. 
+         */
+        if(filter !== undefined){
+  
+          /* parse the filter so we can work with it easier */
+          let rawFilter = JSON.parse(filter)
+          /* Gte the number of filters we need to apply */
+          let numFilters = Object.getOwnPropertyNames(rawFilter)
+          
+          /* Go through each entry and apply the filter to the query */
+          numFilters.map(item => {
+  
+            /* Need to check if multiple ids have been passed in or not */
+            if(item === 'id' || item === 'ids' || item === 'userId'){
+              /* Now check if we have multiple values to filter by */
+              if(rawFilter[item].length > 1){
+                /* use whereIn to filter on multiples */
+                queryBuilder.whereIn('id', rawFilter[item])
+              } else {
+                /* Only one value to filter by */
+                /* First check if we have an array of vaues, even 1 */
+                if(Array.isArray(rawFilter[item])){
+                  queryBuilder.where('id', rawFilter[item][0])
+                } else {
+                  queryBuilder.where('id', rawFilter[item])
+                }
+              }
+            } else {
+              /* Just use a normal where filter for this */
+              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
+            }
+          })
+  
         }
-      })
+        })
       .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type', 'ri.recipeId as recipeId')
       .where('ri.ingredientId', id)
         .modify((queryBuilder) => {
@@ -548,26 +599,35 @@ const findById = async id => {
 
         /* parse the filter so we can work with it easier */
         let rawFilter = JSON.parse(filter)
-
         /* Gte the number of filters we need to apply */
         let numFilters = Object.getOwnPropertyNames(rawFilter)
-
+        
         /* Go through each entry and apply the filter to the query */
         numFilters.map(item => {
 
-          /* Now check if we have multiple values to filter by */
-          if(rawFilter[item].length > 1){
-            /* use whereIn to filter on multiples */
-            queryBuilder.whereIn('id', rawFilter[item])
+          /* Need to check if multiple ids have been passed in or not */
+          if(item === 'id' || item === 'ids' || item === 'userId'){
+            /* Now check if we have multiple values to filter by */
+            if(rawFilter[item].length > 1){
+              /* use whereIn to filter on multiples */
+              queryBuilder.whereIn('id', rawFilter[item])
+            } else {
+              /* Only one value to filter by */
+              /* First check if we have an array of vaues, even 1 */
+              if(Array.isArray(rawFilter[item])){
+                queryBuilder.where('id', rawFilter[item][0])
+              } else {
+                queryBuilder.where('id', rawFilter[item])
+              }
+            }
           } else {
-            /* Only one value to filter by */
-            queryBuilder.where('id', rawFilter[item][0])
+            /* Just use a normal where filter for this */
+            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
           }
-
         })
 
       }
-     })
+      })
      .select('ri.id')
      .where('ri.ingredientId', id)
      .count()
