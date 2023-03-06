@@ -550,26 +550,35 @@ const findByUser = async (id, options) => {
 
         /* parse the filter so we can work with it easier */
         let rawFilter = JSON.parse(filter)
-
         /* Gte the number of filters we need to apply */
         let numFilters = Object.getOwnPropertyNames(rawFilter)
-
+        
         /* Go through each entry and apply the filter to the query */
         numFilters.map(item => {
 
-          /* Now check if we have multiple values to filter by */
-          if(rawFilter[item].length > 1){
-            /* use whereIn to filter on multiples */
-            queryBuilder.whereIn('id', rawFilter[item])
+          /* Need to check if multiple ids have been passed in or not */
+          if(item === 'id' || item === 'ids' || item === 'userId'){
+            /* Now check if we have multiple values to filter by */
+            if(rawFilter[item].length > 1){
+              /* use whereIn to filter on multiples */
+              queryBuilder.whereIn('id', rawFilter[item])
+            } else {
+              /* Only one value to filter by */
+              /* First check if we have an array of vaues, even 1 */
+              if(Array.isArray(rawFilter[item])){
+                queryBuilder.where('id', rawFilter[item][0])
+              } else {
+                queryBuilder.where('id', rawFilter[item])
+              }
+            }
           } else {
-            /* Only one value to filter by */
-            queryBuilder.where('id', rawFilter[item][0])
+            /* Just use a normal where filter for this */
+            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
           }
-
         })
 
       }
-    })
+      })
      .select(
        'pi.id',
      )
@@ -582,35 +591,44 @@ const findByUser = async (id, options) => {
     const result = await db('pantry_ingredients as pi')
      .join('pantries as p', 'pi.pantryId', '=', 'p.id')
      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
-      .modify((queryBuilder) => {
-        /* 
-        * We now use a singular filter passed via the request query params that 
-        * is an object where each key is the filed to filter by and the values 
-        * are the values to filter by. 
-        */
-        if(filter !== undefined){
+     .modify((queryBuilder) => {
+      /* 
+       * We now use a singular filter passed via the request query params that 
+       * is an object where each key is the filed to filter by and the values 
+       * are the values to filter by. 
+       */
+      if(filter !== undefined){
 
-          /* parse the filter so we can work with it easier */
-          let rawFilter = JSON.parse(filter)
+        /* parse the filter so we can work with it easier */
+        let rawFilter = JSON.parse(filter)
+        /* Gte the number of filters we need to apply */
+        let numFilters = Object.getOwnPropertyNames(rawFilter)
+        
+        /* Go through each entry and apply the filter to the query */
+        numFilters.map(item => {
 
-          /* Gte the number of filters we need to apply */
-          let numFilters = Object.getOwnPropertyNames(rawFilter)
-
-          /* Go through each entry and apply the filter to the query */
-          numFilters.map(item => {
-
+          /* Need to check if multiple ids have been passed in or not */
+          if(item === 'id' || item === 'ids' || item === 'userId'){
             /* Now check if we have multiple values to filter by */
             if(rawFilter[item].length > 1){
               /* use whereIn to filter on multiples */
               queryBuilder.whereIn('id', rawFilter[item])
             } else {
               /* Only one value to filter by */
-              queryBuilder.where('id', rawFilter[item][0])
+              /* First check if we have an array of vaues, even 1 */
+              if(Array.isArray(rawFilter[item])){
+                queryBuilder.where('id', rawFilter[item][0])
+              } else {
+                queryBuilder.where('id', rawFilter[item])
+              }
             }
+          } else {
+            /* Just use a normal where filter for this */
+            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
+          }
+        })
 
-          })
-
-        }
+      }
       })
      .select(
        'pi.id as id',
