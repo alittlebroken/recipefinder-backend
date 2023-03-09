@@ -310,7 +310,6 @@ const findAll = async (options) => {
 
     /* Extract the pagination options */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
-    console.log('filter: ', filter)
 
     /* Count the records we are interested in */
     const recordCount = await db('categories')
@@ -332,17 +331,31 @@ const findAll = async (options) => {
           
           /* Need to check if multiple ids have been passed in or not */
           if(item === 'id' || item === 'ids' || item === 'userId'){
+            
+            /* All items for id or ids need to be integers so we need
+               to ensure they are not strings otherwise the length 
+               function when it gets to double digits will report
+               incorrectly and cause issues */
+            let idList = []
+            if(Array.isArray(rawFilter[item])) {
+              rawFilter[item].map(listItem => {
+                idList.push(parseInt(listItem))
+              })
+            } else {
+              idList.push(parseInt(rawFilter[item]))
+            }
+
             /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
+            if(idList.length > 1){
               /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
+              queryBuilder.whereIn('id', idList)
             } else {
               /* Only one value to filter by */
               /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
+              if(Array.isArray(idList)){
+                queryBuilder.where('id', idList[0])
               } else {
-                queryBuilder.where('id', rawFilter[item])
+                queryBuilder.where('id', idList)
               }
             }
           } else {
@@ -350,7 +363,6 @@ const findAll = async (options) => {
             queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
           }
         })
-
       }
       })
       .select('id')
@@ -374,20 +386,34 @@ const findAll = async (options) => {
         
         /* Go through each entry and apply the filter to the query */
         numFilters.map(item => {
-
+          
           /* Need to check if multiple ids have been passed in or not */
           if(item === 'id' || item === 'ids' || item === 'userId'){
+            
+            /* All items for id or ids need to be integers so we need
+               to ensure they are not strings otherwise the length 
+               function when it gets to double digits will report
+               incorrectly and cause issues */
+            let idList = []
+            if(Array.isArray(rawFilter[item])) {
+              rawFilter[item].map(listItem => {
+                idList.push(parseInt(listItem))
+              })
+            } else {
+              idList.push(parseInt(rawFilter[item]))
+            }
+
             /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
+            if(idList.length > 1){
               /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
+              queryBuilder.whereIn('id', idList)
             } else {
               /* Only one value to filter by */
               /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
+              if(Array.isArray(idList)){
+                queryBuilder.where('id', idList[0])
               } else {
-                queryBuilder.where('id', rawFilter[item])
+                queryBuilder.where('id', idList)
               }
             }
           } else {
@@ -395,7 +421,6 @@ const findAll = async (options) => {
             queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
           }
         })
-
       }
       })
       .modify((queryBuilder) => {
