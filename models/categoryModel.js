@@ -310,6 +310,7 @@ const findAll = async (options) => {
 
     /* Extract the pagination options */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
+    console.log('filter: ', filter)
 
     /* Count the records we are interested in */
     const recordCount = await db('categories')
@@ -328,7 +329,7 @@ const findAll = async (options) => {
         
         /* Go through each entry and apply the filter to the query */
         numFilters.map(item => {
-
+          
           /* Need to check if multiple ids have been passed in or not */
           if(item === 'id' || item === 'ids' || item === 'userId'){
             /* Now check if we have multiple values to filter by */
@@ -409,7 +410,7 @@ const findAll = async (options) => {
 
      if(results.length >= 1){
       /* gather the various resulst we need to send back */
-      let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
+      let numPages = parseInt(Math.floor(recordCount.length / size))
       if(numPages < 1) numPages = 1
 
        return {
@@ -423,6 +424,7 @@ const findAll = async (options) => {
      }
 
   } catch(e){
+    
     /* We only wish to output our custom messages and not those passed to from
      * various libraries for security reasons */
     message = 'There was a problem with the resource, please try again later';
