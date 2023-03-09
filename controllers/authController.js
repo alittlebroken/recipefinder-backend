@@ -510,7 +510,12 @@ const logoutUser = async (req, res, next) => {
             await tokenModel.removeOne(isTokenValid.user.id);
         }
  
-        res.clearCookie('jwt')
+        const cookieOptions = {
+                    httpOnly: true,
+                    secure: false, 
+                }
+
+        res.clearCookie('jwt', cookieOptions)
          .status(200)
          .json({
             status: 200,
