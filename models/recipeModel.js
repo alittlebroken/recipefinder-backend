@@ -684,6 +684,8 @@ const findAll = async (options) => {
          */
         if(filter !== undefined){
   
+          console.log(filter)
+
           /* parse the filter so we can work with it easier */
           let rawFilter = JSON.parse(filter)
           /* Gte the number of filters we need to apply */
@@ -691,9 +693,10 @@ const findAll = async (options) => {
           
           /* Go through each entry and apply the filter to the query */
           numFilters.map(item => {
-  
+
             /* Need to check if multiple ids have been passed in or not */
             if(item === 'id' || item === 'ids' || item === 'userId'){
+              
               /* Now check if we have multiple values to filter by */
               if(rawFilter[item].length > 1){
                 /* use whereIn to filter on multiples */
@@ -708,8 +711,14 @@ const findAll = async (options) => {
                 }
               }
             } else {
-              /* Just use a normal where filter for this */
-              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
+              /* Need to check if the value the filter supplied is a string, if
+               * not then we need to use another operator aside from like or
+               * we start to get errors */
+              if(typeof rawFilter[item] !== 'string'){
+                queryBuilder.where(item, '=', `${rawFilter[item]}`)
+              } else { 
+                queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
+              }
             }
           })
   
@@ -769,8 +778,14 @@ const findAll = async (options) => {
                 }
               }
             } else {
-              /* Just use a normal where filter for this */
-              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
+              /* Need to check if the value the filter supplied is a string, if
+               * not then we need to use another operator aside from like or
+               * we start to get errors */
+              if(typeof rawFilter[item] !== 'string'){
+                queryBuilder.where(item, '=', `${rawFilter[item]}`)
+              } else { 
+                queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
+              }
             }
           })
   
