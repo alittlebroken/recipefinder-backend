@@ -32,9 +32,9 @@ const list = async (req, res, next) => {
 
         /* List all the categories we have */
         const results = await categoryModel.findAll(options);
-
+        
         if(!results || results.success === false){
-            res.status(500).json(
+            return res.status(500).json(
                 {
                     status: 500,
                     success: false,
