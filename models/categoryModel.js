@@ -1,6 +1,7 @@
 /* Packages needed */
 require('dotenv').config();
 const db = require('../database');
+const dbHelper = require('../helpers/database')
 
 /*
  * Adds a new category to the database
@@ -313,122 +314,15 @@ const findAll = async (options) => {
 
     /* Count the records we are interested in */
     const recordCount = await db('categories')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-          
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            
-            /* All items for id or ids need to be integers so we need
-               to ensure they are not strings otherwise the length 
-               function when it gets to double digits will report
-               incorrectly and cause issues */
-            let idList = []
-            if(Array.isArray(rawFilter[item])) {
-              rawFilter[item].map(listItem => {
-                idList.push(parseInt(listItem))
-              })
-            } else {
-              idList.push(parseInt(rawFilter[item]))
-            }
-
-            /* Now check if we have multiple values to filter by */
-            if(idList.length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', idList)
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(idList)){
-                queryBuilder.where('id', idList[0])
-              } else {
-                queryBuilder.where('id', idList)
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-      }
-      })
+      .modify(dbHelper.buildFilters, filter)
       .select('id')
       .count('id')
       .groupBy('id')
 
     /* Extract data from the database */
     const results = await db('categories')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-          
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            
-            /* All items for id or ids need to be integers so we need
-               to ensure they are not strings otherwise the length 
-               function when it gets to double digits will report
-               incorrectly and cause issues */
-            let idList = []
-            if(Array.isArray(rawFilter[item])) {
-              rawFilter[item].map(listItem => {
-                idList.push(parseInt(listItem))
-              })
-            } else {
-              idList.push(parseInt(rawFilter[item]))
-            }
-
-            /* Now check if we have multiple values to filter by */
-            if(idList.length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', idList)
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(idList)){
-                queryBuilder.where('id', idList[0])
-              } else {
-                queryBuilder.where('id', idList)
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-      }
-      })
-      .modify((queryBuilder) => {
-        // order by clause
-        if(sortBy !== undefined || sortOrder !== undefined){
-            queryBuilder.orderBy(sortBy, sortOrder)
-        }
-      })
+      .modify(dbHelper.buildFilters, filter)
+      .modify(dbHelper.buildSort, { sortBy, sortOrder })
       .select('*')
       .limit(size)
       .offset(offset)

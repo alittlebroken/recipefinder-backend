@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 /* Import helper modules */
 const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
+const dbHelper = require('../helpers/database');
 const pantryModel = require('../models/pantryModel');
 
 /**
@@ -407,45 +408,7 @@ const findAll = async (options) => {
 
     /* Get a count of all records affected */
     const recordCount = await db('users')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
-              } else {
-                queryBuilder.where('id', rawFilter[item])
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-
-      }
-      })
+    .modify(dbHelper.buildFilters, filter)
     .select('id')
     .count()
     .groupBy('id')
@@ -453,52 +416,9 @@ const findAll = async (options) => {
     /* Find the user by Id */
 
     const result = await db('users')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
-              } else {
-                queryBuilder.where('id', rawFilter[item])
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-
-      }
-      })
+     .modify(dbHelper.buildFilters, filter)
      .select('id', 'username', 'email', 'roles', 'forename', 'surname')
-     .modify((queryBuilder) => {
-        // order by clause
-        if(sortBy !== undefined || sortOrder !== undefined){
-            queryBuilder.orderBy(sortBy, sortOrder)
-        }
-      })
+     .modify(dbHelper.buildSort, { sortBy, sortOrder })
      .limit(size)
      .offset(offset)
 

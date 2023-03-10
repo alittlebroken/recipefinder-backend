@@ -1,7 +1,7 @@
 /* Packages needed */
 require('dotenv').config();
 const db = require('../database');
-
+const dbHelper = require('../helpers/database')
 /* Look for an existing refresh token in the refresh
  * tokens table for a given user
  *
