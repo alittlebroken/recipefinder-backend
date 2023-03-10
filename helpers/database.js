@@ -7,15 +7,10 @@ const buildFilters = (queryBuilder, filters) => {
     /* Make sure to only perform any work if we actually 
      * have a filter to apply
      */
-    
-    if(filters !== undefined){
-
+    if(filters){
         /* The filters should be passed to us as an object with each key 
          * being a new filter and it's content to filter by 
         */
-
-        /* DEBUG */
-        console.log('databaseHelper->buildFilter: ', filters)
 
         /* Parse the filter we are working with */
         let parsedFilters = JSON.parse(filters)
@@ -25,7 +20,6 @@ const buildFilters = (queryBuilder, filters) => {
 
         /* Loop through each filter and apply it */
         numParsedFilters.map(filter => {
-
             /* Check for presence of an ID field as this could contain 
              * multiple ids */
             if(filter === 'id' || filter === 'ids' || filter === 'userId'){
@@ -91,15 +85,9 @@ const buildFilters = (queryBuilder, filters) => {
  */
 const buildSort = (queryBuilder, sort) => {
 
-    /* Ensure the passed in sort options are
-     * valid
-     */
-    let column = sort.sortBy ? sort.sortBy : null
-    let order = sort.sortOrder ? sort.sortOrder : null
-
-    if(column && order){
-        queryBuilder.orderBy(column, sort)
-    }
+    if(sort !== undefined || sort !== null){
+        queryBuilder.orderBy(sort.sortBy, sort.sortOrder)
+    } 
 
 }
 
