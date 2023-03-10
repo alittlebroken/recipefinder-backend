@@ -1,7 +1,6 @@
 /* Packages needed */
 require('dotenv').config();
 const db = require('../database');
-const dbHelper = require('../helpers/database')
 
 /* Include any other needed modules */
 const stepModel = require('./stepModel');
@@ -15,8 +14,6 @@ const recipeCategoriesModel = require('./recipeCategoriesModel');
 
 const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
-const dbHelper = require('../helpers/database')
-
 const dbHelper = require('../helpers/database')
 
 /*
