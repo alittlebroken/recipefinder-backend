@@ -85,7 +85,9 @@ const buildFilters = (queryBuilder, filters) => {
  */
 const buildSort = (queryBuilder, sort) => {
 
-    if(sort !== undefined || sort !== null){
+    if(sort !== undefined && sort !== null){
+        if(sort.sortBy === undefined) sort.sortBy = 'id'
+        if(sort.sortOrder === undefined) sort.sortOrder = 'ASC'
         queryBuilder.orderBy(sort.sortBy, sort.sortOrder)
     } 
 
