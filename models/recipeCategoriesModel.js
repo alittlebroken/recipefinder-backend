@@ -345,7 +345,7 @@ const findByRecipe = async (id, options) => {
   try{
 
     /* extract the pagination settings */
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filterValues, filter, limit, sortBy, sortOrder} = options
 
     /* Validate the passed in data */
     if(!validation.validator(id, 'number')){
@@ -393,7 +393,7 @@ const findByRecipe = async (id, options) => {
     }
 
   } catch(e) {
-
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
