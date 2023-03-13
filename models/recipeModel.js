@@ -468,6 +468,7 @@ const find = async (terms, options) => {
        .modify(dbHelper.buildFilters, filter)
        .select(
          'id as recipeId',
+         'userId',
          'name',
          'description',
          'servings',
@@ -590,8 +591,6 @@ const findAll = async (options) => {
 
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
-    console.log('recipeModel->findAll: options ', options)
-
     return await db.transaction( async trx => {
 
       let recipes = [];
@@ -601,6 +600,7 @@ const findAll = async (options) => {
        .modify(dbHelper.buildFilters, filter)
        .select(
          'id',
+         'userId',
          'name',
          'description',
          'servings',
@@ -704,8 +704,20 @@ const findAll = async (options) => {
  * @returns {array} Contains the specified recipe if founf otherwise it returns
  * an empty array
  */
-const findByRecipe = async (id) => {
+const findByRecipe = async (id, options) => {
 
+  let {
+    page = 1, 
+    size = 5, 
+    offset = 0, 
+    filterBy, 
+    filterValues, 
+    limit = 5, 
+    filter, 
+    sortBy = 'id', 
+    sortOrder = 'desc'
+  } = options
+  
   try {
     
     /* Validate the passed in arguments */
@@ -726,6 +738,7 @@ const findByRecipe = async (id) => {
     const result = await db('recipes')
      .select('id',
      'name',
+     'userId',
      'description',
      'servings',
      'calories_per_serving',
@@ -734,6 +747,7 @@ const findByRecipe = async (id) => {
      'rating')
      .where('id', id);
 
+    
     /* Only if we have found a recipe should we then go ahead and retrieve from
        the database all the supporting data like steps and categories */
     if(result && result.length > 0){
@@ -741,9 +755,10 @@ const findByRecipe = async (id) => {
       /* Find appropriate steps and only if we have found some do we then add
       them to the local steps array ready to be added to the recipe and
       returned */
-      const recipeSteps = await stepModel.findByRecipeId(result[0].id);
-      if(recipeSteps && recipeSteps.length > 0){
-        for( let recipeStep of recipeSteps){
+      const recipeSteps = await stepModel.findByRecipeId(result[0].id, options);
+      
+      if(recipeSteps?.results && recipeSteps?.results?.length > 0){
+        for( let recipeStep of recipeSteps.results){
           steps.push({
             id: recipeStep.id,
             stepNo: recipeStep.stepNo,
@@ -754,9 +769,9 @@ const findByRecipe = async (id) => {
 
       /* Now find the categories for the specified recipe and again check that
       we have some to populate the correct array */
-      const recipeCategories = await recipeCategoriesModel.findByRecipe(result[0].id);
-      if(recipeCategories && recipeCategories.length > 0){
-        for( let recipeCategory of recipeCategories){
+      const recipeCategories = await recipeCategoriesModel.findByRecipe(result[0].id, options);
+      if(recipeCategories?.results && recipeCategories?.results?.length > 0){
+        for( let recipeCategory of recipeCategories.results){
           categories.push({
               id: recipeCategory.categoryId,
               name: recipeCategory.categoryName
@@ -766,7 +781,7 @@ const findByRecipe = async (id) => {
 
       /* Now get all cookbooks the recipe has been added to and again only if we
       have data to check, lopp through and assign to the cookbooks array */
-      const recipeCookbooks = await cookbookRecipesModel.findByRecipe(result[0].id);
+      const recipeCookbooks = await cookbookRecipesModel.findByRecipe(result[0].id, options);
       if(recipeCookbooks && recipeCookbooks.length > 0){
         for( let recipeCookbook of recipeCookbooks){
           cookbooks.push({
@@ -780,9 +795,11 @@ const findByRecipe = async (id) => {
 
       /* Finally get all ingredients for the recipe, check we actually have
       some and then add them to the ingredients array */
-      const recipeIngredients = await recipeIngredientsModel.findByRecipeId(result[0].id);
-      if(recipeIngredients && recipeIngredients.length > 0){
-        for( let recipeIngredient of recipeIngredients){
+      const recipeIngredients = await recipeIngredientsModel.findByRecipeId(result[0].id, options);
+      
+      if(recipeIngredients?.results && recipeIngredients?.results?.length > 0){
+        
+        for( let recipeIngredient of recipeIngredients.results){
           ingredients.push({
             id: recipeIngredient.id,
             name: recipeIngredient.name,
@@ -810,6 +827,7 @@ const findByRecipe = async (id) => {
           cookbooks: [...cookbooks]
         }
       );
+      console.log('\nrecipeModel->findByRecipe [finalRecipe]: \n',finalRecipe)
       return finalRecipe;
 
     } else {
@@ -818,7 +836,7 @@ const findByRecipe = async (id) => {
 
 
   } catch(e) {
-
+        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
