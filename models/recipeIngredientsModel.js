@@ -369,7 +369,7 @@ const findById = async id => {
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .join('recipes as r', 'r.id', '=', 'ri.recipeId')
      .modify(dbHelper.buildFilters, filter)
-     .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
+     .select('i.id as ingredientId', 'ri.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
      .where('ri.recipeId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
      .limit(size)
