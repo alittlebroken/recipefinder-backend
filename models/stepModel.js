@@ -330,7 +330,7 @@ const findByRecipeId = async (recipeId, options) => {
   try{
 
     /* Extract the pagination values */
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let { page, size, offset, filterBy, filterValues, filter, limit, sortBy, sortOrder } = options
 
     /* validate the values passed into the function */
     if(!recipeId || typeof recipeId !== 'number'){
@@ -357,6 +357,8 @@ const findByRecipeId = async (recipeId, options) => {
      .limit(size)
      .offset(offset)
 
+     
+
      if(!result || result.length < 1){
        return [];
      } else {
@@ -373,7 +375,6 @@ const findByRecipeId = async (recipeId, options) => {
      }
 
   } catch(e) {
-
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
