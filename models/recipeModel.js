@@ -23,12 +23,12 @@ const dbHelper = require('../helpers/database')
  * within an object
  * @param {array} steps - All relevant steps needed to make the recipe
  * @param {array} ingredients - All ingredients for the recipe
- * @param {number} cookbook - The cookbook the recipe should be added to
+ * @param {number} cookbooks - The cookbooks the recipe should be added to
  * @param {array} categories - The catgeories the recipe belong to
  * @returns {object} Detailing if the process was a success or not and any
  * supporting messages
  */
-const create = async (recipe, steps, ingredients, cookbookId, categories) => {
+const create = async (recipe, steps, ingredients, cookbooks, categories) => {
 
   try{
 
@@ -83,39 +83,6 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
       }
     };
 
-    /* steps data 
-    if(!validation.validator(steps, 'array')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-
-    /* ingredients data 
-    if(!validation.validator(ingredients, 'array')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-
-    /* cookbook id 
-    if(!validation.validator(cookbookId, 'number')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-
-    /* categories data 
-    if(!validation.validator(categories, 'array')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-    */
-
     /* Add the recipe and related data via a transaction */
     return await db.transaction( async trx => {
 
@@ -125,24 +92,50 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
        .transacting(trx);
 
       if(steps){
-        steps.forEach(step => step.recipeId = recipeId[0].id);
-        await db('steps').insert(steps).transacting(trx);
+        for(let step of steps){
+          await db('steps')
+           .insert({
+              recipeId: recipeId[0].id,
+              stepNo: step.stepNo,
+              content: step.content
+           })
+           .transacting(trx)
+        }
       }
 
       if(ingredients){
-        ingredients.forEach(ingredient => ingredient.recipeId = recipeId[0].id);
-        await db('recipe_ingredients').insert(ingredients).transacting(trx);
+        for(let ingredient of ingredients){
+          await db('recipe_ingredients')
+           .insert({
+              recipeId: recipeId[0].id,
+              ingredientId: ingredient.id,
+              amount: ingredient.amount,
+              amount_type: ingredient.amount_type
+           })
+           .transacting(trx)
+        }
       }
 
-      if(cookbookId){
-        await db('cookbook_recipes').insert(
-          { cookbookId: cookbookId, recipeId: recipeId[0].id}
-        ).transacting(trx);
+      if(cookbooks){
+        for(let cookbook of cookbooks){
+          await db('cookbook_recipes')
+           .insert({
+            recipeId: recipeId[0].id,
+            cookbookId: cookbook.id
+           })
+           .transacting(trx)
+        }
       }
 
       if(categories){
-        categories.forEach(cat => cat.recipeId = recipeId[0].id);
-        await db('recipe_categories').insert(categories).transacting(trx);
+        for(let category of categories){
+          await db('recipe_categories')
+           .insert({
+            recipeId: recipeId[0].id,
+            categoryId: category.id
+           })
+           .transacting(trx)
+        }
       }
       
       return {
@@ -351,15 +344,6 @@ const update = async recipe => {
         message: 'Validation failed for cook_time'
       }
     }
-    
-    /*
-    if(!validation.validator(recipe.rating, 'number')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'Validation failed for rating'
-      }
-    }
-    */
     
     /* Update the specifed record with the new values passed in */
     return await db.transaction(async trx => {
