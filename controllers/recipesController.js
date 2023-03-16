@@ -80,6 +80,18 @@ const list = async (req, res, next) => {
 
     try{
 
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: req.filter,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
+          }
+
         /* Validate the request parameters and or body values */
         if(!req.params || req.params === undefined){
             throw {
@@ -99,7 +111,7 @@ const list = async (req, res, next) => {
 
         /* Get the record from the database */
         let id = parseInt(req.params.id);
-        const result = await recipeModel.findByRecipe(id);
+        const result = await recipeModel.findByRecipe(id, options);
 
         if(!result || result.success === false){
             throw {
@@ -1252,8 +1264,32 @@ const update = async (req, res, next) => {
         }
         */
 
+        /* Check we have data to pass for the various recipe related data */
+        let steps = req.body.steps ? req.body.steps : undefined
+        let ingredients = req.body.ingredients ? req.body.ingredients : undefined
+        let cookbooks = req.body.cookbooks ? req.body.cookbooks : undefined
+        let categories = req.body.categories ? req.body.categories : undefined
+
+        /* Set the data to be added in one easy to use object */
+        const recipeToAdd = {
+            recipeId: parseInt(req.params.id),
+            name: req.body.name,
+            description: req.body.description ? req.body.description : null,
+            userId: parseInt(req.body.userId),
+            servings: parseInt(req.body.servings),
+            calories_per_serving: parseInt(req.body.calories_per_serving),
+            prep_time: parseInt(req.body.prep_time),
+            cook_time: parseInt(req.body.cook_time),
+            steps: [...steps],
+            ingredients: [...ingredients],
+            cookbooks: [...cookbooks],
+            categories: [...categories]
+        }
+
+        console.log('recipesController.update [recipe object]: ', recipeToAdd)
+
         /* Actually update the desired record now */
-        const result = await recipeModel.update({
+        /* const result = await recipeModel.update({
             recipeId: parseInt(req.params.id),
             name: req.body.name,
             description: req.body.description ? req.body.description : null,
@@ -1262,7 +1298,8 @@ const update = async (req, res, next) => {
             calories_per_serving: parseInt(req.body.calories_per_serving),
             prep_time: parseInt(req.body.prep_time),
             cook_time: parseInt(req.body.cook_time)
-        });
+        });*/
+        const result = await recipeModel.update(recipeToAdd);
 
         if(!result || result.success === false){
             throw {

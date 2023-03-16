@@ -361,14 +361,13 @@ const update = async recipe => {
     }
     */
     
-
     /* Update the specifed record with the new values passed in */
-    return await db.transaction( async trx => {
+    return await db.transaction(async trx => {
 
-      /* Add the recipe and return the ID to use later */
-      await db('recipes')
+      /* Add the recipe*/
+        await db('recipes')
         .update({
-          id: recipe.id,
+          id: recipe.recipeId,
           userId: recipe.userId,
           name: recipe.name,
           description: recipe.description,
@@ -377,34 +376,67 @@ const update = async recipe => {
           prep_time: recipe.prep_time,
           cook_time: recipe.cook_time
         })
-        .where('id', recipe.recipeId);
+        .where('id', recipe.recipeId)
+        .transacting(trx)
       
         if(recipe?.steps){
-          await db('steps')
-          .update(recipe.steps)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let step of recipe.steps){
+            await db('steps')
+            .insert({
+              id: step.id,
+              stepNo: step.stepNo,
+              content: step.content,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
         }
 
         if(recipe?.ingredients){
-          await db('recipe_ingredients')
-          .update(recipe.ingredients)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let ingredient of recipe.ingredients){
+            await db('recipe_ingredients')
+            .insert({
+              id: ingredient.id,
+              ingredientId: ingredient.ingredientId,
+              amount: ingredient.amount,
+              amount_type: ingredient.amount_type,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
         }
         
         if(recipe?.cookbooks){
-          await db('cookbook_recipes')
-          .update(recipe.cookbooks)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let cookbook of recipe.cookbooks){
+            await db('cookbook_recipes')
+            .insert({
+              id: cookbook.id,
+              cookbookId: cookbook.cookbookId,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
         }
         
         if(recipe?.categories){
-          await db('recipe_categories')
-          .update(recipe.categories)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let category of recipe.categories){
+            await db('recipe_categories')
+            .insert({
+              id: category.id,
+              categoryId: category.categoryId,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
+            
         }
         
         return {
@@ -773,7 +805,8 @@ const findByRecipe = async (id, options) => {
       if(recipeCategories?.results && recipeCategories?.results?.length > 0){
         for( let recipeCategory of recipeCategories.results){
           categories.push({
-              id: recipeCategory.categoryId,
+              id: recipeCategory.id,
+              categoryId: recipeCategory.categoryId,
               name: recipeCategory.categoryName
             });
         };
@@ -785,7 +818,8 @@ const findByRecipe = async (id, options) => {
       if(recipeCookbooks && recipeCookbooks.length > 0){
         for( let recipeCookbook of recipeCookbooks){
           cookbooks.push({
-            id: recipeCookbook.cookbookId,
+            id: recipeCookbook.id,
+            cookbookId: recipeCookbook.cookbookId,
             name: recipeCookbook.cookbookName,
             description: recipeCookbook.cookbookDescription,
             image: recipeCookbook.cookbookImage
@@ -802,6 +836,7 @@ const findByRecipe = async (id, options) => {
         for( let recipeIngredient of recipeIngredients.results){
           ingredients.push({
             id: recipeIngredient.id,
+            ingredientId: recipeIngredient.ingredientId,
             name: recipeIngredient.name,
             amount: recipeIngredient.amount,
             amount_type: recipeIngredient.amount_type
