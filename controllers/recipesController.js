@@ -498,9 +498,10 @@ const create = async (req, res, next) => {
         let steps = req.body.steps ? req.body.steps : null;
         let ingredients = req.body.ingredients ? req.body.ingredients : null;
         let cookbookId = req.body.cookbookId ? req.body.cookbookId : null;
+        let cookbooks = req.body.cookbooks ? req.body.cookbooks : null;
         let categories = req.body.categories ? req.body.categories : null;
 
-        const result = await recipeModel.create(recipe, steps, ingredients, cookbookId, categories);
+        const result = await recipeModel.create(recipe, steps, ingredients, cookbooks, categories);
 
         if(!result || result.success === false){
             throw {
