@@ -104,54 +104,42 @@ const update = async data => {
       }
     };
 
-    if(!validation.validator(data.pantryId, 'number')){
-      throw {
-        name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: 'Validation failed for pantryId'
-      }
-    };
-
-    if(!validation.validator(data.ingredientId, 'number')){
+    if(!validation.validator(data.ingredients, 'array')){
       throw {
         name: 'PANTRYINGREDIENTSMODEL_ERROR',
         message: 'Validation failed for ingredientId'
       }
     };
 
-    if(!validation.validator(data.amount, 'number')){
-      throw {
-        name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: 'Validation failed for amount'
-      }
-    };
+   
+     await db.transaction(async trx => {
 
-    if(!validation.validator(data.amount_type, 'string')){
-      throw {
-        name: 'PANTRYINGREDIENTSMODEL_ERROR',
-        message: 'Validation failed for amount_type'
-      }
-    };
-
-    /* Update the data */
-    const result = await db('pantry_ingredients')
-     .update({
-      pantryId: Number.parseInt(data.pantryId),
-      ingredientId: Number.parseInt(data.ingredientId),
-      amount: Number.parseInt(data.amount),
-      amount_type: data.amount_type
-     })
-     .where('id', Number.parseInt(data.id));
-
-     if(result && result > 0){
-       return {
-         success: true,
-         message: messageHelper.INFO_RECORD_UPDATED
+      /* Update the users pantry */
+      for(let ingredient of data.ingredients){
+      
+        await db('pantry_ingredients')
+        .insert({
+          id: ingredient.id,
+          pantryId: ingredient.pantryId ? ingredient.pantryId : data.id,
+          ingredientId: ingredient.ingredientId,
+          amount: ingredient.amount,
+          amount_type: ingredient.amount_type
+        })
+        .onConflict('id')
+        .merge()
+        .transacting(trx)
+  
        }
-     } else {
-       return [];
-     }
+
+     })
+     
+     return {
+      success: true,
+      message: messageHelper.INFO_RECORD_UPDATED
+    }
 
   } catch(e) {
+    
     /* Check the error name, we only want to specify our own error messages
        everything else can be represented by a generic message */
     let message;

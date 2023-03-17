@@ -365,7 +365,7 @@ const list = async (pantryId, options) => {
       .join('users as u', 'u.id', '=', 'p.userId')
       .select(
         'p.id as pantryId',
-        'u.username as username'
+        'u.id as userId'
       )
       .where('p.id', pantryId)
 
@@ -386,6 +386,7 @@ const list = async (pantryId, options) => {
        .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
        .select(
         'pi.id as id',
+        'pi.pantryId',
         'i.id as ingredientId',
         'i.name',
         'pi.amount',

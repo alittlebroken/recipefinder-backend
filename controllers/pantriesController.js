@@ -467,45 +467,20 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.pantryId || req.body.pantryId === undefined){
+        if(!req.body.ingredients || req.body.ingredients === undefined){
             throw {
                 status: 400,
                 success: false,
-                message: 'Undefined pantryId'
+                message: 'Undefined ingredients'
             }
         }
 
-        if(!req.body.ingredientId || req.body.ingredientId === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined ingredientId'
-            }
-        }
-
-        if(!req.body.amount || req.body.amount === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined amount'
-            }
-        }
-
-        if(!req.body.amount_type || req.body.amount_type === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined amount_type'
-            }
-        }
-
-        /* Lets update the specified record in the database */
+        /* Lets update the specified record in the database 
+         * do this one ingredient at a time
+        */
         let payload = {
-            id: parseInt(req.body.id),
-            pantryId: parseInt(req.params.id),
-            ingredientId: parseInt(req.body.ingredientId),
-            amount: parseInt(req.body.amount),
-            amount_type: req.body.amount_type
+            id: parseInt(req.params.id),
+            ingredients: req.body.ingredients,
         }
 
         const result = await pantryIngredientsModel.update(payload);
