@@ -7,7 +7,6 @@ const passport = require('passport');
 const userModel = require('../models/userModel');
 
 const tokenModel = require('../models/tokenModel');
-const { json } = require('body-parser');
 
 const moduleName = 'authController';
 
@@ -537,6 +536,82 @@ const logoutUser = async (req, res, next) => {
 };
 
 /* 
+ * Resets a password for the user
+ */
+const resetPassword = async (req, res, next) => {
+
+    const moduleMethod = 'resetPassword';
+
+    try{
+
+        /* Validate the passed in values */
+        if(!req.body.userId || req.body.userId === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Undefined user id'
+            })
+        }
+
+        if(typeof req.body.userId !== 'number'){
+            return res.status(400).json({
+                status: 400,
+                succes: false,
+                message: 'User id is not in the correct format'
+            })
+        }
+
+        if(!req.body.password || req.body.password === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Undefined user password'
+            })
+        }
+
+        if(typeof req.body.password !== 'string'){
+            return res.status(400).json({
+                status: 400,
+                succes: false,
+                message: 'User password is not in the correct format'
+            })
+        }
+
+        /* Send the request to the datase */
+        const result = await userModel.resetPassword({
+            id: req.body.userId,
+            password: req.body.password
+        })
+
+        /* Check the result to ensure that the pass was actually reset */
+        if(result.success === false){
+            return res.status(500).json({
+                status: 500,
+                success: false,
+                message: result.message
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Password successfully updated'
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -562,5 +637,6 @@ module.exports = {
     createUser,
     refreshToken,
     removeToken,
-    logoutUser
+    logoutUser,
+    resetPassword
 };

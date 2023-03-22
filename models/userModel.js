@@ -315,7 +315,6 @@ const removeAll = async () => {
     }
 
   } catch(e) {
-    console.log(e)
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message;
@@ -441,7 +440,6 @@ const findAll = async (options) => {
     };
 
   } catch(e) {
-    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message = 'There was a problem with the resource, please try again later';
@@ -590,6 +588,89 @@ const verifyRefreshToken = async token => {
 
 };
 
+/*
+ * Resets a users password
+ *
+ * @param {object} data - The payload to be processed by the method, contains the id of the user
+ *                         that the password is to be changed for and the new password we wiash to
+ *                         set
+ * @returns { object } - Object payload containing the result of trying to reset a user password
+  */
+const resetPassword = async (data) => {
+
+  try {
+
+    /* Validate the passed in data */
+    if(!validation.validator(data, 'object')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    };
+
+    if(!validation.validator(data.id, 'number')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'User id is not in the correct format'
+      }
+    };
+
+    if(!validation.validator(data.password, 'string')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'User password is not in the correct format'
+      }
+    };
+
+    /* hash the password BEFORE we store it within the database */
+    const hashedPass = await hash(data.password)
+
+    if(hashedPass?.success === false){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: hashedPass.message
+      }
+    }
+
+    /* Update the users password within the DV */
+    const updateStmt = await db('users')
+     .update({
+      password: hashedPass
+     })
+     .where('id', '=', parseInt(data.id))
+     .returning('id')
+
+     if(!updateStmt[0].id){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'Unable to update users account with new password'
+      }
+     }
+
+     return {
+      success: true,
+      message: 'Password successfully updated'
+     }
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+
+    if(e.name === 'USERMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = messageHelper.ERROR_GENERIC_RESOURCE;
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+}
+
 module.exports = {
   insert,
   findByEmail,
@@ -602,5 +683,6 @@ module.exports = {
   generateTokens,
   verifyToken,
   removeAll,
-  verifyRefreshToken
+  verifyRefreshToken,
+  resetPassword
 }
