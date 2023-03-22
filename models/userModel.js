@@ -99,14 +99,29 @@ const findByEmail = async email => {
     if(!email || typeof email !== 'string'){
       throw {
         name: 'USERMODEL_ERROR',
-        message: 'You must supply a valid email address'
+        message: 'You must supply a valid email/username to login'
       }
     }
 
-    /* Try and find the record by email */
+    /* Try and find the record by email or username */
     const result = await db('users')
      .select('id', 'username', 'email', 'roles', 'forename', 'surname', 'password')
-     .where('email', email);
+     .modify((queryBuilder) => {
+
+      if(email){
+        /* Check that the passed in data is actually a username */
+        if(email.indexOf('@') > 0){
+          console.log('Email detected')
+          queryBuilder.where('email', email)
+        } else {
+          console.log('username detected')
+          queryBuilder.where('username', email)
+        }
+      }
+
+     })
+
+     console.log(result)
 
     if(!result || !result.length > 0){
       throw {
