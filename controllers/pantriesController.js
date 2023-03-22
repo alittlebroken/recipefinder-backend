@@ -167,16 +167,16 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(!req.body.userId || req.body.userId === undefined){
+        if(!req.body.id || req.body.id === undefined){
             throw {
                 status: 400,
                 success: false,
-                message: 'Undefined userId'
+                message: 'Undefined user id'
             }
         }
 
         /* Actually create the new pantry for the user */
-        let userId = req.body.userId;
+        let userId = req.body.id;
         const result = await pantryModel.create(userId); 
 
         if(!result || result.success === false){
