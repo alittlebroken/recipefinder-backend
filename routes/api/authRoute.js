@@ -15,7 +15,10 @@ router.post('/register', authController.createUser);
 router.post('/refresh-token', authController.refreshToken);
 router.delete('/refresh-token', checkToken, authController.removeToken);
 
-router.post('/logout', checkToken, authController.logoutUser);
+router.post('/logout', authController.logoutUser);
+
+router.post('/reset-password', checkToken, authController.resetPassword);
+
 /*
  * TODO /logout
  * 
