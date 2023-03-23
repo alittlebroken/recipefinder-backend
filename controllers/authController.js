@@ -610,6 +610,51 @@ const resetPassword = async (req, res, next) => {
 
 };
 
+/* 
+ * Retrieves a users profile from the DB
+ */
+const profile = async (req, res, next) => {
+
+    const moduleMethod = 'profile';
+
+    try{
+
+        /* ensure that we have a valid user request object */
+        if(!req.user){
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: 'No user found',
+                data: {}
+            })
+        }
+
+        /* Get the details from the DB */
+        const result = await userModel.profile(req.user.id)
+
+        if(result?.status === false){
+            return res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                data: {}
+            })
+        }
+
+        res.status(200).json({ data: result.data })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
 
 /* 
  * function template
@@ -619,6 +664,8 @@ const method = async (req, res, next) => {
     const moduleMethod = '';
 
     try{
+
+
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -638,5 +685,6 @@ module.exports = {
     refreshToken,
     removeToken,
     logoutUser,
-    resetPassword
+    resetPassword,
+    profile
 };

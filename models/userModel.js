@@ -686,6 +686,67 @@ const resetPassword = async (data) => {
 
 }
 
+/*
+ * Extracts a users details from the DB
+ * @param {number} id - The ID of the user we are interested in
+ * @returns {object} Contaisn the user details
+ */
+const profile = async (id) => {
+
+  try{
+
+    /* Validate any passed in values */
+    if(!id || id === undefined){
+      return {
+        success: false,
+        message: 'No user id was provided'
+      }
+    }
+
+    if(typeof id !== 'number'){
+      return {
+        success: false,
+        message: 'Unexpected user id format'
+      }
+    }
+
+    /* Extract the details we need from the DB */
+    const result = await db('users')
+     .select(
+      'id', 'username', 'email', 'roles', 'forename', 'surname', 'created_at'
+     ).where('id', '=', id)
+
+     if(result?.length > 0){
+      return {
+        success: true,
+        data: result[0]
+      }
+     } else {
+      return {
+        success: false,
+        data: {}
+      }
+     }
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+       let message;
+
+       if(e.name === 'USERMODEL_ERROR'){
+         message = e.message;
+       } else {
+         message = messageHelper.ERROR_GENERIC_RESOURCE;
+       }
+   
+       return {
+         success: false,
+         message: message
+       }
+  }
+
+}
+
 module.exports = {
   insert,
   findByEmail,
@@ -699,5 +760,6 @@ module.exports = {
   verifyToken,
   removeAll,
   verifyRefreshToken,
-  resetPassword
+  resetPassword,
+  profile
 }
