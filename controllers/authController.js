@@ -655,6 +655,167 @@ const profile = async (req, res, next) => {
 
 };
 
+/* 
+ * Updates a users profile
+ */
+const updateProfile = async (req, res, next) => {
+
+    const moduleMethod = 'updateProfile';
+
+    try{
+
+        /* Validate the passed in values */
+        if(typeof req.body !== 'object'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'The request body is of the wrong format',
+               data: {}
+            })
+        }
+
+        console.log(typeof req.body.username)
+        if(typeof req.body.username !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Username is not of the correct format',
+               data: {} 
+            })
+        }
+ 
+        if(!req.body.username || req.body.username === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Username is missing from request',
+               data: {}
+            })
+        }
+
+        if(typeof req.body.forename !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Forename is not of the correct format',
+               data: {}
+            })
+        }
+
+        if(!req.body.forename || req.body.forename === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Forename is missing from the request',
+               data: {} 
+            })
+        }
+
+        if(typeof req.body.surname !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Surname is of the wrong format',
+               data: {} 
+            })
+        }
+
+        if(!req.body.surname || req.body.surname === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Missing Surname from request',
+               data: {} 
+            })
+        }
+
+        if(typeof req.body.email !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Email is of the wrong format',
+               data: {} 
+            })
+        }
+
+        if(!req.body.email || req.body.email === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Missing Email from request',
+               data: {} 
+            })
+        }
+
+        if(typeof req.body.roles !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Role is of the wrong format',
+               data: {} 
+            })
+        }
+
+        if(!req.body.roles || req.body.roles === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Missing Role from request',
+               data: {} 
+            })
+        }
+
+        let profile = {
+            id: req.user.id,
+            ...req.body
+        }
+
+        /* update the profile for the selected user */
+        const result = await userModel.update(
+            profile.id,
+            profile.username,
+            profile.email,
+            profile.roles,
+            profile.forename,
+            profile.surname
+        )
+
+        if(result.success === false){
+            return res.status(500).json({
+                status: 500,
+                success: result.success,
+                message: result.message,
+                data: {}
+            })
+        }
+
+        if(result.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No profile found to update',
+                data: {}
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Profile successfully updated',
+            data: result[0]
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
 
 /* 
  * function template
@@ -686,5 +847,6 @@ module.exports = {
     removeToken,
     logoutUser,
     resetPassword,
-    profile
+    profile,
+    updateProfile
 };

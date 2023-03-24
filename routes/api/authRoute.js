@@ -20,6 +20,7 @@ router.post('/logout', authController.logoutUser);
 router.post('/reset-password', checkToken, authController.resetPassword);
 
 router.get('/profile', checkToken, authController.profile)
+router.post('/profile', checkToken, authController.updateProfile)
 
 /*
  * TODO /logout
