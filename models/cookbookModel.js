@@ -200,8 +200,6 @@ const findAll = async (options) => {
     /* extract the pagination settings */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
-    console.log('Filter: ', filter)
-
     /* Get a count of all the records we are interested in */
     const recordCount = await db('cookbooks')
       .modify(dbHelper.buildFilters, filter)
@@ -234,7 +232,6 @@ const findAll = async (options) => {
     }
 
   } catch(e) {
-    console.log(e)
     /* Non custom messages should be returned as a generic message to the front
        end */
     const message = 'There was an issue with the resource, please try again later';

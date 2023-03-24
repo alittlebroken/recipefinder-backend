@@ -1287,8 +1287,6 @@ const update = async (req, res, next) => {
             categories: [...categories]
         }
 
-        console.log('recipesController.update [recipe object]: ', recipeToAdd)
-
         /* Actually update the desired record now */
         /* const result = await recipeModel.update({
             recipeId: parseInt(req.params.id),

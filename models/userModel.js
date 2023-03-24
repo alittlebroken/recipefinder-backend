@@ -111,17 +111,13 @@ const findByEmail = async email => {
       if(email){
         /* Check that the passed in data is actually a username */
         if(email.indexOf('@') > 0){
-          console.log('Email detected')
           queryBuilder.where('email', email)
         } else {
-          console.log('username detected')
           queryBuilder.where('username', email)
         }
       }
 
      })
-
-     console.log(result)
 
     if(!result || !result.length > 0){
       throw {
@@ -746,6 +742,7 @@ const profile = async (id) => {
   }
 
 }
+
 
 module.exports = {
   insert,

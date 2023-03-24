@@ -68,7 +68,6 @@ const listAll = async (req, res, next) => {
 
     } catch(e) {
         /* Log out the issue(s) */
-        console.log(e)
         appLogger.logMessage(
             'error', 
             `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
@@ -110,9 +109,7 @@ const listUser = async (req, res, next) => {
             /* Good, we are not an admin user so we can substitue out the id with the logged in
              * users id
              */
-            console.log('User id before switch: ', id)
             id = req.user.id
-            console.log('User id after switch:', id)
         }
 
         /* All appears correct in the request parameters, now actually extract the

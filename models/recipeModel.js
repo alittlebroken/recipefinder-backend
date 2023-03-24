@@ -146,7 +146,6 @@ const create = async (recipe, steps, ingredients, cookbooks, categories) => {
     });
 
   } catch(e) {
-    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
@@ -701,7 +700,6 @@ const findAll = async (options) => {
 
 
   } catch(e) {
-        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
@@ -846,7 +844,6 @@ const findByRecipe = async (id, options) => {
           cookbooks: [...cookbooks]
         }
       );
-      console.log('\nrecipeModel->findByRecipe [finalRecipe]: \n',finalRecipe)
       return finalRecipe;
 
     } else {
@@ -855,7 +852,6 @@ const findByRecipe = async (id, options) => {
 
 
   } catch(e) {
-        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
