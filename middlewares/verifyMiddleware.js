@@ -8,7 +8,7 @@ const checkRoles = (roles) => (req, res, next) => {
         return next({
             status: 401,
             success: false,
-            message: 'Must be logged in to access the specified route'
+            message: 'Must be logged in to access the specified route',
         })
     }
 
@@ -44,14 +44,16 @@ const checkToken = async (req,res,next) => {
                     return res.status(401).json({ 
                         status: 401,
                         success: false,
-                        message: 'Your access token has expired, please login'
+                        message: 'Your access token has expired, please login',
+                        info: 'jwt expired'
                     })
                 } else if(info?.message === 'No auth token'){
                     
                     return res.status(401).json({
                         status: 401,
                         success: false,
-                        message: 'You are not authorized to access this resource, please login'
+                        message: 'You are not authorized to access this resource, please login',
+                        info: 'No auth token'
                     })
                 } else {
                     

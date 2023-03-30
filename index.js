@@ -75,6 +75,7 @@ const recipesRoute = require('./routes/api/recipesRoute');
 const authRoute = require('./routes/api/authRoute');
 const searchRoute = require('./routes/api/searchRoute');
 const usersRoute = require('./routes/api/userRoute');
+const dashRoute = require('./routes/api/dashRoute')
 
 /*
  * Add the routes to the app
@@ -88,6 +89,7 @@ app.use('/recipes', recipesRoute);
 app.use('/auth', authRoute);
 app.use('/search', searchRoute);
 app.use('/users', usersRoute);
+app.use('/dashboard', dashRoute)
 
 /* Capture unknown routes */
 app.get('*', (req, res, next) => {

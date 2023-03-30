@@ -14,6 +14,7 @@ const recipeCategoriesModel = require('./recipeCategoriesModel');
 
 const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
+const dbHelper = require('../helpers/database')
 
 /*
  * Transactional knex method to add a recipe to the database as well as it's
@@ -22,12 +23,12 @@ const messageHelper = require('../helpers/constants');
  * within an object
  * @param {array} steps - All relevant steps needed to make the recipe
  * @param {array} ingredients - All ingredients for the recipe
- * @param {number} cookbook - The cookbook the recipe should be added to
+ * @param {number} cookbooks - The cookbooks the recipe should be added to
  * @param {array} categories - The catgeories the recipe belong to
  * @returns {object} Detailing if the process was a success or not and any
  * supporting messages
  */
-const create = async (recipe, steps, ingredients, cookbookId, categories) => {
+const create = async (recipe, steps, ingredients, cookbooks, categories) => {
 
   try{
 
@@ -82,39 +83,6 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
       }
     };
 
-    /* steps data 
-    if(!validation.validator(steps, 'array')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-
-    /* ingredients data 
-    if(!validation.validator(ingredients, 'array')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-
-    /* cookbook id 
-    if(!validation.validator(cookbookId, 'number')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-
-    /* categories data 
-    if(!validation.validator(categories, 'array')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'One or more required values are missing or incorrect'
-      }
-    };
-    */
-
     /* Add the recipe and related data via a transaction */
     return await db.transaction( async trx => {
 
@@ -124,24 +92,50 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
        .transacting(trx);
 
       if(steps){
-        steps.forEach(step => step.recipeId = recipeId[0].id);
-        await db('steps').insert(steps).transacting(trx);
+        for(let step of steps){
+          await db('steps')
+           .insert({
+              recipeId: recipeId[0].id,
+              stepNo: step.stepNo,
+              content: step.content
+           })
+           .transacting(trx)
+        }
       }
 
       if(ingredients){
-        ingredients.forEach(ingredient => ingredient.recipeId = recipeId[0].id);
-        await db('recipe_ingredients').insert(ingredients).transacting(trx);
+        for(let ingredient of ingredients){
+          await db('recipe_ingredients')
+           .insert({
+              recipeId: recipeId[0].id,
+              ingredientId: ingredient.id,
+              amount: ingredient.amount,
+              amount_type: ingredient.amount_type
+           })
+           .transacting(trx)
+        }
       }
 
-      if(cookbookId){
-        await db('cookbook_recipes').insert(
-          { cookbookId: cookbookId, recipeId: recipeId[0].id}
-        ).transacting(trx);
+      if(cookbooks){
+        for(let cookbook of cookbooks){
+          await db('cookbook_recipes')
+           .insert({
+            recipeId: recipeId[0].id,
+            cookbookId: cookbook.id
+           })
+           .transacting(trx)
+        }
       }
 
       if(categories){
-        categories.forEach(cat => cat.recipeId = recipeId[0].id);
-        await db('recipe_categories').insert(categories).transacting(trx);
+        for(let category of categories){
+          await db('recipe_categories')
+           .insert({
+            recipeId: recipeId[0].id,
+            categoryId: category.id
+           })
+           .transacting(trx)
+        }
       }
       
       return {
@@ -152,7 +146,6 @@ const create = async (recipe, steps, ingredients, cookbookId, categories) => {
     });
 
   } catch(e) {
-    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
@@ -351,23 +344,13 @@ const update = async recipe => {
       }
     }
     
-    /*
-    if(!validation.validator(recipe.rating, 'number')){
-      throw {
-        name: 'RECIPEMODEL_ERROR',
-        message: 'Validation failed for rating'
-      }
-    }
-    */
-    
-
     /* Update the specifed record with the new values passed in */
-    return await db.transaction( async trx => {
+    return await db.transaction(async trx => {
 
-      /* Add the recipe and return the ID to use later */
-      await db('recipes')
+      /* Add the recipe*/
+        await db('recipes')
         .update({
-          id: recipe.id,
+          id: recipe.recipeId,
           userId: recipe.userId,
           name: recipe.name,
           description: recipe.description,
@@ -376,34 +359,67 @@ const update = async recipe => {
           prep_time: recipe.prep_time,
           cook_time: recipe.cook_time
         })
-        .where('id', recipe.recipeId);
+        .where('id', recipe.recipeId)
+        .transacting(trx)
       
         if(recipe?.steps){
-          await db('steps')
-          .update(recipe.steps)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let step of recipe.steps){
+            await db('steps')
+            .insert({
+              id: step.id,
+              stepNo: step.stepNo,
+              content: step.content,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
         }
 
         if(recipe?.ingredients){
-          await db('recipe_ingredients')
-          .update(recipe.ingredients)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let ingredient of recipe.ingredients){
+            await db('recipe_ingredients')
+            .insert({
+              id: ingredient.id,
+              ingredientId: ingredient.ingredientId,
+              amount: ingredient.amount,
+              amount_type: ingredient.amount_type,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
         }
         
         if(recipe?.cookbooks){
-          await db('cookbook_recipes')
-          .update(recipe.cookbooks)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let cookbook of recipe.cookbooks){
+            await db('cookbook_recipes')
+            .insert({
+              id: cookbook.id,
+              cookbookId: cookbook.cookbookId,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
         }
         
         if(recipe?.categories){
-          await db('recipe_categories')
-          .update(recipe.categories)
-          .where('recipeId', recipe.id)
-          .transacting(trx);
+          for(let category of recipe.categories){
+            await db('recipe_categories')
+            .insert({
+              id: category.id,
+              categoryId: category.categoryId,
+              recipeId: recipe.recipeId
+            })
+            .onConflict('id')
+            .merge()
+            .transacting(trx)
+          }
+            
         }
         
         return {
@@ -464,47 +480,10 @@ const find = async (terms, options) => {
 
       /* Find all the recipes which match first */
       const results = await trx('recipes')
-      .modify((queryBuilder) => {
-        /* 
-         * We now use a singular filter passed via the request query params that 
-         * is an object where each key is the filed to filter by and the values 
-         * are the values to filter by. 
-         */
-        if(filter !== undefined){
-  
-          /* parse the filter so we can work with it easier */
-          let rawFilter = JSON.parse(filter)
-          /* Gte the number of filters we need to apply */
-          let numFilters = Object.getOwnPropertyNames(rawFilter)
-          
-          /* Go through each entry and apply the filter to the query */
-          numFilters.map(item => {
-  
-            /* Need to check if multiple ids have been passed in or not */
-            if(item === 'id' || item === 'ids' || item === 'userId'){
-              /* Now check if we have multiple values to filter by */
-              if(rawFilter[item].length > 1){
-                /* use whereIn to filter on multiples */
-                queryBuilder.whereIn('id', rawFilter[item])
-              } else {
-                /* Only one value to filter by */
-                /* First check if we have an array of vaues, even 1 */
-                if(Array.isArray(rawFilter[item])){
-                  queryBuilder.where('id', rawFilter[item][0])
-                } else {
-                  queryBuilder.where('id', rawFilter[item])
-                }
-              }
-            } else {
-              /* Just use a normal where filter for this */
-              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-            }
-          })
-  
-        }
-        })
+       .modify(dbHelper.buildFilters, filter)
        .select(
          'id as recipeId',
+         'userId',
          'name',
          'description',
          'servings',
@@ -514,56 +493,13 @@ const find = async (terms, options) => {
          'rating'
        )
        .whereILike('name',`%${terms}%`)
-       .modify((queryBuilder) => {
-          // order by clause
-          if(sortBy !== undefined || sortOrder !== undefined){
-              queryBuilder.orderBy(sortBy, sortOrder)
-          }
-        })
+       .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .limit(size)
        .offset((page - 1) * size)
        .transacting(trx);
 
        const resultCount = await trx('recipes')
-       .modify((queryBuilder) => {
-        /* 
-         * We now use a singular filter passed via the request query params that 
-         * is an object where each key is the filed to filter by and the values 
-         * are the values to filter by. 
-         */
-        if(filter !== undefined){
-  
-          /* parse the filter so we can work with it easier */
-          let rawFilter = JSON.parse(filter)
-          /* Gte the number of filters we need to apply */
-          let numFilters = Object.getOwnPropertyNames(rawFilter)
-          
-          /* Go through each entry and apply the filter to the query */
-          numFilters.map(item => {
-  
-            /* Need to check if multiple ids have been passed in or not */
-            if(item === 'id' || item === 'ids' || item === 'userId'){
-              /* Now check if we have multiple values to filter by */
-              if(rawFilter[item].length > 1){
-                /* use whereIn to filter on multiples */
-                queryBuilder.whereIn('id', rawFilter[item])
-              } else {
-                /* Only one value to filter by */
-                /* First check if we have an array of vaues, even 1 */
-                if(Array.isArray(rawFilter[item])){
-                  queryBuilder.where('id', rawFilter[item][0])
-                } else {
-                  queryBuilder.where('id', rawFilter[item])
-                }
-              }
-            } else {
-              /* Just use a normal where filter for this */
-              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-            }
-          })
-  
-        }
-        })
+        .modify(dbHelper.buildFilters, filter)
         .select('id')
         .whereILike('name',`%${terms}%`)
         .count()
@@ -676,47 +612,10 @@ const findAll = async (options) => {
 
       /* Find all the recipes which match first */
       const results = await trx('recipes')
-      .modify((queryBuilder) => {
-        /* 
-         * We now use a singular filter passed via the request query params that 
-         * is an object where each key is the filed to filter by and the values 
-         * are the values to filter by. 
-         */
-        if(filter !== undefined){
-  
-          /* parse the filter so we can work with it easier */
-          let rawFilter = JSON.parse(filter)
-          /* Gte the number of filters we need to apply */
-          let numFilters = Object.getOwnPropertyNames(rawFilter)
-          
-          /* Go through each entry and apply the filter to the query */
-          numFilters.map(item => {
-  
-            /* Need to check if multiple ids have been passed in or not */
-            if(item === 'id' || item === 'ids' || item === 'userId'){
-              /* Now check if we have multiple values to filter by */
-              if(rawFilter[item].length > 1){
-                /* use whereIn to filter on multiples */
-                queryBuilder.whereIn('id', rawFilter[item])
-              } else {
-                /* Only one value to filter by */
-                /* First check if we have an array of vaues, even 1 */
-                if(Array.isArray(rawFilter[item])){
-                  queryBuilder.where('id', rawFilter[item][0])
-                } else {
-                  queryBuilder.where('id', rawFilter[item])
-                }
-              }
-            } else {
-              /* Just use a normal where filter for this */
-              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-            }
-          })
-  
-        }
-        })
+       .modify(dbHelper.buildFilters, filter)
        .select(
          'id',
+         'userId',
          'name',
          'description',
          'servings',
@@ -727,55 +626,11 @@ const findAll = async (options) => {
        )
        .limit(size)
        .offset(offset)
-       .modify((queryBuilder) => {
-          // order by clause
-          if(sortBy !== undefined || sortOrder !== undefined){
-              queryBuilder.orderBy(sortBy, sortOrder)
-          }
-        })
+       .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .transacting(trx);
 
-
       const recordCount = await trx('recipes')
-      .modify((queryBuilder) => {
-        /* 
-         * We now use a singular filter passed via the request query params that 
-         * is an object where each key is the filed to filter by and the values 
-         * are the values to filter by. 
-         */
-        if(filter !== undefined){
-  
-          /* parse the filter so we can work with it easier */
-          let rawFilter = JSON.parse(filter)
-          /* Gte the number of filters we need to apply */
-          let numFilters = Object.getOwnPropertyNames(rawFilter)
-          
-          /* Go through each entry and apply the filter to the query */
-          numFilters.map(item => {
-  
-            /* Need to check if multiple ids have been passed in or not */
-            if(item === 'id' || item === 'ids' || item === 'userId'){
-              /* Now check if we have multiple values to filter by */
-              if(rawFilter[item].length > 1){
-                /* use whereIn to filter on multiples */
-                queryBuilder.whereIn('id', rawFilter[item])
-              } else {
-                /* Only one value to filter by */
-                /* First check if we have an array of vaues, even 1 */
-                if(Array.isArray(rawFilter[item])){
-                  queryBuilder.where('id', rawFilter[item][0])
-                } else {
-                  queryBuilder.where('id', rawFilter[item])
-                }
-              }
-            } else {
-              /* Just use a normal where filter for this */
-              queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-            }
-          })
-  
-        }
-        })
+        .modify(dbHelper.buildFilters, filter)
         .select('id')
         .count()
         .groupBy('id')
@@ -845,7 +700,6 @@ const findAll = async (options) => {
 
 
   } catch(e) {
-        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
@@ -864,8 +718,20 @@ const findAll = async (options) => {
  * @returns {array} Contains the specified recipe if founf otherwise it returns
  * an empty array
  */
-const findByRecipe = async (id) => {
+const findByRecipe = async (id, options) => {
 
+  let {
+    page = 1, 
+    size = 5, 
+    offset = 0, 
+    filterBy, 
+    filterValues, 
+    limit = 5, 
+    filter, 
+    sortBy = 'id', 
+    sortOrder = 'desc'
+  } = options
+  
   try {
     
     /* Validate the passed in arguments */
@@ -886,6 +752,7 @@ const findByRecipe = async (id) => {
     const result = await db('recipes')
      .select('id',
      'name',
+     'userId',
      'description',
      'servings',
      'calories_per_serving',
@@ -894,6 +761,7 @@ const findByRecipe = async (id) => {
      'rating')
      .where('id', id);
 
+    
     /* Only if we have found a recipe should we then go ahead and retrieve from
        the database all the supporting data like steps and categories */
     if(result && result.length > 0){
@@ -901,9 +769,10 @@ const findByRecipe = async (id) => {
       /* Find appropriate steps and only if we have found some do we then add
       them to the local steps array ready to be added to the recipe and
       returned */
-      const recipeSteps = await stepModel.findByRecipeId(result[0].id);
-      if(recipeSteps && recipeSteps.length > 0){
-        for( let recipeStep of recipeSteps){
+      const recipeSteps = await stepModel.findByRecipeId(result[0].id, options);
+      
+      if(recipeSteps?.results && recipeSteps?.results?.length > 0){
+        for( let recipeStep of recipeSteps.results){
           steps.push({
             id: recipeStep.id,
             stepNo: recipeStep.stepNo,
@@ -914,11 +783,12 @@ const findByRecipe = async (id) => {
 
       /* Now find the categories for the specified recipe and again check that
       we have some to populate the correct array */
-      const recipeCategories = await recipeCategoriesModel.findByRecipe(result[0].id);
-      if(recipeCategories && recipeCategories.length > 0){
-        for( let recipeCategory of recipeCategories){
+      const recipeCategories = await recipeCategoriesModel.findByRecipe(result[0].id, options);
+      if(recipeCategories?.results && recipeCategories?.results?.length > 0){
+        for( let recipeCategory of recipeCategories.results){
           categories.push({
-              id: recipeCategory.categoryId,
+              id: recipeCategory.id,
+              categoryId: recipeCategory.categoryId,
               name: recipeCategory.categoryName
             });
         };
@@ -926,11 +796,12 @@ const findByRecipe = async (id) => {
 
       /* Now get all cookbooks the recipe has been added to and again only if we
       have data to check, lopp through and assign to the cookbooks array */
-      const recipeCookbooks = await cookbookRecipesModel.findByRecipe(result[0].id);
+      const recipeCookbooks = await cookbookRecipesModel.findByRecipe(result[0].id, options);
       if(recipeCookbooks && recipeCookbooks.length > 0){
         for( let recipeCookbook of recipeCookbooks){
           cookbooks.push({
-            id: recipeCookbook.cookbookId,
+            id: recipeCookbook.id,
+            cookbookId: recipeCookbook.cookbookId,
             name: recipeCookbook.cookbookName,
             description: recipeCookbook.cookbookDescription,
             image: recipeCookbook.cookbookImage
@@ -940,11 +811,14 @@ const findByRecipe = async (id) => {
 
       /* Finally get all ingredients for the recipe, check we actually have
       some and then add them to the ingredients array */
-      const recipeIngredients = await recipeIngredientsModel.findByRecipeId(result[0].id);
-      if(recipeIngredients && recipeIngredients.length > 0){
-        for( let recipeIngredient of recipeIngredients){
+      const recipeIngredients = await recipeIngredientsModel.findByRecipeId(result[0].id, options);
+      
+      if(recipeIngredients?.results && recipeIngredients?.results?.length > 0){
+        
+        for( let recipeIngredient of recipeIngredients.results){
           ingredients.push({
             id: recipeIngredient.id,
+            ingredientId: recipeIngredient.ingredientId,
             name: recipeIngredient.name,
             amount: recipeIngredient.amount,
             amount_type: recipeIngredient.amount_type
@@ -978,7 +852,6 @@ const findByRecipe = async (id) => {
 
 
   } catch(e) {
-
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
@@ -1246,45 +1119,7 @@ const findByUserId = async (id, options) => {
 
     /* Get a count of all records being affected */
     const recordCount = await db('recipes')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
-              } else {
-                queryBuilder.where('id', rawFilter[item])
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-
-      }
-      })
+    .modify(dbHelper.buildFilters, filter)
     .select('id')
     .where('userId', id)
     .count()
@@ -1292,53 +1127,10 @@ const findByUserId = async (id, options) => {
 
     /* Gather the required data from the database */
     const results = await db('recipes')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
-              } else {
-                queryBuilder.where('id', rawFilter[item])
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-
-      }
-      })
+     .modify(dbHelper.buildFilters, filter)
      .select('*')
      .where('userId', id)
-     .modify((queryBuilder) => {
-        // order by clause
-        if(sortBy !== undefined || sortOrder !== undefined){
-            queryBuilder.orderBy(sortBy, sortOrder)
-        }
-      })
+     .modify(dbHelper.buildSort, { sortBy, sortOrder })
      .limit(size)
      .offset(offset);
 

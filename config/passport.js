@@ -28,6 +28,9 @@ passport.use(
        */
       try {
 
+        /* Check if the user has passed in a username or email address */
+        const usingEmail = email.indexOf('@')
+
         /* Find the user within the DB, check it is a valid user and if not
         reject the login attempt */
         const user = await userModel.findByEmail(email);

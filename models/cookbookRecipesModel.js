@@ -1,7 +1,7 @@
 /* Packages needed */
 require('dotenv').config();
 const db = require('../database');
-
+const dbHelper = require('../helpers/database')
 const validation = require('../helpers/validation');
 
 /*
@@ -368,6 +368,7 @@ const findByRecipe = async id => {
      .join('cookbooks as cb', 'cr.cookbookId', '=', 'cb.id')
      .join('users as usr', 'cb.userId', '=', 'usr.id')
      .select(
+       'cr.id as id',
        'cb.id as cookbookId',
        'cb.name as cookbookName',
        'usr.id as userId',

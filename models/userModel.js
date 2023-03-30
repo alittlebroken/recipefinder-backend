@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 /* Import helper modules */
 const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
+const dbHelper = require('../helpers/database');
 const pantryModel = require('../models/pantryModel');
 
 /**
@@ -98,14 +99,25 @@ const findByEmail = async email => {
     if(!email || typeof email !== 'string'){
       throw {
         name: 'USERMODEL_ERROR',
-        message: 'You must supply a valid email address'
+        message: 'You must supply a valid email/username to login'
       }
     }
 
-    /* Try and find the record by email */
+    /* Try and find the record by email or username */
     const result = await db('users')
      .select('id', 'username', 'email', 'roles', 'forename', 'surname', 'password')
-     .where('email', email);
+     .modify((queryBuilder) => {
+
+      if(email){
+        /* Check that the passed in data is actually a username */
+        if(email.indexOf('@') > 0){
+          queryBuilder.where('email', email)
+        } else {
+          queryBuilder.where('username', email)
+        }
+      }
+
+     })
 
     if(!result || !result.length > 0){
       throw {
@@ -314,7 +326,6 @@ const removeAll = async () => {
     }
 
   } catch(e) {
-    console.log(e)
     let message;
     if(e.name === 'USERMODEL_ERROR'){
       message = e.message;
@@ -407,45 +418,7 @@ const findAll = async (options) => {
 
     /* Get a count of all records affected */
     const recordCount = await db('users')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
-              } else {
-                queryBuilder.where('id', rawFilter[item])
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-
-      }
-      })
+    .modify(dbHelper.buildFilters, filter)
     .select('id')
     .count()
     .groupBy('id')
@@ -453,52 +426,9 @@ const findAll = async (options) => {
     /* Find the user by Id */
 
     const result = await db('users')
-    .modify((queryBuilder) => {
-      /* 
-       * We now use a singular filter passed via the request query params that 
-       * is an object where each key is the filed to filter by and the values 
-       * are the values to filter by. 
-       */
-      if(filter !== undefined){
-
-        /* parse the filter so we can work with it easier */
-        let rawFilter = JSON.parse(filter)
-        /* Gte the number of filters we need to apply */
-        let numFilters = Object.getOwnPropertyNames(rawFilter)
-        
-        /* Go through each entry and apply the filter to the query */
-        numFilters.map(item => {
-
-          /* Need to check if multiple ids have been passed in or not */
-          if(item === 'id' || item === 'ids' || item === 'userId'){
-            /* Now check if we have multiple values to filter by */
-            if(rawFilter[item].length > 1){
-              /* use whereIn to filter on multiples */
-              queryBuilder.whereIn('id', rawFilter[item])
-            } else {
-              /* Only one value to filter by */
-              /* First check if we have an array of vaues, even 1 */
-              if(Array.isArray(rawFilter[item])){
-                queryBuilder.where('id', rawFilter[item][0])
-              } else {
-                queryBuilder.where('id', rawFilter[item])
-              }
-            }
-          } else {
-            /* Just use a normal where filter for this */
-            queryBuilder.where(item, 'like', `%${rawFilter[item]}%`)
-          }
-        })
-
-      }
-      })
+     .modify(dbHelper.buildFilters, filter)
      .select('id', 'username', 'email', 'roles', 'forename', 'surname')
-     .modify((queryBuilder) => {
-        // order by clause
-        if(sortBy !== undefined || sortOrder !== undefined){
-            queryBuilder.orderBy(sortBy, sortOrder)
-        }
-      })
+     .modify(dbHelper.buildSort, { sortBy, sortOrder })
      .limit(size)
      .offset(offset)
 
@@ -521,7 +451,6 @@ const findAll = async (options) => {
     };
 
   } catch(e) {
-    console.log(e)
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message = 'There was a problem with the resource, please try again later';
@@ -551,8 +480,8 @@ const generateTokens = async data => {
     };
 
     /* Generate the token and refresh token */
-    const accessTokenExpiry = process.env.ENVIRONMENT === "production" ? process.env.JWT_TOKEN_EXPIRY : "24h"
-    const refreshTokenExpiry = process.env.ENVIRONMENT === "production" ? process.env.JWT_REFRESH_TOKEN_EXPIRY : "24h"
+    const accessTokenExpiry = process.env.ENVIRONMENT === "production" ? process.env.JWT_TOKEN_EXPIRY : "5m"
+    const refreshTokenExpiry = process.env.ENVIRONMENT === "production" ? process.env.JWT_REFRESH_TOKEN_EXPIRY : "7d"
 
     const accessToken = await jwt.sign(
         data, 
@@ -670,6 +599,151 @@ const verifyRefreshToken = async token => {
 
 };
 
+/*
+ * Resets a users password
+ *
+ * @param {object} data - The payload to be processed by the method, contains the id of the user
+ *                         that the password is to be changed for and the new password we wiash to
+ *                         set
+ * @returns { object } - Object payload containing the result of trying to reset a user password
+  */
+const resetPassword = async (data) => {
+
+  try {
+
+    /* Validate the passed in data */
+    if(!validation.validator(data, 'object')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: messageHelper.ERROR_MISSING_VALUES
+      }
+    };
+
+    if(!validation.validator(data.id, 'number')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'User id is not in the correct format'
+      }
+    };
+
+    if(!validation.validator(data.password, 'string')){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'User password is not in the correct format'
+      }
+    };
+
+    /* hash the password BEFORE we store it within the database */
+    const hashedPass = await hash(data.password)
+
+    if(hashedPass?.success === false){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: hashedPass.message
+      }
+    }
+
+    /* Update the users password within the DV */
+    const updateStmt = await db('users')
+     .update({
+      password: hashedPass
+     })
+     .where('id', '=', parseInt(data.id))
+     .returning('id')
+
+     if(!updateStmt[0].id){
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'Unable to update users account with new password'
+      }
+     }
+
+     return {
+      success: true,
+      message: 'Password successfully updated'
+     }
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+    let message;
+
+    if(e.name === 'USERMODEL_ERROR'){
+      message = e.message;
+    } else {
+      message = messageHelper.ERROR_GENERIC_RESOURCE;
+    }
+
+    return {
+      success: false,
+      message: message
+    }
+  }
+
+}
+
+/*
+ * Extracts a users details from the DB
+ * @param {number} id - The ID of the user we are interested in
+ * @returns {object} Contaisn the user details
+ */
+const profile = async (id) => {
+
+  try{
+
+    /* Validate any passed in values */
+    if(!id || id === undefined){
+      return {
+        success: false,
+        message: 'No user id was provided'
+      }
+    }
+
+    if(typeof id !== 'number'){
+      return {
+        success: false,
+        message: 'Unexpected user id format'
+      }
+    }
+
+    /* Extract the details we need from the DB */
+    const result = await db('users')
+     .select(
+      'id', 'username', 'email', 'roles', 'forename', 'surname', 'created_at'
+     ).where('id', '=', id)
+
+     if(result?.length > 0){
+      return {
+        success: true,
+        data: result[0]
+      }
+     } else {
+      return {
+        success: false,
+        data: {}
+      }
+     }
+
+  } catch(e) {
+    /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security */
+       let message;
+
+       if(e.name === 'USERMODEL_ERROR'){
+         message = e.message;
+       } else {
+         message = messageHelper.ERROR_GENERIC_RESOURCE;
+       }
+   
+       return {
+         success: false,
+         message: message
+       }
+  }
+
+}
+
+
 module.exports = {
   insert,
   findByEmail,
@@ -682,5 +756,7 @@ module.exports = {
   generateTokens,
   verifyToken,
   removeAll,
-  verifyRefreshToken
+  verifyRefreshToken,
+  resetPassword,
+  profile
 }

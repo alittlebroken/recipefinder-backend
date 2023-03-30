@@ -7,7 +7,6 @@ const passport = require('passport');
 const userModel = require('../models/userModel');
 
 const tokenModel = require('../models/tokenModel');
-const { json } = require('body-parser');
 
 const moduleName = 'authController';
 
@@ -510,7 +509,12 @@ const logoutUser = async (req, res, next) => {
             await tokenModel.removeOne(isTokenValid.user.id);
         }
  
-        res.clearCookie('jwt')
+        const cookieOptions = {
+                    httpOnly: true,
+                    secure: false, 
+                }
+
+        res.clearCookie('jwt', cookieOptions)
          .status(200)
          .json({
             status: 200,
@@ -532,6 +536,288 @@ const logoutUser = async (req, res, next) => {
 };
 
 /* 
+ * Resets a password for the user
+ */
+const resetPassword = async (req, res, next) => {
+
+    const moduleMethod = 'resetPassword';
+
+    try{
+
+        /* Validate the passed in values */
+        if(!req.body.userId || req.body.userId === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Undefined user id'
+            })
+        }
+
+        if(typeof req.body.userId !== 'number'){
+            return res.status(400).json({
+                status: 400,
+                succes: false,
+                message: 'User id is not in the correct format'
+            })
+        }
+
+        if(!req.body.password || req.body.password === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Undefined user password'
+            })
+        }
+
+        if(typeof req.body.password !== 'string'){
+            return res.status(400).json({
+                status: 400,
+                succes: false,
+                message: 'User password is not in the correct format'
+            })
+        }
+
+        /* Send the request to the datase */
+        const result = await userModel.resetPassword({
+            id: req.body.userId,
+            password: req.body.password
+        })
+
+        /* Check the result to ensure that the pass was actually reset */
+        if(result.success === false){
+            return res.status(500).json({
+                status: 500,
+                success: false,
+                message: result.message
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Password successfully updated'
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * Retrieves a users profile from the DB
+ */
+const profile = async (req, res, next) => {
+
+    const moduleMethod = 'profile';
+
+    try{
+
+        /* ensure that we have a valid user request object */
+        if(!req.user){
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: 'No user found',
+                data: {}
+            })
+        }
+
+        /* Get the details from the DB */
+        const result = await userModel.profile(req.user.id)
+
+        if(result?.status === false){
+            return res.status(500).json({
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                data: {}
+            })
+        }
+
+        res.status(200).json({ data: result.data })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * Updates a users profile
+ */
+const updateProfile = async (req, res, next) => {
+
+    const moduleMethod = 'updateProfile';
+
+    try{
+
+        /* Validate the passed in values */
+        if(typeof req.body !== 'object'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'The request body is of the wrong format',
+               data: {}
+            })
+        }
+
+        console.log(typeof req.body.username)
+        if(typeof req.body.username !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Username is not of the correct format',
+               data: {} 
+            })
+        }
+ 
+        if(!req.body.username || req.body.username === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Username is missing from request',
+               data: {}
+            })
+        }
+
+        if(typeof req.body.forename !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Forename is not of the correct format',
+               data: {}
+            })
+        }
+
+        if(!req.body.forename || req.body.forename === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Forename is missing from the request',
+               data: {} 
+            })
+        }
+
+        if(typeof req.body.surname !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Surname is of the wrong format',
+               data: {} 
+            })
+        }
+
+        if(!req.body.surname || req.body.surname === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Missing Surname from request',
+               data: {} 
+            })
+        }
+
+        if(typeof req.body.email !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Email is of the wrong format',
+               data: {} 
+            })
+        }
+
+        if(!req.body.email || req.body.email === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Missing Email from request',
+               data: {} 
+            })
+        }
+
+        if(typeof req.body.roles !== 'string'){
+            return res.status(400).json({
+               status: 400,
+               success: false,
+               message: 'Role is of the wrong format',
+               data: {} 
+            })
+        }
+
+        if(!req.body.roles || req.body.roles === undefined){
+            return res.status(404).json({
+               status: 404,
+               success: false,
+               message: 'Missing Role from request',
+               data: {} 
+            })
+        }
+
+        let profile = {
+            id: req.user.id,
+            ...req.body
+        }
+
+        /* update the profile for the selected user */
+        const result = await userModel.update(
+            profile.id,
+            profile.username,
+            profile.email,
+            profile.roles,
+            profile.forename,
+            profile.surname
+        )
+
+        if(result.success === false){
+            return res.status(500).json({
+                status: 500,
+                success: result.success,
+                message: result.message,
+                data: {}
+            })
+        }
+
+        if(result.length < 1){
+            res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No profile found to update',
+                data: {}
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: 'Profile successfully updated',
+            data: result[0]
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -539,6 +825,8 @@ const method = async (req, res, next) => {
     const moduleMethod = '';
 
     try{
+
+
 
     } catch(e) {
         /* Log out the issue(s) */
@@ -557,5 +845,8 @@ module.exports = {
     createUser,
     refreshToken,
     removeToken,
-    logoutUser
+    logoutUser,
+    resetPassword,
+    profile,
+    updateProfile
 };
