@@ -19,11 +19,15 @@ const storage = multer.diskStorage({
     }
 })
 
+/* Change the filedName based on the environment we are on */
+let uploadFieldName
+process.env.ENVIRONMENT === 'production' ? uploadFieldName = 'images' : uploadFieldName = 'tests'
+
 const upload = multer(
     {
         storage: storage
     }
 )
-.array('images', 10)
+.array(uploadFieldName, 10)
 
 module.exports = upload
