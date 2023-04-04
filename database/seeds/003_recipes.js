@@ -27,7 +27,40 @@ exports.seed = async function(knex) {
       prep_time: 20,
       cook_time: 70,
       rating: 90
-    }
+    },
+    {
+      id: 3,
+      userId: 1,
+      name: 'Cheese on buttered toast',
+      description: `A classic british meal perfect for anytime`,
+      servings: 1,
+      calories_per_serving: 234,
+      prep_time: 5,
+      cook_time: 6,
+      rating: 1
+    },
+    {
+      id: 4,
+      userId: 1,
+      name: 'Meaty burgers',
+      description: null,
+      servings: 4,
+      calories_per_serving: 126,
+      prep_time: 5,
+      cook_time: 20,
+      rating: 15
+    },
+    {
+      id: 5,
+      userId: 2,
+      name: 'Gluten free breaded chicken',
+      description: `Delicious with various sauces`,
+      servings: 1,
+      calories_per_serving: 375,
+      prep_time: 15,
+      cook_time: 25,
+      rating: 19
+    },
   ]);
 
   await knex.raw('select setval(\'recipes_id_seq\', max(id)) from recipes');
