@@ -16,7 +16,8 @@ exports.seed = async function(knex) {
     {id: 8, name: 'Dinner'},
     {id: 9, name: 'Dessert'},
     {id: 10, name: 'Drink'},
-    {id: 11, name: 'Snack'}
+    {id: 11, name: 'Snack'},
+    {id: 12, name: 'Air fryer'}
   ]);
 
   await knex.raw('select setval(\'categories_id_seq\', max(id)) from categories');

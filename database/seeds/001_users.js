@@ -13,7 +13,7 @@ exports.seed = async function(knex) {
   await knex('users').insert([
     {
       id: 1,
-      username: 'admin@localhost',
+      username: 'admin',
       password: hashPass,
       email: 'admin@localhost',
       forename: 'Site',
@@ -23,11 +23,21 @@ exports.seed = async function(knex) {
     },
     {
       id: 2,
-      username: 'customer@localhost',
+      username: 'customer',
       password: hashPass,
       email: 'customer@localhost',
       forename: 'Site',
       surname: 'Customer',
+      phone_no: '',
+      roles: 'customer'
+    },
+    {
+      id: 3,
+      username: 'ncucuzzal',
+      password: hashPass,
+      email: 'ncucuzzal@tinypic.com',
+      forename: 'Natalina',
+      surname: 'Cucuzza',
       phone_no: '',
       roles: 'customer'
     }
