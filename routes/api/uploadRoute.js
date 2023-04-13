@@ -10,7 +10,7 @@ const router = express.Router();
 
 const uploadController = require('../../controllers/uploadController')
 
-router.use(
+router.post(
     '/',
     checkToken,
     uploadFiles,
