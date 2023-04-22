@@ -200,41 +200,54 @@ const remove = async (options) => {
       let {page, size, offset, filterBy, filterValues, filter, sortBy, sortOrder} = options
 
       /* Remove the records */
-      const results = await db('files')
-       .delete()
-       .modify(dbHelper.buildFilters, filter)
+      await db.transacting(async trx => {
 
-      /* Check if any records were deleted */
-      if(results > 0){
-        return {
-          success: true,
-          message: 'Records deleted successfully',
-          results: results,
-          pagination: {}
-        }
-      } else {
-        return {
-          success: false,
-          message: 'No records to delete',
-          results: 0,
-          pagination: {}
-        }
-      }
+        const results = await db('files')
+          .delete()
+          .modify(dbHelper.buildFilters, filter)
+          .returning('name')
+          .transacting(trx)
 
+        /* Check if any records were deleted */
+        if(results.length > 0){
+
+          /* Remove the files */
+          results.map(result => {
+            let fullPath = path.join(process.cwd(), '/public/media')
+            fs.unlink(path.join(fullPath, result.name), err => {
+              if (err) throw {
+                  status: 500,
+                  success: false,
+                  message: 'Unable to delete the uploaded files'
+              }
+            })
+          })
+
+          return {
+            success: true,
+            message: 'Records deleted successfully',
+            results: results.length,
+            pagination: {}
+          }
+          
+        } else {
+          throw {
+            success: false,
+            message: 'No records to delete',
+            results: 0,
+            pagination: {}
+          }
+        }
+
+      })
+      
   } catch(e) {
-    /* Check for library errors and if found swap them out for a generic
-       one to send back over the API for security */
-    let message;
     
-    if(e.name === 'UPLOADMODEL_ERROR'){
-      message = e.message;
-    } else {
-      message = 'There was a problem with the resource, please try again later';
-    }
-
     return {
-      success: false,
-      message: message
+      success: e.success,
+      message: e.message,
+      results: e.results,
+      pagination: e.pagination
     }
 
   }

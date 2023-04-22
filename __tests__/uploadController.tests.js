@@ -12,6 +12,14 @@ const uploadController = require('../controllers/uploadController');
 const userModel = require('../models/userModel')
 const uploadModel = require('../models/uploadModel')
 
+/* Used in tests to create files */
+const testFiles = [
+  'test001.jpg',
+  'test002.jpg',
+  'test003.jpg',
+  'test004.jpg',
+  'test005.jpg',
+]
 
 describe('uploadController', () => {
 
@@ -60,6 +68,8 @@ describe('uploadController', () => {
     */
     beforeEach(async () => {
   
+
+
     });
   
     afterEach(async () => {
@@ -638,53 +648,1015 @@ describe('uploadController', () => {
 
   })
 
-  xdescribe('remove', () => {
+  describe('remove', () => {
 
     /*
     * Steps to run before and after this test suite
     */
     beforeEach(async () => {
-  
+      
+      /* Create 5 files for each test */
+      const srcFile = '__tests__/test.jpg'
+      testFiles.map(file => {
+        fs.copyFile(srcFile, path.join('./public/media', file), err => {
+          if(err) console.log(`Unable to copy test file to ${file}`)
+        })
+      })
+
     });
   
     afterEach(async () => {
-      jest.clearAllMocks();
+      
+      /* Remove the files */
+      testFiles.map(file => {
+        fs.unlink(path.join('./public/media', file), err => {
+          if(err) console.log(`Unable to remove file ${file}`)
+        })
+      })
 
+      jest.clearAllMocks();
     })
 
-    it('', async () => {
+    it('should return status 200 and remove all uploads', async () => {
 
       // Setup
 
+        /* Set the data that the mocked model should return */
+        const modelReturnData = {
+          success: true,
+          message: 'Records deleted successfully',
+          results: 5,
+          pagination: {}
+        }
+
+        /* Mock the return values from the Model used */
+        jest.spyOn(uploadModel, 'remove').mockImplementation(() => {
+          return modelReturnData;
+        })
+
+        jest.spyOn(uploadModel, 'list').mockImplementation(() => {
+          return {
+            success: false,
+            results: [],
+            message: 'There are currently no files',
+            pagination: {
+              current: 1,
+              total: 1,
+              records: 0
+            }
+          }
+        })
+
+        // Query Parameters
+        const queryParams = {
+          page: 1,
+          limit: 10,
+          sort_by: 'id',
+          sort_direction: 'desc',
+          filter_by: null,
+          filter_values: null,
+          filter: null
+        }
+
+        // Set here the expected return values for the test
+        const returnStatus = 200
+        const returnSuccess = true
+        const returnMessage = 'Records deleted successfully'
+        const returnResults = 5
+        const returnPagination = {}
+
       // Execute
+      const res = await request(app)
+        .delete('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Excute to check how many images we have left
+      const resLeft = await request(app)
+        .get('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+      
+      // Assert
+      expect(res.status).toEqual(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+      
+      expect(resLeft.status).toEqual(404)
+      expect(resLeft.body.success).toEqual(false)
+      expect(resLeft.body.message).toEqual('There were no records found')
+      expect(resLeft.body.results).toEqual([])
+      expect(resLeft.body.pagination).toEqual({
+        current: 1,
+        total: 1,
+        records: 0
+      })
+      
+
+    })
+
+    it('should return status 200 and remove the filtered records', async () => {
+
+      // Setup
+
+        /* Set the data that the mocked model should return */
+        const modelReturnData = {
+          success: true,
+          message: 'Records deleted successfully',
+          results: 1,
+          pagination: {}
+        }
+
+        /* Mock the return values from the Model used */
+        jest.spyOn(uploadModel, 'remove').mockImplementation(() => {
+          return modelReturnData;
+        })
+
+        jest.spyOn(uploadModel, 'list').mockImplementation(() => {
+          return {
+            success: false,
+            results: [],
+            message: 'There are currently no files',
+            pagination: {
+              current: 1,
+              total: 1,
+              records: 0
+            }
+          }
+        })
+
+        // Query Parameters
+        const queryParams = {
+          page: 1,
+          limit: 10,
+          sort_by: 'id',
+          sort_direction: 'desc',
+          filter_by: null,
+          filter_values: null,
+          filter: JSON.stringify({id: 1})
+        }
+
+        // Set here the expected return values for the test
+        const returnStatus = 200
+        const returnSuccess = true
+        const returnMessage = 'Records deleted successfully'
+        const returnResults = 1
+        const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .delete('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Excute to check how many images we have left
+      const resLeft = await request(app)
+        .get('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
 
       // Assert
+      expect(res.status).toEqual(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+      expect(resLeft.status).toEqual(404)
+      expect(resLeft.body.success).toEqual(false)
+      expect(resLeft.body.message).toEqual('There were no records found')
+      expect(resLeft.body.results).toEqual([])
+      expect(resLeft.body.pagination).toEqual({
+        current: 1,
+        total: 1,
+        records: 0
+      })
+
+    })
+
+    it('should return status 401 if an unathorised user tries to access', async () => {
+
+      // Setup
+
+        /* Set the data that the mocked model should return */
+        const modelReturnData = {
+          success: false,
+          message: '',
+          results: 0,
+          pagination: {}
+        }
+
+        /* Mock the return values from the Model used */
+        jest.spyOn(uploadModel, 'remove').mockImplementation(() => {
+          return modelReturnData;
+        })
+
+        // Query Parameters
+        const queryParams = {
+          page: 1,
+          limit: 10,
+          sort_by: 'id',
+          sort_direction: 'desc',
+          filter_by: null,
+          filter_values: null,
+          filter: JSON.stringify({id: 1})
+        }
+
+        // Set here the expected return values for the test
+        const returnStatus = 401
+        const returnSuccess = false
+        const returnMessage = 'You are not authorized to access this resource, please login'
+        const returnResults = 0
+        const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .delete('/uploads/')
+        .query(queryParams)
+
+      // Assert
+      expect(res.status).toEqual(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+
+    })
+
+    it('should return status 403 if a user with the wrong role tries to access the resource', async () => {
+
+      // Setup
+
+        /* Set the data that the mocked model should return */
+        const modelReturnData = {
+          success: false,
+          message: '',
+          results: 0,
+          pagination: {}
+        }
+
+        /* Mock the return values from the Model used */
+        jest.spyOn(uploadModel, 'remove').mockImplementation(() => {
+          return modelReturnData;
+        })
+
+        // Query Parameters
+        const queryParams = {
+          page: 1,
+          limit: 10,
+          sort_by: 'id',
+          sort_direction: 'desc',
+          filter_by: null,
+          filter_values: null,
+          filter: JSON.stringify({id: 1})
+        }
+
+        // Set here the expected return values for the test
+        const returnStatus = 403
+        const returnSuccess = false
+        const returnMessage = 'You are not authorized to access the specified route'
+        const returnResults = 0
+        const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .delete('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${failToken}`)
+        .set('Cookie', `jwt=${badRefreshToken}`)
+
+      // Assert
+      expect(res.status).toEqual(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+
+    })
+
+    it('should return status 404 if there are no records to remove', async () => {
+
+      // Setup
+
+        /* Set the data that the mocked model should return */
+        const modelReturnData = {
+          success: false,
+          message: 'No records to delete',
+          results: 0,
+          pagination: {}
+        }
+
+        /* Mock the return values from the Model used */
+        jest.spyOn(uploadModel, 'remove').mockImplementation(() => {
+          return modelReturnData;
+        })
+
+        // Query Parameters
+        const queryParams = {
+          page: 1,
+          limit: 10,
+          sort_by: 'id',
+          sort_direction: 'desc',
+          filter_by: null,
+          filter_values: null,
+          filter: JSON.stringify({id: 1})
+        }
+
+        // Set here the expected return values for the test
+        const returnStatus = 404
+        const returnSuccess = false
+        const returnMessage = 'No records to delete'
+        const returnResults = 0
+        const returnPagination = {
+          total: 1,
+          current: 1,
+          records: 0
+        }
+
+      // Execute
+      const res = await request(app)
+        .delete('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toEqual(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 500 if there was any other errors', async () => {
+
+      // Setup
+
+        /* Set the data that the mocked model should return */
+        const modelReturnData = {
+          success: false,
+          message: 'There was a problem with the resource, please try again later',
+        }
+
+        /* Mock the return values from the Model used */
+        jest.spyOn(uploadModel, 'remove').mockImplementation(() => {
+          return modelReturnData;
+        })
+
+        // Query Parameters
+        const queryParams = {
+          page: 1,
+          limit: 10,
+          sort_by: 'id',
+          sort_direction: 'desc',
+          filter_by: null,
+          filter_values: null,
+          filter: JSON.stringify({id: 1})
+        }
+
+        // Set here the expected return values for the test
+        const returnStatus = 500
+        const returnSuccess = false
+        const returnMessage = 'There was a problem with the resource, please try again later'
+        const returnResults = 0
+        const returnPagination = {
+          total: 1,
+          current: 1,
+          records: 0
+        }
+
+      // Execute
+      const res = await request(app)
+        .delete('/uploads/')
+        .query(queryParams)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toEqual(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
 
     })
 
   })
 
-  xdescribe('update', () => {
+  describe('update', () => {
 
     /*
     * Steps to run before and after this test suite
     */
     beforeEach(async () => {
   
+      /* Create 5 files for each test */
+      const srcFile = '__tests__/test.jpg'
+      testFiles.map(file => {
+        fs.copyFile(srcFile, path.join('./public/media', file), err => {
+          if(err) console.log(`Unable to copy test file to ${file}`)
+        })
+      })
+
     });
   
     afterEach(async () => {
-      jest.clearAllMocks();
+
+     /* Remove the files */
+     testFiles.map(file => {
+      fs.unlink(path.join('./public/media', file), err => {
+        if(err) console.error(err)
+      })
+    })
+
+    jest.clearAllMocks();
 
     })
 
-    it('', async () => {
+    it('should return status 200 and updated the desired record and or image', async () => {
 
       // Setup
 
+      // Set the return data from the model
+      const modelReturnData = {
+        success: true,
+        message: 'Record successfully updated',
+        results: [{id: 1}],
+        pagination: {}
+      }
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return [{
+          status: 200,
+          success: true,
+          message: '',
+          results: [{
+            id:  1,
+            name: 'test001.jpg',
+            mimetype: 'image/jpeg',
+            resource: 'recipe',
+            resourceid: 11,
+            userid: 1
+          }],
+          pagination: {}
+        }]
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 201
+      const returnSuccess = true
+      const returnMessage = 'Record successfully updated'
+      const returnResults = [{ id: 1 }]
+      const returnPagination = {}
+
       // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName)) 
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+        console.log(res.body)
 
       // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 401 if an unauthenticated user tries to access', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {
+          status: 200,
+          success: true,
+          message: '',
+          results: [{
+            id:  1,
+            name: 'test001.jpg',
+            mimetype: 'image/jpeg',
+            resource: 'recipe',
+            resourceid: 11,
+            userid: 1
+          }],
+          pagination: {}
+        }
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 401
+      const returnSuccess = false
+      const returnMessage = 'You are not authorized to access this resource, please login'
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName))
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Connection', 'keep-alive')
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+
+    })
+
+    it('should return status 404 if no record was found to update', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {
+        success: false,
+        message: 'No records found to update',
+        results: [],
+        pagination: {}
+      }
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {
+          status: 200,
+          success: true,
+          message: '',
+          results: [{
+            id:  1,
+            name: 'test001.jpg',
+            mimetype: 'image/jpeg',
+            resource: 'recipe',
+            resourceid: 11,
+            userid: 1
+          }],
+          pagination: {}
+        }
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'No existing record found'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName))
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 404 if the record id is missing', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {}
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'Record id is required'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName)) 
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 400 if the record id is of the wrong type', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {})
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 'steven'
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 400
+      const returnSuccess = false
+      const returnMessage = 'Record id must be a number'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName))
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 404 if resource name is missing', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {
+          status: 200,
+          success: true,
+          message: '',
+          results: [{
+            id:  1,
+            name: 'test001.jpg',
+            mimetype: 'image/jpeg',
+            resource: 'recipe',
+            resourceid: 11,
+            userid: 1
+          }],
+          pagination: {}
+        }
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'Resource name is required'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName))
+        .field('id', recordid)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 400 if resource name is of the wrong type', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {}
+      })
+
+      // Set any form field values we need to send are
+      const resource = 6758
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 400
+      const returnSuccess = false
+      const returnMessage = 'Resource name must be a string'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName))
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 404 if resource id is missing', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {
+          status: 200,
+          success: true,
+          message: '',
+          results: [{
+            id:  1,
+            name: 'test001.jpg',
+            mimetype: 'image/jpeg',
+            resource: 'recipe',
+            resourceid: 11,
+            userid: 1
+          }],
+          pagination: {}
+        }
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'Resource id is required'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName)) 
+        .field('id', recordid)
+        .field('resource', resource)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 400 if resource id is of the wrong type', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return {
+          status: 200,
+          success: true,
+          message: '',
+          results: [{
+            id:  1,
+            name: 'test001.jpg',
+            mimetype: 'image/jpeg',
+            resource: 'recipe',
+            resourceid: 11,
+            userid: 1
+          }],
+          pagination: {}
+        }
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 'Seargant'
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 400
+      const returnSuccess = false
+      const returnMessage = 'Resource id must be a number'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName))
+        .field('id', recordid) 
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 500 for any other error', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      }
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 500
+      const returnSuccess = false
+      const returnMessage = 'There was a problem with the resource, please try again later'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName)) 
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
 
     })
 

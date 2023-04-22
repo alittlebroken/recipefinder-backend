@@ -26,16 +26,18 @@ router.get(
     uploadController.list
 )
 
-/*router.delete(
+router.delete(
     '/',
     checkToken,
+    checkRoles(['Admin']),
     uploadController.remove
-)*/
+)
 
-/*router.put(
+router.put(
     '/',
     checkToken,
+    uploadFiles,
     uploadController.update
-)*/
+)
 
 module.exports = router
