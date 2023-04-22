@@ -112,6 +112,362 @@ const upload = async (req, res, next) => {
 
 
 /* 
+ * List one or more files stored within the database
+ */
+const list = async (req, res, next) => {
+
+    const moduleMethod = 'list';
+
+    try{
+
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: req.filter,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
+          }
+
+        /* Execute the appropriate models method */
+        const result = await uploadModel.list(options)
+        
+        if(!result || (Array.isArray(result?.results) !== true && result.success === false)){
+            return res.status(500).json({
+                success: false,
+                status: 500,
+                message: 'There was a problem with the resource, please try again later',
+                results: [],
+                pagination: {
+                    total: 1,
+                    records: 0,
+                    current: 1
+                }
+            })
+        }
+
+        if(result?.results?.length < 1){
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: 'There were no records found',
+                results: [],
+                pagination: {
+                    records: 0,
+                    total: 1,
+                    current: 1
+                }
+            })
+        }
+
+        res.status(200).send({
+            success: result.success,
+            status: 200,
+            message: '',
+            results: result.results,
+            pagination: result.pagination
+        })
+
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * Remove one or more files from the DB
+ */
+const remove = async (req, res, next) => {
+
+    const moduleMethod = 'remove';
+
+    try{
+
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: req.filter,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
+        }
+
+        const result = await uploadModel.remove(options)
+
+        if(result?.results < 1){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'No records to delete',
+                results: 0,
+                pagination: {
+                    total: 1,
+                    current: 1,
+                    records: 0
+                }
+            })
+        }
+
+        if(result?.message === "There was a problem with the resource, please try again later"){
+            return res.status(500).json({
+                status: 500,
+                success: false,
+                message: result.message,
+                results: 0,
+                pagination: {
+                    total: 1,
+                    current: 1,
+                    records: 0
+                } 
+            })
+        }
+
+        /* No isses return the results */
+        res.status(200).json({
+            status: 200,
+            success: result.success,
+            message: result.message,
+            results: result.results,
+            pagination: result.pagination
+        })
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
+ * Update an existing file already stored within the system
+ */
+const update = async (req, res, next) => {
+
+    const moduleMethod = 'update';
+
+    try{
+
+        /* Extract required data from the request */
+        const {
+            files
+        } = req
+
+        const {
+            id,
+            resource,
+            resourceid 
+        } = req.body
+
+        const {
+            userid = id
+        } = req.user
+
+        if(!resource || resource === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Resource name is required',
+                results: [],
+                pagination: {}
+            })
+        }
+        
+        if(typeof resource !== 'string' ||  !isNaN(parseInt(resource))){
+            return res.status(400).json({
+                status: 400,
+                success: false, 
+                message: 'Resource name must be a string',
+                results: [],
+                pagination: {}
+            })   
+        }
+
+        if(!resourceid || resourceid === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false, 
+                message: 'Resource id is required',
+                results: [],
+                pagination: {}
+            }) 
+        }
+
+        if(typeof parseInt(resourceid) !== 'number' || isNaN(parseInt(resourceid))){
+            return res.status(400).json({
+                status: 400,
+                success: false, 
+                message: 'Resource id must be a number',
+                results: [],
+                pagination: {}
+            })   
+        }
+
+        if(!id || id === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Record id is required',
+                results: [],
+                pagination: {}
+            })
+        }
+
+        if(typeof parseInt(id) !== 'number' || isNaN(parseInt(id))){
+            return res.status(400).json({
+                status: 400,
+                success: false, 
+                message: 'Record id must be a number',
+                results: [],
+                pagination: {}
+            })   
+        }
+
+        if(!userid || userid === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'User id is required',
+                results: [],
+                pagination: {}
+            })
+        }
+
+        if(typeof parseInt(userid) !== 'number' || isNaN(parseInt(userid))){
+            return res.status(400).json({
+                status: 400,
+                success: false, 
+                message: 'User id must be a number',
+                results: [],
+                pagination: {}
+            })   
+        }
+        
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: JSON.stringify({ ids: id}),
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
+        }
+
+        /* Extract the existing record details first */
+        const existing = await uploadModel.list(options)
+        
+        let existingRecord
+        if(existing && existing[0]?.results?.length > 0){
+            existingRecord = existing[0].results[0]
+        } else if (existing?.success === false){
+            throw {
+                status: 500,
+                success: false,
+                message: 'There was a problem with the resource, please try again later',
+                results: [],
+                pagination: {}
+            }
+        } else {
+            throw {
+                status: 404,
+                success: false,
+                message: 'No existing record found',
+                results: [],
+                pagination: {}
+            }
+        }
+
+        /* Create the payload to send to the models method */
+        const payload = {}
+
+            // id
+            payload.id = id
+            if(files.filename){
+                payload.name = files.filename
+                payload.mimetype = file.mimetype
+            } else {
+                payload.name = existingRecord.name
+                payload.mimetype = existingRecord.mimetype
+            }
+            payload.resource = resource
+            payload.resourceid = resourceid
+            payload.userid = userid
+        
+
+        /* Update the record with the new data */
+        const result = await uploadModel.update(payload)
+
+        /* Check if the update went OK and if so remove file we replaced from the filesystem */
+        if(result?.success == true){
+            /* First double check that the existing file is different from the one just uploaded, if it is
+               we can then remove the old one */
+            if(files.filename !== existingRecord.name){
+                let fullPath = path.join(process.cwd(), '/public/media')
+                fs.unlink(path.join(fullPath, existingRecord.name), err => {
+                    if (err) throw {
+                        status: 500,
+                        success: false,
+                        message: 'Unable to delete the existing file'
+                    }
+                  })
+            } 
+        } else {
+
+            /* remove the new file we just uploaded */
+            let fullPath = path.join(process.cwd(), '/public/media')
+
+            fs.unlink(path.join(fullPath, existingRecord.name), err => {
+                if (err) throw {
+                    status: 500,
+                    success: false,
+                    message: 'Unable to delete the newly uploaded file'
+                }
+              })
+
+        }
+
+        /* Send back the update was successful */
+        res.status(201).json({
+            success: true,
+            status: 201,
+            message: 'Record successfully updated',
+            results: result.results,
+            pagination: result.pagination
+        })
+        
+
+    } catch(e) {
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+    }
+
+};
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -133,5 +489,8 @@ const method = async (req, res, next) => {
 };
 
  module.exports = {
-    upload
+    upload,
+    list,
+    remove,
+    update
  }

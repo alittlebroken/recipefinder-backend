@@ -10,11 +10,34 @@ const router = express.Router();
 
 const uploadController = require('../../controllers/uploadController')
 
-router.use(
+//router.get('/:id/recipes', checkToken, setQueryOpts, userController.listUserRecipes);
+
+router.post(
     '/',
     checkToken,
     uploadFiles,
     uploadController.upload
     )
+
+router.get(
+    '/',
+    checkToken,
+    setQueryOpts,
+    uploadController.list
+)
+
+router.delete(
+    '/',
+    checkToken,
+    checkRoles(['Admin']),
+    uploadController.remove
+)
+
+router.put(
+    '/',
+    checkToken,
+    uploadFiles,
+    uploadController.update
+)
 
 module.exports = router

@@ -130,7 +130,8 @@ app.use((error, req, res, next) => {
     success: false,
     status: statusCode,
     message: message,
-    results: results
+    results: results,
+    pagination: {}
   });
 
 });
