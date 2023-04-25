@@ -87,7 +87,7 @@ describe('uploadController', () => {
 
     })
   
-    it('should upload a file and add an entry to the DB', async () => {
+    it('should return status 200 and upload a file and add an entry to the DB', async () => {
 
       // Set Mocked data that models and controllers should return
       const modelReturnData = {
@@ -114,6 +114,7 @@ describe('uploadController', () => {
         .attach('tests', path.join(__dirname, 'test.jpg'))
         .field('resource', 'recipes')
         .field('resourceid', 1)
+        .field('title', 'Image Test 001')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -124,7 +125,7 @@ describe('uploadController', () => {
   
     });
 
-    it('should be able to upload multiple files', async () => {
+    it('should return status 200 and be able to upload multiple files', async () => {
 
       // Set Mocked data that models and controllers should return
       const modelReturnData = {
@@ -153,6 +154,7 @@ describe('uploadController', () => {
         .attach('tests', path.join(__dirname, 'test.jpg'))
         .field('resource', 'recipes')
         .field('resourceid', 1)
+        .field('title', 'Image Tests')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -218,6 +220,7 @@ describe('uploadController', () => {
         .post('/uploads')
         .field('resource', 'recipes')
         .field('resourceid', 1)
+        .field('title', 'Image Test 001')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -251,6 +254,7 @@ describe('uploadController', () => {
         .post('/uploads')
         .attach('tests', path.join(__dirname, 'test.jpg'))
         .field('resourceid', 1)
+        .field('title', 'Image Test 001')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -284,6 +288,7 @@ describe('uploadController', () => {
         .post('/uploads')
         .attach('tests', path.join(__dirname, 'test.jpg'))
         .field('resource', 'recipes')
+        .field('title', 'Image Test 001')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -293,6 +298,43 @@ describe('uploadController', () => {
       expect(response.body.message).toEqual(returnMessage)
 
     })
+
+    it('should return status 404 if the title is missing', async () => {
+
+      // Set Mocked data that models and controllers should return
+      const modelReturnData = {
+        success: true,
+        message: 'File data added to DB'
+      };
+  
+      // Set any variables needed to be passed to controllers and or models
+
+      // Mock any needed third party modules
+      jest.spyOn(uploadModel, 'upload').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      // Set here the expected return values for the test
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'Image title is required'
+
+      /* Execute the function */
+      //await <resource>Controller.<method>(mockRequest, mockResponse, mockNext);
+      const response = await request(app)
+        .post('/uploads')
+        .attach('tests', path.join(__dirname, 'test.jpg'))
+        .field('resource', 'recipes')
+        .field('resourceid', 1)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      /* Test everything works as expected */
+      expect(response.body.status).toBe(returnStatus)
+      expect(response.body.success).toBe(returnSuccess)
+      expect(response.body.message).toEqual(returnMessage)
+  
+    });
 
     it('should return status 500 if there was any other issue', async () => {
 
@@ -321,6 +363,7 @@ describe('uploadController', () => {
         .attach('tests', path.join(__dirname, 'test.jpg'))
         .field('resource', 'recipes')
         .field('resourceid', 1)
+        .field('title', 'Image Test 001')
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -355,8 +398,8 @@ describe('uploadController', () => {
         const modelReturnData = {
           success: true,
           results: [
-            {id: 1, name: 'test.png', mimetype: 'image/png', resource: 'recipe', resourceid: 1, userid: 15},
-            {id: 2, name: 'actual.png', mimetype: 'image/png', resource: 'cookbook', resourceid: 12, userid: 7}
+            {id: 1, src: 'test.png', title: 'Image Test 001', mimetype: 'image/png', resource: 'recipe', resourceid: 1, userid: 15},
+            {id: 2, src: 'actual.png', title: 'Image Test 002', mimetype: 'image/png', resource: 'cookbook', resourceid: 12, userid: 7}
           ],
           message: '',
           pagination: {
@@ -417,7 +460,7 @@ describe('uploadController', () => {
         const modelReturnData = {
           success: true,
           results: [
-            {id: 1, name: 'test.png', mimetype: 'image/png', resource: 'recipe', resourceid: 1, userid: 15},
+            {id: 1, src: 'test.png', title: 'Image Test 001', mimetype: 'image/png', resource: 'recipe', resourceid: 1, userid: 15},
             ],
           message: '',
           pagination: {
@@ -1101,7 +1144,8 @@ describe('uploadController', () => {
           message: '',
           results: [{
             id:  1,
-            name: 'test001.jpg',
+            src: 'test001.jpg',
+            title: 'Test Image 001',
             mimetype: 'image/jpeg',
             resource: 'recipe',
             resourceid: 11,
@@ -1115,6 +1159,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1133,10 +1178,9 @@ describe('uploadController', () => {
         .field('id', recordid)
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
-
-        console.log(res.body)
 
       // Assert
       expect(res.status).toBe(returnStatus)
@@ -1166,7 +1210,8 @@ describe('uploadController', () => {
           message: '',
           results: [{
             id:  1,
-            name: 'test001.jpg',
+            src: 'test001.jpg',
+            title: 'Test Image 001',
             mimetype: 'image/jpeg',
             resource: 'recipe',
             resourceid: 11,
@@ -1180,6 +1225,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Image Test 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1196,6 +1242,7 @@ describe('uploadController', () => {
         .field('id', recordid)
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Connection', 'keep-alive')
 
       // Assert
@@ -1229,8 +1276,9 @@ describe('uploadController', () => {
           message: '',
           results: [{
             id:  1,
-            name: 'test001.jpg',
+            src: 'test001.jpg',
             mimetype: 'image/jpeg',
+            title: 'Test Image 001',
             resource: 'recipe',
             resourceid: 11,
             userid: 1
@@ -1243,6 +1291,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1261,6 +1310,7 @@ describe('uploadController', () => {
         .field('id', recordid)
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -1293,6 +1343,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1310,6 +1361,7 @@ describe('uploadController', () => {
         .attach('tests', path.join(__dirname, fileName)) 
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -1340,6 +1392,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 'steven'
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1358,6 +1411,7 @@ describe('uploadController', () => {
         .field('id', recordid)
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -1389,7 +1443,8 @@ describe('uploadController', () => {
           message: '',
           results: [{
             id:  1,
-            name: 'test001.jpg',
+            src: 'test001.jpg',
+            title: 'Test Imwge 001',
             mimetype: 'image/jpeg',
             resource: 'recipe',
             resourceid: 11,
@@ -1403,6 +1458,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Test image 002'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1420,6 +1476,7 @@ describe('uploadController', () => {
         .attach('tests', path.join(__dirname, fileName))
         .field('id', recordid)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -1452,6 +1509,7 @@ describe('uploadController', () => {
       const resource = 6758
       const resourceId = 12
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1470,8 +1528,114 @@ describe('uploadController', () => {
         .field('id', recordid)
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 404 if the image title is missing', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return []
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+      const title = 'Test Image 001'
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'Image title is required'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName)) 
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      // Assert
+      expect(res.status).toBe(returnStatus)
+      expect(res.body.success).toEqual(returnSuccess)
+      expect(res.body.message).toEqual(returnMessage)
+      expect(res.body.results).toEqual(returnResults)
+      expect(res.body.pagination).toEqual(returnPagination)
+
+    })
+
+    it('should return status 400 if image title is of the wrong format', async () => {
+
+      // Setup
+
+      // Set the return data from the model
+      const modelReturnData = {}
+
+      // Mock the return value of the model used
+      jest.spyOn(uploadModel, 'update').mockImplementation(async () => {
+        return modelReturnData
+      })
+
+      jest.spyOn(uploadModel, 'list').mockImplementation(async () => {
+        return []
+      })
+
+      // Set any form field values we need to send are
+      const resource = 'cookbook'
+      const resourceId = 12
+      const recordid = 15
+      const title = [ 4556327 ]
+
+      // Name of the file to upload
+      const fileName = 'test.jpg'
+
+      // Set what we expect the return values to be
+      const returnStatus = 400
+      const returnSuccess = false
+      const returnMessage = 'Image title must be a string'
+      const returnResults = []
+      const returnPagination = {}
+
+      // Execute
+      const res = await request(app)
+        .put('/uploads/')
+        .attach('tests', path.join(__dirname, fileName)) 
+        .field('id', recordid)
+        .field('resource', resource)
+        .field('resourceid', resourceId)
+        .field('title', title)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('Cookie', `jwt=${goodRefreshToken}`)
+
+      console.log(res.body)
 
       // Assert
       expect(res.status).toBe(returnStatus)
@@ -1501,7 +1665,8 @@ describe('uploadController', () => {
           message: '',
           results: [{
             id:  1,
-            name: 'test001.jpg',
+            src: 'test001.jpg',
+            title: 'Test Image 001',
             mimetype: 'image/jpeg',
             resource: 'recipe',
             resourceid: 11,
@@ -1515,6 +1680,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1532,6 +1698,7 @@ describe('uploadController', () => {
         .attach('tests', path.join(__dirname, fileName)) 
         .field('id', recordid)
         .field('resource', resource)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -1563,7 +1730,8 @@ describe('uploadController', () => {
           message: '',
           results: [{
             id:  1,
-            name: 'test001.jpg',
+            src: 'test001.jpg',
+            title: 'Test Image 001',
             mimetype: 'image/jpeg',
             resource: 'recipe',
             resourceid: 11,
@@ -1577,6 +1745,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 'Seargant'
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1595,6 +1764,7 @@ describe('uploadController', () => {
         .field('id', recordid) 
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
@@ -1630,6 +1800,7 @@ describe('uploadController', () => {
       const resource = 'cookbook'
       const resourceId = 12
       const recordid = 15
+      const title = 'Test Image 001'
 
       // Name of the file to upload
       const fileName = 'test.jpg'
@@ -1648,6 +1819,7 @@ describe('uploadController', () => {
         .field('id', recordid)
         .field('resource', resource)
         .field('resourceid', resourceId)
+        .field('title', title)
         .set('Authorization', `Bearer ${authToken}`)
         .set('Cookie', `jwt=${goodRefreshToken}`)
 
