@@ -3,6 +3,9 @@ require('dotenv').config();
 const db = require('../database');
 const dbHelper = require('../helpers/database')
 
+const fs = require('fs')
+const path = require('path')
+
 /* Stores information about an uploaded file to the DB 
  *
  * @params {object} payload - Contains the details of the file
@@ -24,12 +27,20 @@ const upload = async (payload) => {
         let foundErrors
         payload.map(image => {
 
-            if(!image.name || image.name === undefined){
-                 return foundErrors = 'Image name is required'
+            if(!image.src || image.src === undefined){
+                 return foundErrors = 'Image src is required'
             }
 
-            if(typeof image.name !== 'string'){
-                return foundErrors = 'Image name must be a string'
+            if(typeof image.src !== 'string'){
+                return foundErrors = 'Image src must be a string'
+            }
+
+            if(!image.title || image.title === undefined){
+              return foundErrors = 'Title is required'
+            }
+
+            if(typeof image.title !== 'string'){
+              return foundErrors = 'Title must be a string'
             }
 
             if(!image.mimetype || image.mimetype === undefined){
@@ -199,13 +210,16 @@ const remove = async (options) => {
       /* get the query options */
       let {page, size, offset, filterBy, filterValues, filter, sortBy, sortOrder} = options
 
+      /* Return value for the function */
+      let returnResult
+
       /* Remove the records */
-      await db.transacting(async trx => {
+      await db.transaction(async trx => {
 
         const results = await db('files')
           .delete()
           .modify(dbHelper.buildFilters, filter)
-          .returning('name')
+          .returning('src')
           .transacting(trx)
 
         /* Check if any records were deleted */
@@ -214,16 +228,18 @@ const remove = async (options) => {
           /* Remove the files */
           results.map(result => {
             let fullPath = path.join(process.cwd(), '/public/media')
-            fs.unlink(path.join(fullPath, result.name), err => {
+            
+            fs.unlink(path.join(fullPath, result), err => {
               if (err) throw {
                   status: 500,
                   success: false,
                   message: 'Unable to delete the uploaded files'
               }
+              
             })
           })
 
-          return {
+          returnResult = {
             success: true,
             message: 'Records deleted successfully',
             results: results.length,
@@ -240,14 +256,22 @@ const remove = async (options) => {
         }
 
       })
+
+      return returnResult
       
   } catch(e) {
     
+    let message
+    if(e.message === 'delete from \"files\" - Problem connecting to the database'){
+      message = 'There was a problem with the resource, please try again later'
+    } else {
+      message = e.message
+    }
     return {
-      success: e.success,
-      message: e.message,
-      results: e.results,
-      pagination: e.pagination
+      success: e.success || false,
+      message: message,
+      results: e.results || 0,
+      pagination: e.pagination || {}
     }
 
   }
@@ -264,7 +288,7 @@ const update = async (payload) => {
 
       /* Deconstruct the payload */
       let {
-        id, name, mimetype, resource, resourceid, userid
+        id, src, title, mimetype, resource, resourceid, userid
       } = payload
 
       /* Validate the payload */
@@ -286,19 +310,37 @@ const update = async (payload) => {
         }
       }
 
-      if(!name || name === undefined){
+      if(!src || src === undefined){
         return {
           success: false,
-          message: 'Name is required',
+          message: 'Src is required',
           results: [],
           pagination: {}
         }
       }
 
-      if(typeof name !== 'string'){
+      if(typeof src !== 'string'){
         return {
           success: false,
-          message: 'Name must be a string',
+          message: 'Src must be a string',
+          results: [],
+          pagination: {}
+        }
+      }
+
+      if(!title || title === undefined){
+        return {
+          success: false,
+          message: 'Title is required',
+          results: [],
+          pagination: {}
+        }
+      }
+
+      if(typeof title !== 'string'){
+        return {
+          success: false,
+          message: 'Title must be a string',
           results: [],
           pagination: {}
         }
@@ -379,7 +421,8 @@ const update = async (payload) => {
       /* Update the record in the DB */
       const results = await db('files')
        .update({
-        name: name,
+        src: src,
+        title: title,
         mimetype: mimetype,
         resource: resource,
         resourceid: parseInt(resourceid),

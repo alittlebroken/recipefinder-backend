@@ -20,6 +20,18 @@ jest.mock('../database', () => {
 /* Tracker for the SQL commands */
 let tracker;
 
+/* Array of images tp use for tests */
+const images = [
+  {
+      src: '/public/media/test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
+      mimetype: 'image/jpeg',
+      resource: 'recipe',
+      resourceid: 1,
+      userid: 1
+  }
+]
+
 describe('uploadModel.upload', () => {
 
     /*
@@ -48,30 +60,7 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').responseOnce([1, 2, 3])
   
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const payload = [...images]
 
       /* What do we expect the results to be of running the method */
       const returnStatus = 200
@@ -108,38 +97,22 @@ describe('uploadModel.upload', () => {
   
     });
 
-    it('should return an error if the image name is missing', async () => {
+    it('should return an error if the image src is missing', async () => {
   
       /** Mock the DB responses */
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'images-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.src
+        return [{...copy}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
-      const returnMessage = 'Image name is required'
+      const returnMessage = 'Image src is required'
 
       /** Execute the function */
       const result = await uploadModel.upload(payload);
@@ -150,40 +123,22 @@ describe('uploadModel.upload', () => {
   
     });
 
-    it('should return an error if the image name is of the wrong format', async () => {
+    it('should return an error if the image src is of the wrong format', async () => {
   
       /** Mock the DB responses */
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 12,
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 1,
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.src
+        return [{...copy, src: 1425}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
-      const returnMessage = 'Image name must be a string'
+      const returnMessage = 'Image src must be a string'
 
       /** Execute the function */
       const result = await uploadModel.upload(payload);
@@ -192,6 +147,60 @@ describe('uploadModel.upload', () => {
       expect(result.success).toBe(returnSuccess)
       expect(result.message).toEqual(returnMessage)
   
+    });
+
+    it('should return an error if the title is missing', async () => {
+  
+      /** Mock the DB responses */
+      tracker.on.insert('files').responseOnce([1, 2, 3])
+  
+      /* Set the file payload */
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.title
+        return [{...copy}]
+      }
+      let payload = formatImagesObject(images)
+
+      /* What do we expect the results to be of running the method */
+      const returnStatus = 404
+      const returnSuccess = false
+      const returnMessage = 'Title is required'
+
+      /** Execute the function */
+      const result = await uploadModel.upload(payload);
+
+      /** Test the response back from the function */
+      expect(result.success).toBe(returnSuccess);
+      expect(result.message).toEqual(returnMessage);
+      
+    });
+
+    it('should return an error if title is of the wrong format', async () => {
+  
+      /** Mock the DB responses */
+      tracker.on.insert('files').responseOnce([1, 2, 3])
+  
+      /* Set the file payload */
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.title
+        return [{...copy, title: 564723}]
+      }
+      let payload = formatImagesObject(images)
+
+      /* What do we expect the results to be of running the method */
+      const returnStatus = 400
+      const returnSuccess = false
+      const returnMessage = 'Title must be a string'
+
+      /** Execute the function */
+      const result = await uploadModel.upload(payload);
+
+      /** Test the response back from the function */
+      expect(result.success).toBe(returnSuccess);
+      expect(result.message).toEqual(returnMessage);
+      
     });
 
     it('should return an error if the mime type is missing', async () => {
@@ -200,29 +209,12 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.mimetype
+        return [{...copy}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -243,30 +235,12 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 3,
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.mimetype
+        return [{...copy, mimetype: 1425}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -287,30 +261,13 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
-
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.resource
+        return [{...copy}]
+      }
+      let payload = formatImagesObject(images)
+      
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
       const returnMessage = 'Resource name is required'
@@ -330,30 +287,12 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 764657,
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.resource
+        return [{...copy, resource: 1425}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -374,29 +313,12 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.resourceid
+        return [{...copy}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -417,30 +339,12 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 2
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 'Steve',
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.resourceid
+        return [{...copy, resourceid: 'steven'}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -461,29 +365,12 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').response([])
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const formatImagesObject = (object) => {
+        const copy = {...object[0]}
+        delete copy.userid
+        return [{...copy}]
+      }
+      let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -504,30 +391,12 @@ describe('uploadModel.upload', () => {
         tracker.on.insert('files').response([])
 
         /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 'Stephanie'
-        },
-        {
-            name: 'test-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+        const formatImagesObject = (object) => {
+          const copy = {...object[0]}
+          delete copy.userid
+          return [{...copy, userid: 'steven'}]
+        }
+        let payload = formatImagesObject(images)
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -548,30 +417,7 @@ describe('uploadModel.upload', () => {
       tracker.on.insert('files').simulateError('Lost connection to the database')
 
       /* Set the file payload */
-      const payload = [
-        {
-            name: 'test-1680211818271-248980925.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 1,
-            userid: 1
-        },
-        {
-            name: 'test-1680239642218-12949440.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'cookbook',
-            resourceid: 2,
-            userid: 1
-        },
-        {
-            name: 'test-images-1680239644962-43989377.jpg',
-            mimetype: 'image/jpeg',
-            resource: 'recipe',
-            resourceid: 3,
-            userid: 2
-        },
-
-      ]
+      const payload = [...images]
 
       /* What do we expect the results to be of running the method */
       const returnSuccess = false
@@ -608,9 +454,9 @@ describe('uploadModel.list', () => {
 
     // Setup
     const modelReturnData = [
-      { id: 1, userid: 1, name: 'images-001.png', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
-      { id: 2, userid: 2, name: 'images-002.png', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
-      { id: 3, userid: 1, name: 'images-003.png', mimetype: 'image/png', resource: 'cookbook', resourceid: 1 },
+      { id: 1, userid: 1, src: 'images-001.png', title: 'Test Image 1', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
+      { id: 2, userid: 2, src: 'images-002.png', title: 'Test Image 2', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
+      { id: 3, userid: 1, src: 'images-003.png', title: 'Test Image 2', mimetype: 'image/png', resource: 'cookbook', resourceid: 1 },
     ]
 
     tracker.on.select('files').responseOnce([{ id: 1}, { id: 2}, { id: 3}])
@@ -687,8 +533,8 @@ describe('uploadModel.list', () => {
 
     // Setup
     const modelReturnData = [
-      { id: 1, userid: 1, name: 'images-001.png', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
-      { id: 3, userid: 1, name: 'images-003.png', mimetype: 'image/png', resource: 'cookbook', resourceid: 1 },
+      { id: 1, userid: 1, src: 'images-001.png', title: 'Test Image 1',mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
+      { id: 3, userid: 1, src: 'images-003.png', title: 'Test Image 3', mimetype: 'image/png', resource: 'cookbook', resourceid: 1 },
     ]
 
     tracker.on.select('files').responseOnce([{ id: 1}, {id: 3}])
@@ -714,7 +560,7 @@ describe('uploadModel.list', () => {
 
     // Run
     const result = await uploadModel.list(options)
-
+    
     // Assert
     expect(result.success).toBe(returnSuccess)
     expect(Array.isArray(result.results)).toBe(true)
@@ -727,8 +573,11 @@ describe('uploadModel.list', () => {
     expect(typeof result.results[0].userid).toEqual('number')
     expect(result.results[0].userid).toEqual(1)
 
-    expect(typeof result.results[0].name).toEqual('string')
-    expect(result.results[0].name).toEqual('images-001.png')
+    expect(typeof result.results[0].src).toEqual('string')
+    expect(result.results[0].src).toEqual('images-001.png')
+
+    expect(typeof result.results[0].title).toEqual('string')
+    expect(result.results[0].title).toEqual('Test Image 1')
 
     expect(typeof result.results[0].mimetype).toEqual('string')
     expect(result.results[0].mimetype).toEqual('image/png')
@@ -745,8 +594,11 @@ describe('uploadModel.list', () => {
     expect(typeof result.results[1].userid).toEqual('number')
     expect(result.results[1].userid).toEqual(1)
 
-    expect(typeof result.results[1].name).toEqual('string')
-    expect(result.results[1].name).toEqual('images-003.png')
+    expect(typeof result.results[1].src).toEqual('string')
+    expect(result.results[1].src).toEqual('images-003.png')
+
+    expect(typeof result.results[1].title).toEqual('string')
+    expect(result.results[1].title).toEqual('Test Image 3')
 
     expect(typeof result.results[1].mimetype).toEqual('string')
     expect(result.results[1].mimetype).toEqual('image/png')
@@ -764,7 +616,7 @@ describe('uploadModel.list', () => {
 
     // Setup
     const modelReturnData = [
-      { id: 1, userid: 1, name: 'images-001.png', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
+      { id: 1, userid: 1, src: 'images-001.png', title: 'Test Image 1', mimetype: 'image/png', resource: 'recipe', resourceid: 2 },
     ]
 
     tracker.on.select('files').responseOnce([{ id: 1}, {id: 2}, {id: 3}])
@@ -803,8 +655,11 @@ describe('uploadModel.list', () => {
     expect(typeof result.results[0].userid).toEqual('number')
     expect(result.results[0].userid).toEqual(1)
 
-    expect(typeof result.results[0].name).toEqual('string')
-    expect(result.results[0].name).toEqual('images-001.png')
+    expect(typeof result.results[0].src).toEqual('string')
+    expect(result.results[0].src).toEqual('images-001.png')
+
+    expect(typeof result.results[0].title).toEqual('string')
+    expect(result.results[0].title).toEqual('Test Image 1')
 
     expect(typeof result.results[0].mimetype).toEqual('string')
     expect(result.results[0].mimetype).toEqual('image/png')
@@ -866,13 +721,18 @@ describe('uploadModel.remove', () => {
   afterEach(() => {
     /* Reset the tracker */
     tracker.reset();
-
+    jest.restoreAllMocks();
   })
 
   it('it should remove all uploaded files if no filters set', async () => {
 
     // Setup
-    const modelReturnData = 4
+    const modelReturnData = [
+      'image001.jpg',
+      'image002.jpg',
+      'image003.jpg',
+      'image004.jpg'
+    ]
 
     const returnSuccess = true
     const returnMessage = 'Records deleted successfully'
@@ -886,6 +746,10 @@ describe('uploadModel.remove', () => {
       sortBy: 'id',
       sortOrder: 'desc'
     }
+
+    jest.spyOn(fs, 'unlink').mockImplementation((filename, callback) => {
+      callback(null)
+    })
 
     tracker.on.delete('files').responseOnce(modelReturnData)
 
@@ -902,7 +766,7 @@ describe('uploadModel.remove', () => {
   it('it should remove the specified records set by the filter', async () => {
 
     // Setup
-    const modelReturnData = 2
+    const modelReturnData = ['image001.jpg', 'image002.jpg']
 
     const returnSuccess = true
     const returnMessage = 'Records deleted successfully'
@@ -916,6 +780,10 @@ describe('uploadModel.remove', () => {
       sortBy: 'id',
       sortOrder: 'desc'
     }
+
+    jest.spyOn(fs, 'unlink').mockImplementation((filename, callback) => {
+      callback(null)
+    })
 
     tracker.on.delete('files').responseOnce(modelReturnData)
 
@@ -947,11 +815,15 @@ describe('uploadModel.remove', () => {
       sortOrder: 'desc'
     }
 
+    jest.spyOn(fs, 'unlink').mockImplementation((filename, callback) => {
+      callback(null)
+    })
+
     tracker.on.delete('files').responseOnce(modelReturnData)
 
     // Execute
     const result = await uploadModel.remove(options)
-
+    
     // Assert
     expect(result.success).toBe(returnSuccess)
     expect(result.message).toEqual(returnMessage)
@@ -977,11 +849,15 @@ describe('uploadModel.remove', () => {
       sortOrder: 'desc'
     }
 
+    jest.spyOn(fs, 'unlink').mockImplementation((filename, callback) => {
+      callback(null)
+    })
+
     tracker.on.delete('files').simulateError('Problem connecting to the database')
 
     // Execute
     const result = await uploadModel.remove(options)
-
+    
     // Assert
     expect(result.success).toBe(returnSuccess)
     expect(result.message).toEqual(returnMessage)
@@ -1015,7 +891,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1043,7 +920,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1072,7 +950,8 @@ describe('uploadModel.update', () => {
     tracker.on.update('files').responseOnce([])
 
     const payload = {
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1102,7 +981,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: ['1'],
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1123,7 +1003,7 @@ describe('uploadModel.update', () => {
 
   })
 
-  it('should return an error if name is missing', async () => {
+  it('should return an error if src is missing', async () => {
 
     // Setup
     const modelReturnData = []
@@ -1132,6 +1012,7 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1139,7 +1020,7 @@ describe('uploadModel.update', () => {
     }
 
     const returnSuccess = false
-    const returnMessage = 'Name is required'
+    const returnMessage = 'Src is required'
     const returnResults = modelReturnData
 
     // Execute
@@ -1152,7 +1033,7 @@ describe('uploadModel.update', () => {
 
   })
 
-  it('should return an error if name is of the wrong format', async () => {
+  it('should return an error if src is of the wrong format', async () => {
 
     // Setup
     const modelReturnData = []
@@ -1161,7 +1042,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 13,
+      src: 13,
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1169,7 +1051,68 @@ describe('uploadModel.update', () => {
     }
 
     const returnSuccess = false
-    const returnMessage = 'Name must be a string'
+    const returnMessage = 'Src must be a string'
+    const returnResults = modelReturnData
+
+    // Execute
+    const result = await uploadModel.update(payload)
+
+    // Assert
+    expect(result.success).toBe(returnSuccess)
+    expect(result.message).toEqual(returnMessage)
+    expect(result.results).toEqual(returnResults)
+
+  })
+
+  it('should return an error if title is missing', async () => {
+
+    // Setup
+    const modelReturnData = []
+
+    tracker.on.update('files').responseOnce([1])
+
+    const payload = {
+      id: 1,
+      src: 'test-1680211818271-248980925.jpg',
+      mimetype: 'image/jpeg',
+      resource: 'recipe',
+      resourceid: 1,
+      userid: 1
+    }
+
+    const returnSuccess = false
+    const returnMessage = 'Title is required'
+    const returnResults = modelReturnData
+
+    // Execute
+    const result = await uploadModel.update(payload)
+
+    // Assert
+    expect(result.success).toBe(returnSuccess)
+    expect(result.message).toEqual(returnMessage)
+    expect(result.results).toEqual(returnResults)
+
+  })
+
+  it('should return an error if title is of the wrong type', async () => {
+
+    // Setup
+    const modelReturnData = []
+
+    tracker.on.update('files').responseOnce([1])
+
+    const payload = {
+      id: 1,
+      src: 'test-1680211818271-248980925.jpg',
+      title: 124534,
+      mimetype: 'image/jpeg',
+      resource: 'recipe',
+      resourceid: 1,
+      userid: 1
+    }
+
+    const returnSuccess = false
+    const returnMessage = 'Title must be a string'
     const returnResults = modelReturnData
 
     // Execute
@@ -1191,7 +1134,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       resource: 'recipe',
       resourceid: 1,
       userid: 1
@@ -1220,7 +1164,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 1,
       resource: 'recipe',
       resourceid: 1,
@@ -1250,7 +1195,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resourceid: 1,
       userid: 1
@@ -1279,7 +1225,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test image 1',
       mimetype: 'image/jpeg',
       resource: 1,
       resourceid: 1,
@@ -1309,7 +1256,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       userid: 1
@@ -1338,7 +1286,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 'Steve oMalley',
@@ -1368,7 +1317,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1397,7 +1347,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,
@@ -1425,7 +1376,8 @@ describe('uploadModel.update', () => {
 
     const payload = {
       id: 1,
-      name: 'test-1680211818271-248980925.jpg',
+      src: 'test-1680211818271-248980925.jpg',
+      title: 'Test Image 1',
       mimetype: 'image/jpeg',
       resource: 'recipe',
       resourceid: 1,

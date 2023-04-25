@@ -23,6 +23,7 @@ const upload = async (req, res, next) => {
         const {
             resource,
             resourceid,
+            title
         } = req.body
 
         /* Validate the passed in values */
@@ -50,6 +51,16 @@ const upload = async (req, res, next) => {
             }) 
         }
 
+        if(!title || title === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'Image title is required',
+                results: [],
+                pagination: {}
+            })
+        }
+
         /* Loop through the files sent and construct the 
          * Payload to send */
         let payload
@@ -57,10 +68,11 @@ const upload = async (req, res, next) => {
 
             /* Construct the payload for this file */
             payload = {
-                name: `${file.filename}`,
+                src: `${file.filename}`,
                 mimetype: file.mimetype,
                 resource: resource,
                 resourceid: parseInt(resourceid),
+                title: title,
                 userid: req.user.id
             }
 
@@ -273,7 +285,8 @@ const update = async (req, res, next) => {
         const {
             id,
             resource,
-            resourceid 
+            resourceid,
+            title
         } = req.body
 
         const {
@@ -358,6 +371,28 @@ const update = async (req, res, next) => {
                 results: [],
                 pagination: {}
             })   
+        }
+
+        if(!title || title === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false, 
+                message: 'Image title is required',
+                results: [],
+                pagination: {} 
+            })
+        }
+
+        console.log(title, typeof title, !isNaN(parseInt(title)))
+
+        if(typeof title !== 'string' || !isNaN(parseInt(title))){
+            return res.status(400).json({
+                status: 400,
+                success: false, 
+                message: 'Image title must be a string',
+                results: [],
+                pagination: {}
+            })
         }
         
         /* Pagination, filter and sort  options to send to the method that requires it */

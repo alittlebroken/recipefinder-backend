@@ -14,7 +14,9 @@ exports.up = function(knex) {
         .inTable('users')
         .onUpdate('CASCADE')
         .onDelete('CASCADE');
-       table.string('name', 255).notNullable();
+       table.string('src', 255).notNullable();
+       table.string('title', 255).notNullable();
+       table.string('alt', 255).nullable();
        table.string('mimetype', 255).notNullable();
        table.string('resource', 255).notNullable();
        table.integer('resourceid').notNullable();
