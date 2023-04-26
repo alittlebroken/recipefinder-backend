@@ -283,15 +283,15 @@ const update = async (req, res, next) => {
         } = req
 
         const {
-            id,
             resource,
             resourceid,
             title
         } = req.body
-
-        const {
-            userid = id
-        } = req.user
+        
+        
+        let recordid = req?.param?.id ? req?.param?.id : undefined
+        let userid = req?.user?.id ? req?.user?.id : undefined
+         
 
         if(!resource || resource === undefined){
             return res.status(404).json({
@@ -333,7 +333,8 @@ const update = async (req, res, next) => {
             })   
         }
 
-        if(!id || id === undefined){
+        if(!recordid || recordid === undefined){
+
             return res.status(404).json({
                 status: 404,
                 success: false,
@@ -343,7 +344,7 @@ const update = async (req, res, next) => {
             })
         }
 
-        if(typeof parseInt(id) !== 'number' || isNaN(parseInt(id))){
+        if(typeof parseInt(recordid) !== 'number' || isNaN(parseInt(id))){
             return res.status(400).json({
                 status: 400,
                 success: false, 
@@ -383,8 +384,6 @@ const update = async (req, res, next) => {
             })
         }
 
-        console.log(title, typeof title, !isNaN(parseInt(title)))
-
         if(typeof title !== 'string' || !isNaN(parseInt(title))){
             return res.status(400).json({
                 status: 400,
@@ -394,7 +393,7 @@ const update = async (req, res, next) => {
                 pagination: {}
             })
         }
-        
+
         /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
             page: req.page,
@@ -402,7 +401,7 @@ const update = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
-            filter: JSON.stringify({ ids: id}),
+            filter: JSON.stringify({ ids: recordid}),
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
         }
@@ -432,10 +431,10 @@ const update = async (req, res, next) => {
         }
 
         /* Create the payload to send to the models method */
-        const payload = {}
+        let payload = {}
 
             // id
-            payload.id = id
+            payload.id = recordid
             if(files.filename){
                 payload.name = files.filename
                 payload.mimetype = file.mimetype
@@ -446,7 +445,6 @@ const update = async (req, res, next) => {
             payload.resource = resource
             payload.resourceid = resourceid
             payload.userid = userid
-        
 
         /* Update the record with the new data */
         const result = await uploadModel.update(payload)

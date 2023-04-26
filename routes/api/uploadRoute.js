@@ -34,7 +34,7 @@ router.delete(
 )
 
 router.put(
-    '/',
+    '/:id',
     checkToken,
     uploadFiles,
     uploadController.update
