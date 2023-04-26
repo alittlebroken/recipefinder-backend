@@ -288,10 +288,8 @@ const update = async (req, res, next) => {
             title
         } = req.body
         
-        
-        let recordid = req?.param?.id ? req?.param?.id : undefined
+        let recordid = req?.params?.id ? req?.params?.id : undefined
         let userid = req?.user?.id ? req?.user?.id : undefined
-         
 
         if(!resource || resource === undefined){
             return res.status(404).json({
@@ -344,7 +342,7 @@ const update = async (req, res, next) => {
             })
         }
 
-        if(typeof parseInt(recordid) !== 'number' || isNaN(parseInt(id))){
+        if(typeof parseInt(recordid) !== 'number' || isNaN(parseInt(recordid))){
             return res.status(400).json({
                 status: 400,
                 success: false, 
@@ -408,7 +406,6 @@ const update = async (req, res, next) => {
 
         /* Extract the existing record details first */
         const existing = await uploadModel.list(options)
-        
         let existingRecord
         if(existing && existing[0]?.results?.length > 0){
             existingRecord = existing[0].results[0]
