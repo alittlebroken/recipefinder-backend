@@ -280,11 +280,15 @@ const remove = async (options) => {
 /* Updates a file record witin the DB 
  *
  * @params {object} payload - Contains the details of the file to be updated
+ * @params {object} options - Conatins all the SQL parameters for the request
  * @returns {object} returns an object containg the result of updating the
  * file info to the database
 */
-const update = async (payload) => {
+const update = async (payload, options) => {
   try{
+
+      /* Deconstruct the options */
+      const { filter } = options
 
       /* Deconstruct the payload */
       let {
@@ -428,6 +432,7 @@ const update = async (payload) => {
         resourceid: parseInt(resourceid),
         userid: parseInt(userid)
        })
+       .modify(dbHelper.buildFilters, filter)
        .returning('id')
 
       if(results.length > 0){
