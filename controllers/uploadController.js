@@ -16,14 +16,14 @@ const upload = async (req, res, next) => {
     try{
 
         /* Extract the params */
+        const files = req.files
+        
         const {
-            files
-        } = req
-
-        const {
+            src,
             resource,
             resourceid,
-            title
+            title,
+            userId
         } = req.body
 
         /* Validate the passed in values */
@@ -51,6 +51,14 @@ const upload = async (req, res, next) => {
             }) 
         }
 
+        if(!userId || userId === undefined){
+            return res.status(404).json({
+                status: 404,
+                success: false,
+                message: 'User id is required'
+            })
+        }
+
         if(!title || title === undefined){
             return res.status(404).json({
                 status: 404,
@@ -64,23 +72,56 @@ const upload = async (req, res, next) => {
         /* Loop through the files sent and construct the 
          * Payload to send */
         let payload
-        files.map(file => {
+        let payloads = []
 
-            /* Construct the payload for this file */
-            payload = {
-                src: `${file.filename}`,
-                mimetype: file.mimetype,
-                resource: resource,
-                resourceid: parseInt(resourceid),
-                title: title,
-                userid: req.user.id
+        let fileBasePath = `${process.env.APP_URL}/media/`
+
+        let result
+
+        if(!files){
+            /* There was no file specified */
+            if(!src){
+                return res.status(404).json({
+                    status: 404,
+                    success: false,
+                    message: 'Src MUST be set if no image is uploaded',
+                    results: [],
+                    pagination: {}
+                })
+            } else {
+                payload.src = `${fileBasePath}${src}`
+                payload.mimetype = 'none/none'
+                payload.resource = resource
+                payload.resourceid = parseInt(resourceid)
+                payload.title = title
+                payload.userid = parseInt(userId)
+                payloads.push(payload)
             }
+        } else {
 
-        })
+            /* Add an entry for each file uploaded */
+            files.map(file => {
+                /* Construct the payload for this file */
+                payload = {
+                    src: `${fileBasePath}${file.filename}`,
+                    mimetype: file.mimetype,
+                    resource: resource,
+                    resourceid: parseInt(resourceid),
+                    title: title,
+                    userid: parseInt(userId)
+                }
+
+                payloads.push(payload)
+
+            })
+
+        }
+
+        console.log(payloads)
 
         /* File uploaded OK, so lets add it to the DB */
-        const result = await uploadModel.upload(payload)
-
+        result = await uploadModel.upload(payloads)
+        
         if(!result || result.success === false) {
 
             /* Delete the files uploaded */
@@ -111,6 +152,7 @@ const upload = async (req, res, next) => {
 
 
     } catch(e) {
+        console.log(e)
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
@@ -287,7 +329,7 @@ const update = async (req, res, next) => {
             resourceid,
             title
         } = req.body
-        
+
         let recordid = req?.params?.id ? req?.params?.id : undefined
         let userid = req?.user?.id ? req?.user?.id : undefined
 
@@ -392,6 +434,7 @@ const update = async (req, res, next) => {
             })
         }
 
+
         /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
             page: req.page,
@@ -399,16 +442,17 @@ const update = async (req, res, next) => {
             offset: req.offset,
             filterBy: req.filterBy,
             filterValues: req.filterValues,
-            filter: JSON.stringify({ ids: recordid}),
+            filter: JSON.stringify({ ids: parseInt(recordid)}),
             sortBy: req.sortBy,
             sortOrder: req.sortOrder
         }
 
         /* Extract the existing record details first */
         const existing = await uploadModel.list(options)
+
         let existingRecord
-        if(existing && existing[0]?.results?.length > 0){
-            existingRecord = existing[0].results[0]
+        if(existing && existing?.results?.length > 0){
+            existingRecord = existing.results[0]
         } else if (existing?.success === false){
             throw {
                 status: 500,
@@ -431,35 +475,57 @@ const update = async (req, res, next) => {
         let payload = {}
 
             // id
-            payload.id = recordid
-            if(files.filename){
-                payload.name = files.filename
-                payload.mimetype = file.mimetype
+            payload.id = parseInt(recordid)
+            let newFile
+            
+            if(files?.length > 0){
+                newFile = files[0]
+            }
+
+            if(newFile?.filename){
+                payload.src = `${process.env.APP_URL}/media/${newFile.filename}`
+                payload.mimetype = newFile.mimetype
             } else {
-                payload.name = existingRecord.name
+                if(existingRecord.src.includes('http')){
+                    payload.src = existingRecord.src
+                } else {
+                    payload.src = `${process.env.APP_URL}/media/${existingRecord.src}`
+                }
                 payload.mimetype = existingRecord.mimetype
             }
             payload.resource = resource
-            payload.resourceid = resourceid
-            payload.userid = userid
+            payload.title = title
+            payload.resourceid = parseInt(resourceid)
+            payload.userid = parseInt(userid)
+
+            console.log(payload)
 
         /* Update the record with the new data */
-        const result = await uploadModel.update(payload)
-
-        /* Check if the update went OK and if so remove file we replaced from the filesystem */
+        const result = await uploadModel.update(payload, options)
+        
+        /* Check if the update went OK and if so remove file we replaced from the filesystem.*/
         if(result?.success == true){
-            /* First double check that the existing file is different from the one just uploaded, if it is
-               we can then remove the old one */
-            if(files.filename !== existingRecord.name){
-                let fullPath = path.join(process.cwd(), '/public/media')
-                fs.unlink(path.join(fullPath, existingRecord.name), err => {
-                    if (err) throw {
-                        status: 500,
-                        success: false,
-                        message: 'Unable to delete the existing file'
-                    }
-                  })
-            } 
+
+            /* Check that a new file was uploaded so we dont remove the existing file if the associated 
+             * data only was updated
+             */
+            if(files?.filename || files?.filename !== undefined){
+
+                /* Ensure that the new file is different to the xisting one and only then
+                   should it be removed */
+                if(files.filename !== existingRecord.name){
+                    let fullPath = path.join(process.cwd(), '/public/media')
+                    fs.unlink(path.join(fullPath, existingRecord.name), err => {
+                        if (err) throw {
+                            status: 500,
+                            success: false,
+                            message: 'Unable to delete the existing file'
+                        }
+                    })
+                } 
+
+            }
+
         } else {
 
             /* remove the new file we just uploaded */
@@ -486,6 +552,7 @@ const update = async (req, res, next) => {
         
 
     } catch(e) {
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
