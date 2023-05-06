@@ -4,6 +4,7 @@ require('dotenv').config();
 const { checkRoles, checkToken } = require('../../middlewares/verifyMiddleware');
 const { setQueryOpts } = require('../../middlewares/queriesMiddleware')
 
+const uploadFiles = require('../../config/multer')
 
 const express = require('express');
 const router = express.Router();
@@ -23,6 +24,6 @@ router.delete('/', checkToken, checkRoles(['Admin']),cookbookController.removeAl
 router.delete('/:id', checkToken, cookbookController.removeById);
 router.delete('/:id/recipes', checkToken, cookbookController.removeRecipes);
 router.delete('/:id/categories', checkToken, cookbookController.removeCategories);
-router.put('/:id', checkToken, cookbookController.update);
+router.put('/:id', checkToken, uploadFiles, cookbookController.update);
 
 module.exports = router;
