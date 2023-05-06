@@ -227,16 +227,18 @@ const remove = async (options) => {
 
           /* Remove the files */
           results.map(result => {
-            let fullPath = path.join(process.cwd(), '/public/media')
-            
-            fs.unlink(path.join(fullPath, result), err => {
-              if (err) throw {
-                  status: 500,
-                  success: false,
-                  message: 'Unable to delete the uploaded files'
-              }
+            if(!result.src.includes('http')){
+              let fullPath = path.join(process.cwd(), '/public/media')
               
-            })
+              fs.unlink(path.join(fullPath, result), err => {
+                if (err) throw {
+                    status: 500,
+                    success: false,
+                    message: 'Unable to delete the uploaded files'
+                }
+                
+              })
+            }
           })
 
           returnResult = {
@@ -260,7 +262,6 @@ const remove = async (options) => {
       return returnResult
       
   } catch(e) {
-    
     let message
     if(e.message === 'delete from \"files\" - Problem connecting to the database'){
       message = 'There was a problem with the resource, please try again later'
