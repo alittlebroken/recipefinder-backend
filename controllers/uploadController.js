@@ -117,8 +117,6 @@ const upload = async (req, res, next) => {
 
         }
 
-        console.log(payloads)
-
         /* File uploaded OK, so lets add it to the DB */
         result = await uploadModel.upload(payloads)
         
@@ -188,7 +186,7 @@ const list = async (req, res, next) => {
 
         /* Execute the appropriate models method */
         const result = await uploadModel.list(options)
-        
+
         if(!result || (Array.isArray(result?.results) !== true && result.success === false)){
             return res.status(500).json({
                 success: false,
@@ -497,8 +495,6 @@ const update = async (req, res, next) => {
             payload.title = title
             payload.resourceid = parseInt(resourceid)
             payload.userid = parseInt(userid)
-
-            console.log(payload)
 
         /* Update the record with the new data */
         const result = await uploadModel.update(payload, options)
