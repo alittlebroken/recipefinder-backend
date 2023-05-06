@@ -182,6 +182,13 @@ const update = async (req, res, next) => {
 
   try{
 
+    /* Extract the required params */
+    const { 
+     name, description, image
+    } = req.body
+ 
+    const userId = parseInt(req.body.userId)
+
     /* Perform validation */
     let validationErrors;
     if(!req.params.id || req.params.id === 'undefined'){
@@ -193,7 +200,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(!req.body.userId || req.body.userId === undefined){
+    if(!userId || userId === undefined){
       validationErrors = {
         status: 400,
         success: false,
@@ -202,7 +209,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(typeof req.body.userId !== 'number'){
+    if(typeof userId !== 'number'){
       validationErrors = {
         status: 400,
         success: false,
@@ -211,7 +218,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(!req.body.name || req.body.name === undefined){
+    if(!name || name === undefined){
       validationErrors = {
         status: 400,
         success: false,
@@ -220,7 +227,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(typeof req.body.name !== 'string'){
+    if(typeof name !== 'string'){
       validationErrors = {
         status: 400,
         success: false,
@@ -229,7 +236,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(!req.body.description || req.body.description === undefined){
+    if(!description || description === undefined){
       validationErrors = {
         status: 400,
         success: false,
@@ -238,7 +245,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(typeof req.body.description !== 'string'){
+    if(typeof description !== 'string'){
       validationErrors = {
         status: 400,
         success: false,
@@ -249,12 +256,6 @@ const update = async (req, res, next) => {
 
     /* extra the data from the req body and parameters */
     let id = parseInt(req.params.id)
-    const {
-      name,
-      description,
-      userId,
-      image
-    } = req.body;
 
     /* Update the record in the DB */
     const result = await cookbookModel.update(
