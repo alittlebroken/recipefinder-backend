@@ -60,12 +60,11 @@ const buildFilters = (queryBuilder, filters) => {
                 }
 
             } else {
-
                 /* Non id filed, so next we need to determine if the 
                  * value is of type integer or not so we can add the 
                  * appropriate filter operand*/
-                if(typeof parsedFilters[filter] !== 'string'){
-                    queryBuilder.where(filter, '=', parsedFilters[filter])
+                if(typeof parsedFilters[filter] !== 'string' || filter === 'resourceid'){
+                    queryBuilder.where(filter, '=', parseInt(parsedFilters[filter]))
                 } else {
                     queryBuilder.where(filter, 'like', `%${parsedFilters[filter]}%`)
                 }
