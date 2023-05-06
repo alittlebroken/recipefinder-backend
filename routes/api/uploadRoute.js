@@ -24,7 +24,6 @@ router.get(
     '/',
     checkToken,
     setQueryOpts,
-    setQueryOpts,
     uploadController.list
 )
 
