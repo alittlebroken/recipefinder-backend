@@ -113,42 +113,45 @@ const create = async (req, res, next) => {
 
     /* Validate the request variables */
 
-    if(req.body.userId === undefined){
+    const userId = parseInt(req?.body?.userId)
+    const {name, description, image} = req?.body;
+
+    if(userId === undefined){
       let err = new Error('Undefined userId');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(typeof req.body.userId !== 'number'){
+    if(typeof userId !== 'number'){
       let err = new Error('Wrong format for userId');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(req.body.name === undefined){
+    if(name === undefined){
       let err = new Error('Undefined name');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(typeof req.body.name !== 'string'){
+    if(typeof name !== 'string'){
       let err = new Error('Wrong format for name');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(req.body.description === undefined){
+    if(description === undefined){
       let err = new Error('Undefined description');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(typeof req.body.description !== 'string'){
+    if(typeof description !== 'string'){
       let err = new Error('Wrong format for description');
       err.status = 400;
       err.success = false;
@@ -156,14 +159,15 @@ const create = async (req, res, next) => {
     }
 
     /* extract the data from the request object and then create the new record */
-    const {userId, name, description, image} = req.body;
-    const results = await cookbookModel.create(userId, name, description, image);
 
+    const results = await cookbookModel.create(userId, name, description, image);
+    
     if(results.success === false){
       res.status(500).json({
         status: 500,
         success: false,
-        message: 'There was a problem with the resource, please try again later'
+        message: 'There was a problem with the resource, please try again later',
+        results: []
       });
     }
 
