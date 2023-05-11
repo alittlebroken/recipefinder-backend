@@ -17,13 +17,12 @@ const upload = async (req, res, next) => {
 
         /* Extract the params */
         const files = req.files
-        
+        const userId = parseInt(req.body.userId)
         const {
             src,
             resource,
             resourceid,
-            title,
-            userId
+            title
         } = req.body
 
         /* Validate the passed in values */
