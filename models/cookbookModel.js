@@ -24,17 +24,19 @@ const create = async (userId, name, description, image) => {
     }
 
     /* Attempt to add the cookbook */
-    await db('cookbooks').
+    const result = await db('cookbooks').
      insert({
        userId: userId,
        name: name,
        description: description,
        image: image
      })
+     .returning('id')
 
      return {
        success: true,
-       message: 'Cookbook successfully added'
+       message: 'Cookbook successfully added',
+       results: result
      }
 
   } catch(e) {
