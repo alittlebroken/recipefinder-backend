@@ -17,9 +17,9 @@ router.get('/', checkToken, checkRoles(['Admin']), setQueryOpts, cookbookControl
 router.get('/:id', checkToken, cookbookController.getById);
 router.get('/:id/recipes', checkToken, setQueryOpts, cookbookController.recipes);
 router.get('/:id/categories', checkToken, setQueryOpts, cookbookController.getCategories);
-router.post('/', checkToken, cookbookController.create);
-router.post('/:id/recipe', checkToken, cookbookController.addRecipe);
-router.post('/:id/categories', checkToken, cookbookController.addCategory);
+router.post('/', checkToken, uploadFiles, cookbookController.create);
+router.post('/:id/recipe', checkToken, uploadFiles, cookbookController.addRecipe);
+router.post('/:id/categories', checkToken, uploadFiles, cookbookController.addCategory);
 router.delete('/', checkToken, checkRoles(['Admin']),cookbookController.removeAll);
 router.delete('/:id', checkToken, cookbookController.removeById);
 router.delete('/:id/recipes', checkToken, cookbookController.removeRecipes);
