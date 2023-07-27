@@ -140,7 +140,8 @@ const create = async (recipe, steps, ingredients, cookbooks, categories) => {
       
       return {
         success: true,
-        message: 'Recipe successfully added'
+        message: 'Recipe successfully added',
+        results: recipeId
       }
 
     });
@@ -669,12 +670,24 @@ const findAll = async (options) => {
            .select('cat.id as id', 'cat.name as name')
            .where('rc.recipeId', result.id).transacting(trx);
 
+          let imageResults = await trx('files as f')
+           .select(
+            'f.id as imageId',
+            'f.src as source',
+            'f.title as title',
+            'f.alt as alt',
+           )
+           .where('f.resource', '=', 'recipe')
+           .andWhere('f.resourceid', '=', result.id)
+           .transacting(trx)
+
           let recipe = {
             ...result,
             ingredients: [...ingredientResults],
             cookbooks: [...cookbookResults],
             steps: [...stepResults],
-            categories: [...categoryResults]
+            categories: [...categoryResults],
+            images: [...imageResults]
           };
 
           recipes.push(recipe);
@@ -700,6 +713,7 @@ const findAll = async (options) => {
 
 
   } catch(e) {
+
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
