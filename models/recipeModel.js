@@ -703,7 +703,7 @@ const findAll = async (options) => {
       if(numPages < 1) numPages = 1
 
        return {
-        results: results,
+        results: recipes,
         totalRecords: recordCount.length,
         totalPages: numPages,
         currentPage: page
