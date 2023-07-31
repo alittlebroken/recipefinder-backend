@@ -625,7 +625,7 @@ const findAll = async (options) => {
          'cook_time',
          'rating'
        )
-       .limit(size)
+       .limit(parseInt(size))
        .offset(offset)
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .transacting(trx);
