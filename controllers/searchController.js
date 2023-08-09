@@ -15,6 +15,8 @@ const performSearch = async (req, res, next) => {
 
     const moduleMethod = 'performSearch';
 
+    console.log(req.body)
+
     try{
 
         /* Pagination, filter and sort  options to send to the method that requires it */
@@ -62,7 +64,7 @@ const performSearch = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors)
 
-        if(typeof req.body.categories !== 'string'){
+        /*if(typeof req.body.categories !== 'string'){
             validationErrors = {
                 status: 400,
                 success: false,
@@ -70,7 +72,7 @@ const performSearch = async (req, res, next) => {
                 results: []
             }  
         }
-        if(validationErrors) return next(validationErrors)
+        if(validationErrors) return next(validationErrors)*/
 
         /* Now find the recipes */
         let results;
@@ -83,22 +85,19 @@ const performSearch = async (req, res, next) => {
              * recipes being found by name or if they are being found by
              * one or more ingredients
              */
-            if(req.body.typeOfSearch === 'recipes'){
-
+            
+            if(req.body.typeOfSearch.toLowerCase() === 'recipes'){
                 results = await recipeModel.find(req.body.terms, options);
-
-            } else if (req.body.typeOfSearch === 'ingredients') {
-
+                console.log(results)
+            } else if (req.body.typeOfSearch.toLowerCase() === 'ingredients') {
                 results = await recipeModel.findByIngredients(req.body.terms, options);
-                
+                console.log(results)
             } else {
-
                 results = await recipeModel.findByCategory(req.body.terms, options);
-
+                console.log(results)
             }
         }
 
-        
         /* Run some checks against the results and determine what needs to be returned */
         if(results?.success === false){
             return next({
@@ -120,7 +119,7 @@ const performSearch = async (req, res, next) => {
                 returnMessage = 'No recipes found for the supplied category';
             }
 
-            res.status(404).json({
+            return res.status(404).json({
                 status: 404,
                 success: false,
                 message: returnMessage,
