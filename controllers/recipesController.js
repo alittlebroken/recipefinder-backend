@@ -383,10 +383,19 @@ const create = async (req, res, next) => {
 
     const moduleMethod = 'create';
 
+    /* Destructure the passed in params so we can cast them to the correct
+       types */
+    const userid = parseInt(req.body.userId)
+    const name = req.body.name
+    const servings = parseInt(req.body.servings)
+    const calories_per_serving = parseInt(req.body.calories_per_serving)
+    const prep_time = parseInt(req.body.prep_time)
+    const cook_time = parseInt(req.body.cook_time)
+
     try{
 
         /* Validate the Request parameters and body values */
-        if(!req.body.userId || req.body.userId === undefined){
+        if(!userid || userid === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -394,7 +403,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.userId !== 'number'){
+        if(typeof userid !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -402,7 +411,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.name || req.body.name === undefined){
+        if(!name || name === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -410,7 +419,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.name !== 'string'){
+        if(typeof name !== 'string'){
             throw {
                 status: 400,
                 success: false,
@@ -418,7 +427,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.servings || req.body.servings === undefined){
+        if(!servings || servings === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -426,7 +435,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.servings !== 'number'){
+        if(typeof servings !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -434,7 +443,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.calories_per_serving || req.body.calories_per_serving === undefined){
+        if(!calories_per_serving || calories_per_serving === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -442,7 +451,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.calories_per_serving !== 'number'){
+        if(typeof calories_per_serving !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -450,7 +459,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.prep_time || req.body.prep_time === undefined){
+        if(!prep_time || prep_time === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -458,7 +467,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.prep_time !== 'number'){
+        if(typeof prep_time !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -466,7 +475,7 @@ const create = async (req, res, next) => {
             };
         }
 
-        if(!req.body.cook_time || req.body.cook_time === undefined){
+        if(!cook_time || cook_time === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -474,7 +483,7 @@ const create = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.cook_time !== 'number'){
+        if(typeof cook_time !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -487,12 +496,12 @@ const create = async (req, res, next) => {
 
         /* Add the recipe and supporting data to the database */
         let recipe = {
-            userId: req.body.userId,
-            name: req.body.name,
-            servings: req.body.servings,
-            calories_per_serving: req.body.calories_per_serving,
-            prep_time: req.body.prep_time,
-            cook_time: req.body.cook_time
+            userId: userid,
+            name: name,
+            servings: servings,
+            calories_per_serving: calories_per_serving,
+            prep_time: prep_time,
+            cook_time: cook_time
         };
 
         let steps = req.body.steps ? req.body.steps : null;
@@ -1127,6 +1136,15 @@ const update = async (req, res, next) => {
 
     try{
 
+        /* Extract out all the number body parameters and convert them from strings */
+        const id = parseInt(req.params.id)
+        const userId = parseInt(req.body.userId)
+        const servings = parseInt(req.body.servings)
+        const calories_per_serving = parseInt(req.body.calories_per_serving)
+        const prep_time = parseInt(req.body.prep_time)
+        const cook_time = parseInt(req.body.cook_time)
+       
+
         /* Validate request parameters and body */
         if(!req.params || req.params === undefined){
             throw {
@@ -1168,7 +1186,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.userId || req.body.userId === undefined){
+        if(!userId || userId === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -1176,7 +1194,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.userId !== 'number'){
+        if(typeof userId !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -1184,7 +1202,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.servings || req.body.servings === undefined){
+        if(!servings || servings === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -1192,7 +1210,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.servings !== 'number'){
+        if(typeof servings !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -1200,7 +1218,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.calories_per_serving || req.body.calories_per_serving === undefined){
+        if(!calories_per_serving || calories_per_serving === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -1208,7 +1226,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.calories_per_serving !== 'number'){
+        if(typeof calories_per_serving !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -1216,7 +1234,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.prep_time || req.body.prep_time === undefined){
+        if(!prep_time || prep_time === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -1224,7 +1242,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.prep_time !== 'number'){
+        if(typeof prep_time !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -1232,7 +1250,7 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(!req.body.cook_time || req.body.cook_time === undefined){
+        if(!cook_time || cook_time === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -1240,30 +1258,13 @@ const update = async (req, res, next) => {
             }
         }
 
-        if(typeof req.body.cook_time !== 'number'){
+        if(typeof cook_time !== 'number'){
             throw {
                 status: 400,
                 success: false,
                 message: 'Wrong format for cook_time'
             }
         }
-        /*
-        if(!req.body.rating || req.body.rating === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined rating'
-            }
-        }
-
-        if(typeof req.body.rating !== 'number'){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Wrong format for rating'
-            }
-        }
-        */
 
         /* Check we have data to pass for the various recipe related data */
         let steps = req.body.steps ? req.body.steps : undefined
@@ -1273,31 +1274,20 @@ const update = async (req, res, next) => {
 
         /* Set the data to be added in one easy to use object */
         const recipeToAdd = {
-            recipeId: parseInt(req.params.id),
+            recipeId: id,
             name: req.body.name,
             description: req.body.description ? req.body.description : null,
-            userId: parseInt(req.body.userId),
-            servings: parseInt(req.body.servings),
-            calories_per_serving: parseInt(req.body.calories_per_serving),
-            prep_time: parseInt(req.body.prep_time),
-            cook_time: parseInt(req.body.cook_time),
+            userId: userId,
+            servings: servings,
+            calories_per_serving: calories_per_serving,
+            prep_time: prep_time,
+            cook_time: cook_time,
             steps: [...steps],
             ingredients: [...ingredients],
             cookbooks: [...cookbooks],
             categories: [...categories]
         }
 
-        /* Actually update the desired record now */
-        /* const result = await recipeModel.update({
-            recipeId: parseInt(req.params.id),
-            name: req.body.name,
-            description: req.body.description ? req.body.description : null,
-            userId: parseInt(req.body.userId),
-            servings: parseInt(req.body.servings),
-            calories_per_serving: parseInt(req.body.calories_per_serving),
-            prep_time: parseInt(req.body.prep_time),
-            cook_time: parseInt(req.body.cook_time)
-        });*/
         const result = await recipeModel.update(recipeToAdd);
 
         if(!result || result.success === false){
