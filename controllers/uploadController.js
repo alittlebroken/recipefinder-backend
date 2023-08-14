@@ -17,7 +17,7 @@ const upload = async (req, res, next) => {
 
         /* Extract the params */
         const files = req.files
-        const userId = parseInt(req.body.userId)
+        const userId = req.body.userId ? parseInt(req.body.userId) : parseInt(req.user.id)
         const {
             src,
             resource,
@@ -149,7 +149,7 @@ const upload = async (req, res, next) => {
 
 
     } catch(e) {
-        console.log(e)
+        
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 
@@ -171,6 +171,8 @@ const list = async (req, res, next) => {
 
     try{
 
+        
+
         /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
             page: req.page,
@@ -185,6 +187,7 @@ const list = async (req, res, next) => {
 
         /* Execute the appropriate models method */
         const result = await uploadModel.list(options)
+        
 
         if(!result || (Array.isArray(result?.results) !== true && result.success === false)){
             return res.status(500).json({
@@ -326,6 +329,7 @@ const update = async (req, res, next) => {
             resourceid,
             title
         } = req.body
+
 
         let recordid = req?.params?.id ? req?.params?.id : undefined
         let userid = req?.user?.id ? req?.user?.id : undefined
