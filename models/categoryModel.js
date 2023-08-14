@@ -324,7 +324,7 @@ const findAll = async (options) => {
       .modify(dbHelper.buildFilters, filter)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
       .select('*')
-      .limit(size)
+      .limit(parseInt(size))
       .offset(offset)
 
      if(results.length >= 1){
@@ -343,7 +343,7 @@ const findAll = async (options) => {
      }
 
   } catch(e){
-    
+
     /* We only wish to output our custom messages and not those passed to from
      * various libraries for security reasons */
     message = 'There was a problem with the resource, please try again later';
