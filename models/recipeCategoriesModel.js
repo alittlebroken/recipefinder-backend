@@ -422,7 +422,7 @@ const findByRecipe = async (id, options) => {
  */
 const findByCategory = async (id, options) => {
 
-  let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+  let {page, size, offset, filter, filterBy, filterValues, limit, sortBy, sortOrder} = options
 
   try{
 
@@ -461,7 +461,7 @@ const findByCategory = async (id, options) => {
 
     if(result && result.length > 0){
       /* Calculate number of pages */
-      let numPages = parseInt(Math.floor(recordCount.length / size))
+      let numPages = parseInt(Math.floor(totalCount.length / size))
       if(numPages < 1) numPages = 1
       
       return {
@@ -475,7 +475,6 @@ const findByCategory = async (id, options) => {
     }
 
   } catch(e) {
-    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
