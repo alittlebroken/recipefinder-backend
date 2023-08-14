@@ -15,8 +15,6 @@ const performSearch = async (req, res, next) => {
 
     const moduleMethod = 'performSearch';
 
-    console.log(req.body)
-
     try{
 
         /* Pagination, filter and sort  options to send to the method that requires it */
@@ -64,16 +62,6 @@ const performSearch = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors)
 
-        /*if(typeof req.body.categories !== 'string'){
-            validationErrors = {
-                status: 400,
-                success: false,
-                message: 'Wrong format for search categories',
-                results: []
-            }  
-        }
-        if(validationErrors) return next(validationErrors)*/
-
         /* Now find the recipes */
         let results;
         /* If no search terms have been set then return all recipes */
@@ -88,13 +76,13 @@ const performSearch = async (req, res, next) => {
             
             if(req.body.typeOfSearch.toLowerCase() === 'recipes'){
                 results = await recipeModel.find(req.body.terms, options);
-                console.log(results)
+                
             } else if (req.body.typeOfSearch.toLowerCase() === 'ingredients') {
                 results = await recipeModel.findByIngredients(req.body.terms, options);
-                console.log(results)
+                
             } else {
                 results = await recipeModel.findByCategory(req.body.terms, options);
-                console.log(results)
+                
             }
         }
 
