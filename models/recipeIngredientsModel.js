@@ -420,7 +420,7 @@ const findById = async id => {
 
     try{
 
-      let {page, size, offset, filterBy, filterValues, result, sortBy, sortOrder} = options
+      let {page, size, offset, filter, result, sortBy, sortOrder} = options
 
       /* Validate the passed in data */
       if(!validation.validator(id, 'number')){
@@ -445,12 +445,11 @@ const findById = async id => {
      .modify(dbHelper.buildFilters, filter)
      .select('ri.id')
      .where('ri.ingredientId', id)
-     .count()
-     .groupBy('ri.id')
+     
 
      if(results && results.length > 0){
       /* Calculate number of pages */
-        let numPages = parseInt(Math.floor(recordCount.length / size))
+        let numPages = parseInt(Math.floor(resultCount.length / size))
         if(numPages < 1) numPages = 1
 
        return {
@@ -464,6 +463,7 @@ const findById = async id => {
      }
 
     } catch(e) {
+      
       /* Check for library errors and if found swap them out for a generic
          one to send back over the API for security */
       let message;
