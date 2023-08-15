@@ -36,7 +36,7 @@ const find = async (req, res, next) => {
         
         if(results.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'No steps were found'
             }
@@ -98,7 +98,7 @@ const findById = async (req, res, next) => {
 
         if(results.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'No steps were found'
             }

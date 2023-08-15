@@ -123,7 +123,7 @@ const list = async (req, res, next) => {
 
         if(result.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'No recipe found matching supplied id'
             }
@@ -195,7 +195,7 @@ const listRecipeIngredients = async (req, res, next) => {
 
         if(results.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'Recipe currently has no ingredients'
             }
@@ -272,7 +272,7 @@ const listRecipeSteps = async (req, res, next) => {
 
         if(results.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'This recipe currently has no steps'
             }
@@ -351,7 +351,7 @@ const listRecipeCategories = async (req, res, next) => {
 
         if(results.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'This recipe currently has no categories'
             }

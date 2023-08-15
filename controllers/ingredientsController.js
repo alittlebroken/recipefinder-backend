@@ -28,8 +28,8 @@ const get = async (req, res, next) => {
         const results = await ingredientModel.findAll(options);
 
         if(!results || results.length < 1){
-            res.status(404).json({
-                status: 404,
+            res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'No ingredients have been found',
                 results: []
@@ -89,8 +89,8 @@ const getById = async (req, res, next) => {
         const result = await ingredientModel.findById(id);
 
         if(!result || result.length < 1){
-            res.status(404).json({
-                status: 404,
+            res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'No ingredients have been found',
                 results: []

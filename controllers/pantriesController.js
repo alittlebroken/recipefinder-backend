@@ -41,7 +41,7 @@ const listAll = async (req, res, next) => {
 
         if(result.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'There are no pantries to list'
             }
@@ -123,7 +123,7 @@ const list = async (req, res, next) => {
 
         if(result.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'No pantry matched the supplied id'
             }
@@ -495,7 +495,7 @@ const update = async (req, res, next) => {
         
         if(result?.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'There was no pantry to update'
             }

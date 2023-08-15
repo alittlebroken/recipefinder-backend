@@ -29,7 +29,7 @@ const list = async (req, res, next) => {
 
     if(!results || results.length < 1) {
       let err = new Error('There were no cookbooks to find');
-      err.status = 404;
+      err.status = 204;
       err.success = false;
       throw err;
     };
@@ -79,8 +79,8 @@ const getById = async (req, res, next) => {
     const results = await cookbookModel.findById(id);
 
     if(!results || results.length < 1){
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'No matching cookbook found'
       })
@@ -358,8 +358,8 @@ const recipes = async (req, res, next) => {
     let results = await cookbookModel.recipes(id, options);
 
     if(results.length < 1){
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'The cookbook currently has no recipes'
       })
@@ -423,8 +423,8 @@ const getCategories = async (req, res, next) => {
     let results = await cookbookCategoriesModel.findByCookbook(id, options);
     
     if(results.length < 1) {
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'The cookbook currently has no categories'
       });
@@ -580,8 +580,8 @@ const addCategory = async (req, res, next) => {
     }
 
     if(results.length < 1) {
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'No data found matching supplied values'
       });
@@ -629,8 +629,8 @@ const removeRecipes = async (req, res, next) => {
     }
 
     if(!results || results.length < 1) {
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'No matching records found'
       });

@@ -464,7 +464,7 @@ const update = async (req, res, next) => {
             }
         } else {
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'No existing record found',
                 results: [],

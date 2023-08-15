@@ -107,8 +107,8 @@ const performSearch = async (req, res, next) => {
                 returnMessage = 'No recipes found for the supplied category';
             }
 
-            return res.status(404).json({
-                status: 404,
+            return res.status(204).json({
+                status: 204,
                 success: false,
                 message: returnMessage,
                 results: []

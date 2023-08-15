@@ -44,8 +44,8 @@ const list = async (req, res, next) => {
         }
 
         if(results.length < 1){
-            res.status(404).json({
-                status: 404,
+            res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'There are no categories to return'
             })
