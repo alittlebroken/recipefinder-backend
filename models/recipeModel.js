@@ -558,7 +558,7 @@ const find = async (terms, options) => {
        }
 
        /* Calculate number of pages */
-       let numPages = parseInt(Math.floor(resultCount.length / size))
+       let numPages = parseInt(Math.floor(resultCount.length / size)) + 1
        if(numPages < 1) numPages = 1
 
        return {
@@ -699,7 +699,7 @@ const findAll = async (options) => {
        }
 
        /* Calculate number of pages */
-      let numPages = parseInt(Math.floor(recordCount.length / size))
+      let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
        return {
@@ -1162,7 +1162,7 @@ const findByUserId = async (id, options) => {
     /* If we any results then send them back  */
     if(results && results.length > 0){
       /* Calculate number of pages */
-      let numPages = parseInt(Math.floor(recordCount.length / size))
+      let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
       return {
