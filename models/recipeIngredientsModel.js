@@ -422,6 +422,8 @@ const findById = async id => {
 
       let {page, size, offset, filter, result, sortBy, sortOrder} = options
 
+      sortBy = `i.${sortBy}`
+
       /* Validate the passed in data */
       if(!validation.validator(id, 'number')){
         throw {
