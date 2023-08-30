@@ -424,6 +424,8 @@ const findByCategory = async (id, options) => {
 
   let {page, size, offset, filter, filterBy, filterValues, limit, sortBy, sortOrder} = options
 
+  sortBy = `rc.${sortBy}`
+
   try{
 
     /* Validate the passed in data */
