@@ -207,10 +207,10 @@ const findAll = async (options) => {
     .groupBy('id')
 
     /* Search the table for the specified term */
-    const results = await db('ingredients')
+    const results = await db('ingredients as i')
       .modify(dbHelper.buildFilters, filter)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .select('*')
+      .select('i.id', 'i.name')
       .limit(size)
       .offset(offset)
 
