@@ -28,7 +28,7 @@ const get = async (req, res, next) => {
         const results = await ingredientModel.findAll(options);
 
         if(!results || results.length < 1){
-            res.status(204).json({
+            return res.status(204).json({
                 status: 204,
                 success: false,
                 message: 'No ingredients have been found',
@@ -46,7 +46,7 @@ const get = async (req, res, next) => {
             throw err;
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             results: results.results,
             totalPages: results.totalPages,
             totalRecords: results.totalRecords,
@@ -54,6 +54,7 @@ const get = async (req, res, next) => {
         });
 
     } catch(e) {
+        console.log(e)
         return next(e);
     }
 
