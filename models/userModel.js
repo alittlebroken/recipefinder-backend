@@ -707,10 +707,11 @@ const profile = async (id) => {
     }
 
     /* Extract the details we need from the DB */
-    const result = await db('users')
+    const result = await db('users as u')
+     .join('pantries as p', 'p.userId', '=', 'u.id')
      .select(
-      'id', 'username', 'email', 'roles', 'forename', 'surname', 'created_at'
-     ).where('id', '=', id)
+      'u.id', 'u.username', 'u.email', 'u.roles', 'u.forename', 'u.surname', 'u.created_at', 'p.id as pantryId'
+     ).where('u.id', '=', id)
 
      if(result?.length > 0){
       return {
