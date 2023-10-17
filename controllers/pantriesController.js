@@ -76,20 +76,16 @@ const list = async (req, res, next) => {
 
     try{
 
-        /* Get the pagination values */
-        let page = req.query.page;
-        let size = req.query.pageSize;
-
-        if(page < 1) page = 1
-        if(size < 1) size = 1
-
-        let offset = parseInt((page - 1) * size)
-
-        /* Pagination options to send to the method that requires it */
+        /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
-            page,
-            size,
-            offset
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: req.filter,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Validate any request parameters */
@@ -112,7 +108,7 @@ const list = async (req, res, next) => {
         /* Attempt to retrieve the record from the database */
         let id = parseInt(req.params.id);
         const result = await pantryModel.list(id, options);
-
+        console.log(result)
         if(!result || result.success === false){
             throw {
                 status: 500,
