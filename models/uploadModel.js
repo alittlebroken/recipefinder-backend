@@ -473,9 +473,109 @@ const update = async (payload, options) => {
   }
 }
 
+
+/* retrieve a file from the files table
+ *
+ * @params {string} resource   - The resource the file has been associated with
+ * @params {number} resourceid - The id within the resource the file belongs to
+ * @returns {array} containing the files found for the resource and id specified
+ */
+const getFile = async (resource, resourceid) => {
+
+  try{
+
+    /* Validate the passed in values */
+    if(!resource || resource === undefined){
+      return {
+        success: false,
+        message: 'Resource name is required',
+        results: []
+      }
+    }
+
+    if(typeof resource !== 'string'){
+      return {
+        success: false,
+        message: 'Resource name must be in the correct format',
+        results: []
+      }
+    }
+
+    if(!resourceid || resourceid === undefined){
+      return {
+        success: false,
+        message: 'Resource id is required',
+        results: []
+      }
+    }
+
+    if(typeof parseInt(resourceid) !== 'number'){
+      return {
+        success: false,
+        message: 'Resource id must be in the correct format',
+        results: []
+      }
+    }
+
+    /* Extract the details from the database */
+    const results = await db('files as f')
+    .select(
+      'f.src',
+      'f.title',
+      'f.alt'
+    )
+    .where('f.resource', '=', resource)
+    .where('f.resourceid', '=', parseInt(resourceid))
+
+    if(!results) {
+      return {
+        success: false,
+        message: 'There was a problem with the resource, please try again later',
+        results: []
+      }
+    }
+
+    if(results?.length < 1){
+      return {
+        success: false,
+        message: 'There were no files matching the chosen parameters',
+        results: []
+      }
+    } else {
+      return {
+        success: true,
+        message: 'Files successfully found',
+        results: results
+      }
+    }
+
+  } catch(error) {
+
+      /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security 
+      */
+       let message;
+    
+       if(e.name === 'UPLOADMODEL_ERROR'){
+         message = e.message;
+       } else {
+         message = 'There was a problem with the resource, please try again later';
+       }
+   
+       return {
+         success: false,
+         message: message,
+         results: []
+       }
+
+  }
+
+} 
+
 module.exports = {
     upload,
     list,
     remove,
-    update
+    update,
+    getFile
 }
