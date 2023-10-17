@@ -141,6 +141,7 @@ const list = async (options) => {
        .count('id')
        .groupBy('id')
 
+
       /* Now get the actual data we want */
       const results = await db('files')
       .select('*')
@@ -148,6 +149,7 @@ const list = async (options) => {
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
       .limit(size)
       .offset(offset)
+
 
      /* Check we have data to return */
      if(results && results.length > 0){
