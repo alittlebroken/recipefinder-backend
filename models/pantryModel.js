@@ -2,6 +2,8 @@
 require('dotenv').config();
 const db = require('../database');
 const dbHelper = require('../helpers/database')
+const uploadsModel = require('./uploadModel')
+
 /**
  * Creates a new pantry for a new user
  * @param {integer} userId - The id of the user to create the pantry for
@@ -395,6 +397,22 @@ const list = async (pantryId, options) => {
        .where('pi.pantryId', pantryResults[0].pantryId)
        .limit(size)
        .offset(offset)
+
+      /* For each ingredient we have found get all the details on any images 
+      * associated with it */
+     /* Stores the final results for getting a list of ingredients belonging to a pantry */
+      let finalResults = []
+      for(let i = 0; i < ingredientResults.length; i++){
+        let ingredient
+        const images = await uploadsModel.getFile('Ingredients', ingredientResults[i].ingredientId)
+
+        ingredient = {
+          ...ingredientResults[i],
+          images: images.results
+        }
+
+        finalResults.push(ingredient)
+      }
 
       pantry = [
         {
