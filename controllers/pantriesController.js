@@ -108,7 +108,7 @@ const list = async (req, res, next) => {
         /* Attempt to retrieve the record from the database */
         let id = parseInt(req.params.id);
         const result = await pantryModel.list(id, options);
-        console.log(result)
+        
         if(!result || result.success === false){
             throw {
                 status: 500,
