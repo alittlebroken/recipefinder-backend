@@ -346,8 +346,8 @@ const list = async (pantryId, options) => {
 
   try{
 
-    /* Extract the pagination options */
-    let {page,size,offset} = options
+    /* Extract the pagination settings */
+    let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
     /* Validate the passed in value(s) */
     if(!pantryId || pantryId === undefined || typeof pantryId !== 'number'){
