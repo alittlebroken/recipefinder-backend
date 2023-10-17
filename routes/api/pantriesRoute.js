@@ -17,6 +17,7 @@ router.get(
 router.get(
     '/:id', 
     checkToken, 
+    setQueryOpts,
     pantriesController.list);
 router.post(
     '/', 
