@@ -351,6 +351,10 @@ const list = async (pantryId, options) => {
     /* Extract the pagination settings */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
+    console.log(options)
+
+    /* Set the filter to use the correct alias */
+
     /* Validate the passed in value(s) */
     if(!pantryId || pantryId === undefined || typeof pantryId !== 'number'){
       throw {
@@ -371,13 +375,9 @@ const list = async (pantryId, options) => {
       )
       .where('p.id', pantryId)
 
-      /* Now find out how many ingredients the pantry has */
-      const pantryIngredientsCount = await db('pantry_ingredients as pi')
-       .count('pi.id')
-       .where('pi.pantryId', pantryResults[0].pantryId)
-
       /* Get a total count of the records we will get */
       const recordCount = await db('pantry_ingredients as pi')
+      .modify(dbHelper.buildFilters, filter)
       .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
       .select('pi.id')
       .where('pi.pantryId', pantryResults[0].pantryId)
@@ -385,6 +385,7 @@ const list = async (pantryId, options) => {
       .groupBy('pi.id')
 
       const ingredientResults = await db('pantry_ingredients as pi')
+       .modify(dbHelper.buildFilters, filter)
        .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
        .select(
         'pi.id as id',
@@ -417,8 +418,8 @@ const list = async (pantryId, options) => {
       pantry = [
         {
          ...pantryResults[0],
-         numIngredients: Number.parseInt(pantryIngredientsCount[0].count),
-         ingredients: ingredientResults
+         numIngredients: Number.parseInt(recordCount?.length),
+         ingredients: finalResults
         }
       ]
 
