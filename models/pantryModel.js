@@ -351,10 +351,6 @@ const list = async (pantryId, options) => {
     /* Extract the pagination settings */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
-    console.log(options)
-
-    /* Set the filter to use the correct alias */
-
     /* Validate the passed in value(s) */
     if(!pantryId || pantryId === undefined || typeof pantryId !== 'number'){
       throw {
@@ -437,7 +433,7 @@ const list = async (pantryId, options) => {
      return {
       results: pantry,
       totalRecords: recordCount.length,
-      totalPages: parseInt(Math.floor(recordCount.length/size)),
+      totalPages: parseInt(Math.ceil(recordCount.length/size)),
       currentPage: page
      };
 
