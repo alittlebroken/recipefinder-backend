@@ -365,6 +365,89 @@ const removeAll = async (req, res, next) => {
 
 };
 
+/*
+ * Removes a specififc ingredient from then pantry
+*/
+const removeItem = async (req, res, next) => {
+
+    const moduleMethid = 'removeItem';
+
+    try{
+
+        /* Validate request parameters */
+        /* Validate request parameters */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.pantryId || req.params.pantryId === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined pantryId'
+            }
+        }
+
+        if(!req.body || req.body === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request body'
+            }
+        }
+
+        if(!req.body.ingredientId || req.body.ingredientId === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredientID'
+            }
+        }
+
+        if(typeof parseInt(req.body.ingredientId) !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredient id'
+            }
+        }
+
+        /* Remove the ingredient from the pantry */
+        const result = await pantryModel.removeItem({
+            pantryId: parseInt(pantryId),
+            ingredientId: parseInt(ingredientId)
+        })
+
+        if(result.status === true){
+            return res.status(200).json({
+                status: 200,
+                success: true,
+                message: 'Ingredient successfully removed from the pantry'
+            });
+        } else {
+            return res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Unable to remove ingredient from the pantry'
+            });
+        }
+
+    } catch(error) {
+      /* Log out the issue(s) */
+      appLogger.logMessage(
+        'error', 
+        `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+        );
+
+        return next(e);  
+    }
+
+}
+
 /* 
  * Remove all items from a specific pantry
  */
@@ -546,5 +629,6 @@ module.exports = {
     add,
     removeAll,
     removeItems,
+    removeItem,
     update
 };
