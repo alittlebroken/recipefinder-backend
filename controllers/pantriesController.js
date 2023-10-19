@@ -370,7 +370,7 @@ const removeAll = async (req, res, next) => {
 */
 const removeItem = async (req, res, next) => {
 
-    const moduleMethid = 'removeItem';
+    const moduleMethod = 'removeItem';
 
     try{
 
