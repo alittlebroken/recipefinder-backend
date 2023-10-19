@@ -384,7 +384,7 @@ const removeItem = async (req, res, next) => {
             }
         }
 
-        if(!req.params.pantryId || req.params.pantryId === undefined){
+        if(!req.params.pantryid || req.params.pantryid === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -392,7 +392,7 @@ const removeItem = async (req, res, next) => {
             }
         }
 
-        if(!req.params.ingredientId || req.params.ingredientId === undefined){
+        if(!req.params.ingredientid || req.params.ingredientid === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -400,7 +400,7 @@ const removeItem = async (req, res, next) => {
             }
         }
 
-        if(typeof parseInt(req.params.ingredientId) !== 'number'){
+        if(typeof parseInt(req.params.ingredientid) !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -410,8 +410,8 @@ const removeItem = async (req, res, next) => {
 
         /* Remove the ingredient from the pantry */
         const result = await pantryModel.removeItem({
-            pantryId: parseInt(req.params.pantryId),
-            ingredientId: parseInt(req.params.ingredientId)
+            pantryId: parseInt(req.params.pantryid),
+            ingredientId: parseInt(req.params.ingredientid)
         })
 
         if(result.status === true){
