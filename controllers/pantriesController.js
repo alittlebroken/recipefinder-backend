@@ -392,15 +392,7 @@ const removeItem = async (req, res, next) => {
             }
         }
 
-        if(!req.body || req.body === undefined){
-            throw {
-                status: 400,
-                success: false,
-                message: 'Undefined request body'
-            }
-        }
-
-        if(!req.body.ingredientId || req.body.ingredientId === undefined){
+        if(!req.params.ingredientId || req.params.ingredientId === undefined){
             throw {
                 status: 400,
                 success: false,
@@ -408,7 +400,7 @@ const removeItem = async (req, res, next) => {
             }
         }
 
-        if(typeof parseInt(req.body.ingredientId) !== 'number'){
+        if(typeof parseInt(req.params.ingredientId) !== 'number'){
             throw {
                 status: 400,
                 success: false,
@@ -418,8 +410,8 @@ const removeItem = async (req, res, next) => {
 
         /* Remove the ingredient from the pantry */
         const result = await pantryModel.removeItem({
-            pantryId: parseInt(pantryId),
-            ingredientId: parseInt(ingredientId)
+            pantryId: parseInt(req.params.pantryId),
+            ingredientId: parseInt(req.params.ingredientId)
         })
 
         if(result.status === true){
