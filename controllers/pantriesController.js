@@ -413,8 +413,8 @@ const removeItem = async (req, res, next) => {
             pantryId: parseInt(req.params.pantryid),
             ingredientId: parseInt(req.params.ingredientid)
         })
-
-        if(result.status === true){
+        
+        if(result.success === true){
             return res.status(200).json({
                 status: 200,
                 success: true,
