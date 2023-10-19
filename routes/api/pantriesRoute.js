@@ -37,6 +37,10 @@ router.delete(
     '/:pantryId', 
     checkToken, 
     pantriesController.removeItems);
+router.delete(
+    '/:pantryid/:ingredientid',
+    checkToken,
+    pantriesController.removeItem);
 router.put(
     '/:id', 
     checkToken, 
