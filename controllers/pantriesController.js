@@ -428,7 +428,7 @@ const removeItem = async (req, res, next) => {
             });
         }
 
-    } catch(error) {
+    } catch(e) {
       /* Log out the issue(s) */
       appLogger.logMessage(
         'error', 
