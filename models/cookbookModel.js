@@ -202,21 +202,40 @@ const findAll = async (options) => {
     /* extract the pagination settings */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
+    /* As we have aliased the tablenames we need to alias any filters we pass in */
+    let oldFilter = JSON.parse(filter)
+    let newFilter = {}
+    newFilter['c.userId'] = oldFilter.userId
+    filter = JSON.stringify(newFilter)
+
+    /* Now realias the sortby field */
+    sortBy = `c.${sortBy}`
+
     /* Get a count of all the records we are interested in */
-    const recordCount = await db('cookbooks')
+    const recordCount = await db('cookbooks as c')
       .modify(dbHelper.buildFilters, filter)
-      .select('id')
-      .count('id')
-      .groupBy('id')
+      .select('c.id')
+      .count('c.id')
+      .groupBy('c.id')
 
     /* No need for validation so return all cookbooks */
-    const results = await db('cookbooks')
+    const results = await db('cookbooks as c')
+      .join('files as f', 'f.resourceid', '=', 'c.id')
       .modify(dbHelper.buildFilters, filter)
-      .select('*')
+      .select(
+        'c.id',
+        'c.userId',
+        'c.name',
+        'c.description',
+        'f.src',
+        'f.title',
+        'f.alt'
+      )
+      .where('f.resource', '=', 'Cookbook')
       .limit(size)
       .offset(offset)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-
+    
     /* Check if any results have been returned */
     if(!results || results.length == 0){
       return [];
@@ -237,7 +256,7 @@ const findAll = async (options) => {
     /* Non custom messages should be returned as a generic message to the front
        end */
     const message = 'There was an issue with the resource, please try again later';
-
+   
     return {
       success: false,
       message: message
