@@ -13,7 +13,7 @@ const passport = require('passport');
 const cookbookController = require('../../controllers/cookbookController');
 
 /* Add the various routes */
-router.get('/', checkToken, checkRoles(['Admin']), setQueryOpts, cookbookController.list);
+router.get('/', checkToken, setQueryOpts, cookbookController.list);
 router.get('/:id', checkToken, cookbookController.getById);
 router.get('/:id/recipes', checkToken, setQueryOpts, cookbookController.recipes);
 router.get('/:id/categories', checkToken, setQueryOpts, cookbookController.getCategories);
