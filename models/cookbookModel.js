@@ -467,10 +467,22 @@ const recipes = async (cookbookId, options) => {
 
   /* For each recipe create a new recipe object and assign the appropriate
      categories for the recipe */
-  results.map(recipe => {
+  results.map(async recipe => {
 
     /* Filter out the cats for the current recipe */
     let recipeCats = cats.filter(cat => cat.recipeId === recipe.recipeId);
+
+    /* Get the images for the recipe */
+    let recipeImages = await db('files as f')
+     .select(
+      'f.id as imageId',
+      'f.userId as imageUser',
+      'f.src as imageSrc',
+      'f.title as imageTitle',
+      'f.alt as imageAlt'
+     )
+      .where('f.resourceid', '=', recipe.recipeId)
+      /where('f.resource', '=', 'recipe')
 
     recipes.push(
       {
@@ -478,7 +490,8 @@ const recipes = async (cookbookId, options) => {
         name: recipe.name,
         description: recipe.description,
         rating: recipe.rating,
-        categories: recipeCats
+        categories: recipeCats,
+        images: recipeImages
       }
     );
   })
