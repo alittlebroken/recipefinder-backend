@@ -451,7 +451,7 @@ const recipes = async (cookbookId, options) => {
   const results = await db('cookbook_recipes as cbr')
     .join('recipes as r', 'r.id', 'cbr.recipeId')
     .modify(dbHelper.buildFilters, filter)
-    .select('r.id as recipeId', 'r.name', 'r.rating')
+    .select('r.id as recipeId', 'r.name', 'r.rating', 'r.description')
     .where('cbr.cookbookId', cookbookId)
     .modify(dbHelper.buildSort, { sortBy, sortOrder })
     .limit(size)
@@ -472,6 +472,7 @@ const recipes = async (cookbookId, options) => {
       {
         id: recipe.recipeId,
         name: recipe.name,
+        description: recipe.description,
         rating: recipe.rating,
         categories: recipeCats
       }
