@@ -450,9 +450,11 @@ const recipes = async (cookbookId, options) => {
   /* Extract a list of categories and recipes */
   const results = await db('cookbook_recipes as cbr')
     .join('recipes as r', 'r.id', 'cbr.recipeId')
+    .join('files as f', 'f.resourceid', 'r.id')
     .modify(dbHelper.buildFilters, filter)
     .select('r.id as recipeId', 'r.name', 'r.rating', 'r.description')
     .where('cbr.cookbookId', cookbookId)
+    .where('f.resource', '=', 'recipe')
     .modify(dbHelper.buildSort, { sortBy, sortOrder })
     .limit(size)
     .offset(offset)
