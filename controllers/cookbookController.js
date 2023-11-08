@@ -26,7 +26,7 @@ const list = async (req, res, next) => {
 
     /* Get the cookbooks from the database */
     const results = await cookbookModel.findAll(options);
-
+    
     if(!results || results.length < 1) {
       let err = new Error('There were no cookbooks to find');
       err.status = 204;
@@ -356,9 +356,9 @@ const recipes = async (req, res, next) => {
     /* get the desired recipes */
     let id = parseInt(req.params.id)
     let results = await cookbookModel.recipes(id, options);
-
+    console.log('cookbookController.js > recipes: ', results)
     if(results.length < 1){
-      res.status(204).json({
+      return res.status(204).json({
         status: 204,
         success: false,
         message: 'The cookbook currently has no recipes'
@@ -366,7 +366,7 @@ const recipes = async (req, res, next) => {
     }
 
     if(results.success === false){
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         success: false,
         message: 'There was a problem with the resource, please try again later'
