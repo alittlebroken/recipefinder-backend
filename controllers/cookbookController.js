@@ -613,7 +613,7 @@ const removeRecipes = async (req, res, next) => {
     let results = await cookbookRecipesModel.removeByCookbook(id);
 
     if(results.success === false){
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         success: false,
         message: 'There was a problem with the resource, please try again later'
@@ -621,7 +621,7 @@ const removeRecipes = async (req, res, next) => {
     }
 
     if(!results || results.length < 1) {
-      res.status(204).json({
+      return res.status(204).json({
         status: 204,
         success: false,
         message: 'No matching records found'
