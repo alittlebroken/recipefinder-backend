@@ -45,11 +45,12 @@ const listAll = async (req, res, next) => {
         }
         
         if(results.length < 1){
-            throw {
-                status: 204,
+            return res.status(200).json({
+                status: 200,
                 success: false,
-                message: 'There are currently no recipes'
-            }
+                message: 'No recipes have been found',
+                results: []
+            }); 
         }
 
         res.status(200).json({
