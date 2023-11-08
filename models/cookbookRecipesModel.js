@@ -120,12 +120,16 @@ const remove = async id => {
  * Removes all recipes for the specified cookbook id
  * @param {number} id - The unique identifier of the cookbook the recipes are
  * being removed from
+ * @param {object} options  - Settings for manipulating the records further
  * @returns {object} Contains the success state of the requested action and
  * any accompanying message to explain further
  */
-const removeByCookbook = async id => {
+const removeByCookbook = async (id, options) => {
 
    try {
+
+    /* Extract the pagination settings */
+    let {page, size, offset, filterBy, filter, filterValues, limit, sortBy, sortOrder} = options
 
      /* Validate the passed in data */
      if(!validation.validator(id, 'number')){
@@ -137,8 +141,8 @@ const removeByCookbook = async id => {
 
      /* Add the entry to the database */
      const result = await db('cookbook_recipes')
+      .modify(dbHelper.buildFilters, filter)
       .delete()
-      .where('cookbookId', id);
 
       /* Check we deleted a record */
       if(result && result > 0){
