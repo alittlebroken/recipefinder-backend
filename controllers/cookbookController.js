@@ -356,7 +356,7 @@ const recipes = async (req, res, next) => {
     /* get the desired recipes */
     let id = parseInt(req.params.id)
     let results = await cookbookModel.recipes(id, options);
-    console.log('cookbookController.js > recipes: ', results)
+   
     if(results.length < 1){
       return res.status(204).json({
         status: 204,
