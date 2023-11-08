@@ -25,8 +25,9 @@ const upload = async (req, res, next) => {
             title
         } = req.body
 
+
         /* Validate the passed in values */
-        if(files.length < 1){
+        if(files?.length < 1){
             return res.status(404).json({
                 status: 404,
                 success: false,
