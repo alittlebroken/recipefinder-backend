@@ -35,12 +35,12 @@ const find = async (req, res, next) => {
         }
         
         if(results.length < 1){
-            throw {
-                status: 204,
+            return res.status(200).json({
+                status: 200,
                 success: false,
-                message: 'No steps were found'
-            }
-        }
+                message: 'There are no steps found',
+                results: []
+        })}
 
         res.status(200).json({
             results: results.results,
@@ -215,11 +215,12 @@ const removeById = async (req, res, next) => {
        }
        
        if(results.count < 1){
-        throw {
-            status: 404,
+        return res.status(200).json({
+            status: 200,
             success: false,
-            message: 'There are no steps to remove'
-        }
+            message: 'There are no steps to remove',
+            results: []
+        })
        }
        
        res.status(200).json(results);
