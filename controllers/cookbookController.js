@@ -365,14 +365,6 @@ const recipes = async (req, res, next) => {
       })
     }
 
-    if(results.success === false){
-      return res.status(500).json({
-        status: 500,
-        success: false,
-        message: 'There was a problem with the resource, please try again later'
-      })
-    }
-
     res.status(200).json({
       results: results.results,
       totalPages: results.totalPages,
