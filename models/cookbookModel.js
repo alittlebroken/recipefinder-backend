@@ -473,7 +473,8 @@ const recipes = async (cookbookId, options) => {
 
   /* For each recipe create a new recipe object and assign the appropriate
      categories for the recipe */
-  results.map(async recipe => {
+  for(let i = 0; i < results.length; i++){
+    let recipe = results[i]
 
     /* Filter out the cats for the current recipe */
     let recipeCats = cats.filter(cat => cat.recipeId === recipe.recipeId);
@@ -500,11 +501,14 @@ const recipes = async (cookbookId, options) => {
         images: recipeImages
       }
     );
-  })
+
+  }
 
   /* Calculate number of pages */
   let numPages = parseInt(Math.floor(recordCount.length / size))
   if(numPages < 1) numPages = 1
+
+  console.log(recipes)
 
   return {
     results: recipes,
