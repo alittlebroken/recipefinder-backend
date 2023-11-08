@@ -46,7 +46,7 @@ const listAll = async (req, res, next) => {
         
         if(results.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'There are currently no recipes'
             }
