@@ -424,7 +424,11 @@ const recipes = async (cookbookId, options) => {
   try{
 
     /* Extract the pagination settings */
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filter, filterValues, limit, sortBy, sortOrder} = options
+
+    /* As we use aliases we need to add the alis to the front of the various filter and sort options
+       that we pass in */
+    sortBy = 'cbr.' + sortBy
 
     /* array of recipe objects to return */
     let recipes = [];
@@ -461,6 +465,8 @@ const recipes = async (cookbookId, options) => {
     .limit(size)
     .offset(offset)
 
+    console.log('cookbookModel.js > recipes: ', results)
+
   const cats = await db('recipe_categories as rcat')
      .join('categories as cat', 'cat.id', 'rcat.categoryId')
      .select('cat.name as name', 'cat.id as categoryId', 'rcat.recipeId as recipeId')
@@ -476,7 +482,7 @@ const recipes = async (cookbookId, options) => {
     let recipeImages = await db('files as f')
      .select(
       'f.id as imageId',
-      'f.userId as imageUser',
+      'f.userid as imageUser',
       'f.src as imageSrc',
       'f.title as imageTitle',
       'f.alt as imageAlt'
@@ -508,7 +514,7 @@ const recipes = async (cookbookId, options) => {
   };
 
   } catch(e) {
-
+    console.log(e)
     /* Determine if we have a custom or module produced error. We hide away
       module based messages produced by the DB for security */
     let message;
