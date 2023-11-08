@@ -328,7 +328,8 @@ const update = async (req, res, next) => {
         const {
             resource,
             resourceid,
-            title
+            title,
+            alt
         } = req.body
 
 
@@ -497,6 +498,7 @@ const update = async (req, res, next) => {
             }
             payload.resource = resource
             payload.title = title
+            payload.alt = alt
             payload.resourceid = parseInt(resourceid)
             payload.userid = parseInt(userid)
 

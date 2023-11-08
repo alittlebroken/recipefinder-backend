@@ -295,7 +295,7 @@ const update = async (payload, options) => {
 
       /* Deconstruct the payload */
       let {
-        id, src, title, mimetype, resource, resourceid, userid
+        id, src, title, alt, mimetype, resource, resourceid, userid
       } = payload
 
       /* Validate the payload */
@@ -430,6 +430,7 @@ const update = async (payload, options) => {
        .update({
         src: src,
         title: title,
+        alt: alt || title,
         mimetype: mimetype,
         resource: resource,
         resourceid: parseInt(resourceid),
