@@ -598,6 +598,18 @@ const removeRecipes = async (req, res, next) => {
 
   try{
 
+    /* Pagination, filter and sort  options to send to the method that requires it */
+    let options = {
+      page: req.page,
+      size: req.limit,
+      offset: req.offset,
+      filterBy: req.filterBy,
+      filterValues: req.filterValues,
+      filter: req.filter,
+      sortBy: req.sortBy,
+      sortOrder: req.sortOrder
+    }
+
     /* Validate the request object values we need */
 
     if(!req.params.id || req.params.id === 'undefined'){
@@ -610,8 +622,8 @@ const removeRecipes = async (req, res, next) => {
     let id = parseInt(req.params.id);
 
     /* Delete the cookbooks recipes */
-    let results = await cookbookRecipesModel.removeByCookbook(id);
-
+    let results = await cookbookRecipesModel.removeByCookbook(id, options);
+    
     if(results.success === false){
       return res.status(500).json({
         status: 500,
@@ -635,6 +647,7 @@ const removeRecipes = async (req, res, next) => {
     });
 
   } catch(e) {
+    
     /* Log out the issue(s) */
     appLogger.logMessage('error', `cookbookController.removeRecipes - Status Code ${e.status}: ${e.message}`);
 
