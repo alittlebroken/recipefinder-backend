@@ -229,7 +229,8 @@ const findAll = async (options) => {
         'c.description',
         'f.src',
         'f.title',
-        'f.alt'
+        'f.alt',
+        'f.id as imageid'
       )
       .where('f.resource', '=', 'Cookbook')
       .limit(size)
