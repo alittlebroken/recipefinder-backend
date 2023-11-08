@@ -465,8 +465,6 @@ const recipes = async (cookbookId, options) => {
     .limit(size)
     .offset(offset)
 
-    console.log('cookbookModel.js > recipes: ', results)
-
   const cats = await db('recipe_categories as rcat')
      .join('categories as cat', 'cat.id', 'rcat.categoryId')
      .select('cat.name as name', 'cat.id as categoryId', 'rcat.recipeId as recipeId')
@@ -508,8 +506,6 @@ const recipes = async (cookbookId, options) => {
   let numPages = parseInt(Math.floor(recordCount.length / size))
   if(numPages < 1) numPages = 1
 
-  console.log(recipes)
-
   return {
     results: recipes,
     currentPage: page,
@@ -518,7 +514,7 @@ const recipes = async (cookbookId, options) => {
   };
 
   } catch(e) {
-    console.log(e)
+    
     /* Determine if we have a custom or module produced error. We hide away
       module based messages produced by the DB for security */
     let message;
