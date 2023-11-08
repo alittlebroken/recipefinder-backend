@@ -488,7 +488,7 @@ const recipes = async (cookbookId, options) => {
       'f.alt as imageAlt'
      )
       .where('f.resourceid', '=', recipe.recipeId)
-      /where('f.resource', '=', 'recipe')
+      .where('f.resource', '=', 'recipe')
 
     recipes.push(
       {
