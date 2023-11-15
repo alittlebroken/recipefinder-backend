@@ -61,20 +61,20 @@ const buildFilters = (queryBuilder, filters) => {
                     if(Array.isArray(idList)){
                         /* Ensure we filter on the correct field */
                         if(filter === 'id' || filter === 'ids'){
-                            queryBuilder.whereIn('id', idList[0])
+                            queryBuilder.where('id', idList[0])
                         } else if( filter === 'userId'){
-                            queryBuilder.whereIn('userId', idList[0])
+                            queryBuilder.where('userId', idList[0])
                         } else if( filter === 'userid'){
-                            queryBuilder.whereIn('userid', idList[0])
+                            queryBuilder.where('userid', idList[0])
                         }
                     } else {
                         /* Ensure we filter on the correct field */
                         if(filter === 'id' || filter === 'ids'){
-                            queryBuilder.whereIn('id', idList)
+                            queryBuilder.where('id', idList)
                         } else if( filter === 'userId'){
-                            queryBuilder.whereIn('userId', idList)
+                            queryBuilder.where('userId', idList)
                         } else if( filter === 'userid'){
-                            queryBuilder.whereIn('userid', idList)
+                            queryBuilder.where('userid', idList)
                         }
                     }
 
