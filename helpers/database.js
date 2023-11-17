@@ -115,9 +115,7 @@ const buildSort = (queryBuilder, sort) => {
 
 /* Function using queryBuilder to set pagination on any results returned */
 const buildLimit = (queryBuilder, limit) => {
-    if(limit === null){
-        queryBuilder.limit(null)
-    } else {
+    if(limit !== null){
         queryBuilder.limit(limit)
     }
 }
