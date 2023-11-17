@@ -113,7 +113,17 @@ const buildSort = (queryBuilder, sort) => {
 
 }
 
+/* Function using queryBuilder to set pagination on any results returned */
+const buildLimit = (queryBuilder, limit) => {
+    if(limit === null){
+        queryBuilder.limit(null)
+    } else {
+        queryBuilder.limit(limit)
+    }
+}
+
 module.exports = {
     buildFilters,
-    buildSort
+    buildSort,
+    buildLimit
 }
