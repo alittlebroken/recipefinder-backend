@@ -44,7 +44,7 @@ const listAll = async (req, res, next) => {
             }
         }
         
-        if(results.length < 1){
+        if(results.results.length < 1){
             return res.status(200).json({
                 status: 200,
                 success: false,
@@ -52,6 +52,8 @@ const listAll = async (req, res, next) => {
                 results: []
             }); 
         }
+
+       
 
         res.status(200).json({
             results: results.results,
