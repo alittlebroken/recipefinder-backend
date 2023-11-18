@@ -286,6 +286,7 @@ const listAll = async (options) => {
     const results = await db('pantries as p')
      .join('users as u', 'p.userId', '=', 'u.id')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select(
       'p.id as id',
       'u.id as userId',
@@ -296,7 +297,6 @@ const listAll = async (options) => {
        .as('numIngredients')
      )
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
      if(!results){
@@ -382,6 +382,7 @@ const list = async (pantryId, options) => {
 
       const ingredientResults = await db('pantry_ingredients as pi')
        .modify(dbHelper.buildFilters, filter)
+       .modify(dbHelper.buildLimit, size)
        .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
        .select(
         'pi.id as id',
@@ -392,7 +393,6 @@ const list = async (pantryId, options) => {
         'pi.amount_type'
         )
        .where('pi.pantryId', pantryResults[0].pantryId)
-       .limit(size)
        .offset(offset)
 
       /* For each ingredient we have found get all the details on any images 

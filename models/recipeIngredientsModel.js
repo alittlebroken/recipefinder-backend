@@ -369,10 +369,10 @@ const findById = async id => {
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .join('recipes as r', 'r.id', '=', 'ri.recipeId')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('i.id as ingredientId', 'ri.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
      .where('ri.recipeId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
      
     if(results && results.length > 0){
@@ -436,10 +436,10 @@ const findById = async id => {
      const results = await db('recipe_ingredients as ri')
       .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
       .modify(dbHelper.buildFilters, filter)
+      .modify(dbHelper.buildLimit, size)
       .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type', 'ri.recipeId as recipeId')
       .where('ri.ingredientId', id)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .limit(size)
       .offset((page - 1) * size);
 
     const resultCount = await db('recipe_ingredients as ri')

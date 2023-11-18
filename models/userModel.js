@@ -427,9 +427,9 @@ const findAll = async (options) => {
 
     const result = await db('users')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('id', 'username', 'email', 'roles', 'forename', 'surname')
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
     /* Check we have some results */

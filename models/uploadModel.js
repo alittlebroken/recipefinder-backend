@@ -147,7 +147,7 @@ const list = async (options) => {
       .select('*')
       .modify(dbHelper.buildFilters, filter)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .limit(size)
+      .modify(dbHelper.buildLimit, size)
       .offset(offset)
 
 

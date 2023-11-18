@@ -222,6 +222,7 @@ const findAll = async (options) => {
     const results = await db('cookbooks as c')
       .join('files as f', 'f.resourceid', '=', 'c.id')
       .modify(dbHelper.buildFilters, filter)
+      .modify(dbHelper.buildLimit, size)
       .select(
         'c.id',
         'c.userId',
@@ -233,7 +234,6 @@ const findAll = async (options) => {
         'f.id as imageid'
       )
       .where('f.resource', '=', 'Cookbook')
-      .limit(size)
       .offset(offset)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
     
@@ -456,6 +456,7 @@ const recipes = async (cookbookId, options) => {
   const results = await db('cookbook_recipes as cbr')
     .join('recipes as r', 'r.id', 'cbr.recipeId')
     .modify(dbHelper.buildFilters, filter)
+    .modify(dbHelper.buildLimit, size)
     .select('r.id as recipeId', 
       'r.name', 
       'r.rating', 
@@ -463,7 +464,6 @@ const recipes = async (cookbookId, options) => {
       )
     .where('cbr.cookbookId', cookbookId)
     .modify(dbHelper.buildSort, { sortBy, sortOrder })
-    .limit(size)
     .offset(offset)
 
   const cats = await db('recipe_categories as rcat')
@@ -564,10 +564,10 @@ const findByUserId = async (id, options) => {
     /* gather the data from the database */
     const result = await db('cookbooks')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .where('userId', id)
      .select('*')
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
     if(!result || result.length === 0){

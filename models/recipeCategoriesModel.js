@@ -440,6 +440,7 @@ const findByCategory = async (id, options) => {
     const result = await db('recipe_categories as rc')
      .join('categories as cat', 'cat.id', '=', 'rc.categoryId')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select(
        'rc.id as id',
        'rc.recipeId as recipeId',
@@ -448,7 +449,6 @@ const findByCategory = async (id, options) => {
      )
      .where('rc.categoryId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(parseInt(size))
      .offset((page - 1) * size);
 
     const totalCount = await db('recipe_categories as rc')

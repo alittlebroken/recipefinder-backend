@@ -214,8 +214,8 @@ const findAll = async (options) => {
     const results = await db('ingredients as i')
       .modify(dbHelper.buildFilters, filter)
       .modify(dbHelper.buildSort, { sortBy , sortOrder })
+      .modify(dbHelper.buildLimit, size)
       .select('i.id', 'i.name')
-      .limit(size)
       .offset(offset)
 
       /* Try to extract the images for the results */
@@ -259,7 +259,7 @@ const findAll = async (options) => {
       let numPages = parseInt(Math.floor(recordCount.length / size))
       if(numPages < 1) numPages = 1
 
-    console.log(finalResults)
+    
      if(!finalResults || finalResults.length < 1){
        return [];
      } else {

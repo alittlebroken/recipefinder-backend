@@ -323,8 +323,8 @@ const findAll = async (options) => {
     const results = await db('categories')
       .modify(dbHelper.buildFilters, filter)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
+      .modify(dbHelper.buildLimit, size)
       .select('*')
-      .limit(parseInt(size))
       .offset(offset)
 
      if(results.length >= 1){

@@ -482,6 +482,7 @@ const find = async (terms, options) => {
       /* Find all the recipes which match first */
       const results = await trx('recipes')
        .modify(dbHelper.buildFilters, filter)
+       .modify(dbHelper.buildLimit, size)
        .select(
          'id as recipeId',
          'userId',
@@ -495,7 +496,6 @@ const find = async (terms, options) => {
        )
        .whereILike('name',`%${terms}%`)
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
-       .limit(size)
        .offset((page - 1) * size)
        .transacting(trx);
 
@@ -614,6 +614,7 @@ const findAll = async (options) => {
       /* Find all the recipes which match first */
       const results = await trx('recipes')
        .modify(dbHelper.buildFilters, filter)
+       .modify(dbHelper.buildLimit, size)
        .select(
          'id',
          'userId',
@@ -625,7 +626,6 @@ const findAll = async (options) => {
          'cook_time',
          'rating'
        )
-       .limit(parseInt(size))
        .offset(offset)
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .transacting(trx);
@@ -701,6 +701,7 @@ const findAll = async (options) => {
        /* Calculate number of pages */
       let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
+
 
        return {
         results: recipes,
@@ -1153,10 +1154,10 @@ const findByUserId = async (id, options) => {
     /* Gather the required data from the database */
     const results = await db('recipes')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('*')
      .where('userId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset);
 
     /* If we any results then send them back  */
