@@ -13,7 +13,7 @@ const uploadFiles = require('../../config/multer')
 
 //router.get('/',checkToken, setQueryOpts, recipesController.listAll);
 router.get('/', setQueryOpts, recipesController.listAll);
-router.get('/:id',checkToken, recipesController.list);
+router.get('/:id', recipesController.list);
 router.get('/:id/ingredients',checkToken, setQueryOpts, recipesController.listRecipeIngredients);
 router.get('/:id/steps',checkToken, setQueryOpts, recipesController.listRecipeSteps);
 router.get('/:id/categories',checkToken, setQueryOpts, recipesController.listRecipeCategories);
