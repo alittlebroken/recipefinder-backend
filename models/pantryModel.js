@@ -2,6 +2,8 @@
 require('dotenv').config();
 const db = require('../database');
 const dbHelper = require('../helpers/database')
+const uploadsModel = require('./uploadModel')
+
 /**
  * Creates a new pantry for a new user
  * @param {integer} userId - The id of the user to create the pantry for
@@ -284,6 +286,7 @@ const listAll = async (options) => {
     const results = await db('pantries as p')
      .join('users as u', 'p.userId', '=', 'u.id')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select(
       'p.id as id',
       'u.id as userId',
@@ -294,7 +297,6 @@ const listAll = async (options) => {
        .as('numIngredients')
      )
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
      if(!results){
@@ -346,8 +348,8 @@ const list = async (pantryId, options) => {
 
   try{
 
-    /* Extract the pagination options */
-    let {page,size,offset} = options
+    /* Extract the pagination settings */
+    let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
     /* Validate the passed in value(s) */
     if(!pantryId || pantryId === undefined || typeof pantryId !== 'number'){
@@ -369,13 +371,9 @@ const list = async (pantryId, options) => {
       )
       .where('p.id', pantryId)
 
-      /* Now find out how many ingredients the pantry has */
-      const pantryIngredientsCount = await db('pantry_ingredients as pi')
-       .count('pi.id')
-       .where('pi.pantryId', pantryResults[0].pantryId)
-
       /* Get a total count of the records we will get */
       const recordCount = await db('pantry_ingredients as pi')
+      .modify(dbHelper.buildFilters, filter)
       .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
       .select('pi.id')
       .where('pi.pantryId', pantryResults[0].pantryId)
@@ -383,6 +381,8 @@ const list = async (pantryId, options) => {
       .groupBy('pi.id')
 
       const ingredientResults = await db('pantry_ingredients as pi')
+       .modify(dbHelper.buildFilters, filter)
+       .modify(dbHelper.buildLimit, size)
        .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
        .select(
         'pi.id as id',
@@ -393,14 +393,29 @@ const list = async (pantryId, options) => {
         'pi.amount_type'
         )
        .where('pi.pantryId', pantryResults[0].pantryId)
-       .limit(size)
        .offset(offset)
+
+      /* For each ingredient we have found get all the details on any images 
+      * associated with it */
+     /* Stores the final results for getting a list of ingredients belonging to a pantry */
+      let finalResults = []
+      for(let i = 0; i < ingredientResults.length; i++){
+        let ingredient
+        const images = await uploadsModel.getFile('Ingredients', ingredientResults[i].ingredientId)
+
+        ingredient = {
+          ...ingredientResults[i],
+          images: images.results
+        }
+
+        finalResults.push(ingredient)
+      }
 
       pantry = [
         {
          ...pantryResults[0],
-         numIngredients: Number.parseInt(pantryIngredientsCount[0].count),
-         ingredients: ingredientResults
+         numIngredients: Number.parseInt(recordCount?.length),
+         ingredients: finalResults
         }
       ]
 
@@ -418,7 +433,7 @@ const list = async (pantryId, options) => {
      return {
       results: pantry,
       totalRecords: recordCount.length,
-      totalPages: parseInt(Math.floor(recordCount.length/size)),
+      totalPages: parseInt(Math.ceil(recordCount.length/size)),
       currentPage: page
      };
 

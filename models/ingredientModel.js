@@ -199,30 +199,72 @@ const findAll = async (options) => {
     /* Extract the pagination settings */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
+    /* This is used to hold the final set of records that we
+     * send back to the client */
+    let finalResults = []
+
     /* get the total count of records */
-    const recordCount = await db('ingredients')
+    const recordCount = await db('ingredients as i')
     .modify(dbHelper.buildFilters, filter)
     .select('id')
     .count('id')
     .groupBy('id')
 
     /* Search the table for the specified term */
-    const results = await db('ingredients')
+    const results = await db('ingredients as i')
       .modify(dbHelper.buildFilters, filter)
-      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .select('*')
-      .limit(size)
+      .modify(dbHelper.buildSort, { sortBy , sortOrder })
+      .modify(dbHelper.buildLimit, size)
+      .select('i.id', 'i.name')
       .offset(offset)
+
+      /* Try to extract the images for the results */
+      for(let i = 0; i < results.length; i++)
+      {
+        /* Create a copy of the current record so we can then add
+        * image details if the ingredient has any */
+        let temp = {
+          ...results[i]
+        }
+        
+        /* Gather details on the images for this record */
+        const images = await db('files')
+          .select('id as img_id', 'src', 'title', 'alt')
+          .where('resource', '=', 'Ingredients')
+          .where('resourceid', '=', results[i].id)
+
+        /* Check if we have any images to add to the ingredient */
+        if(Array.isArray(images)){
+
+          /* Check how many images we have to append to the ingredient. If
+           * we have multiple then we add them as an array, otherwise just
+           * as a singular entity 
+          */
+          if(images.length > 1){
+            temp.images = images
+          } else {
+            temp.img_id = images[0]?.img_id || null
+            temp.src = images[0]?.src || null
+            temp.alt = images[0]?.alt || null
+            temp.title = images[0]?.title || null
+          }
+
+        } 
+
+        /* Assign the temp var to the final results */
+        finalResults.push(temp)
+      }
 
       /* Calculate number of pages */
       let numPages = parseInt(Math.floor(recordCount.length / size))
       if(numPages < 1) numPages = 1
 
-     if(!results || results.length < 1){
+    
+     if(!finalResults || finalResults.length < 1){
        return [];
      } else {
        return {
-        results: results,
+        results: finalResults,
         currentPage: page,
         totalRecords: recordCount.length,
         totalPages: numPages
@@ -230,6 +272,7 @@ const findAll = async (options) => {
      }
 
   } catch(e) {
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;

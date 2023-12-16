@@ -369,10 +369,10 @@ const findById = async id => {
      .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
      .join('recipes as r', 'r.id', '=', 'ri.recipeId')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('i.id as ingredientId', 'ri.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type')
      .where('ri.recipeId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
      
     if(results && results.length > 0){
@@ -420,7 +420,9 @@ const findById = async id => {
 
     try{
 
-      let {page, size, offset, filterBy, filterValues, result, sortBy, sortOrder} = options
+      let {page, size, offset, filter, result, sortBy, sortOrder} = options
+
+      sortBy = `i.${sortBy}`
 
       /* Validate the passed in data */
       if(!validation.validator(id, 'number')){
@@ -434,10 +436,10 @@ const findById = async id => {
      const results = await db('recipe_ingredients as ri')
       .join('ingredients as i', 'ri.ingredientId', '=', 'i.id')
       .modify(dbHelper.buildFilters, filter)
+      .modify(dbHelper.buildLimit, size)
       .select('i.id as id', 'i.name as name', 'ri.amount as amount', 'ri.amount_type as amount_type', 'ri.recipeId as recipeId')
       .where('ri.ingredientId', id)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .limit(size)
       .offset((page - 1) * size);
 
     const resultCount = await db('recipe_ingredients as ri')
@@ -445,12 +447,11 @@ const findById = async id => {
      .modify(dbHelper.buildFilters, filter)
      .select('ri.id')
      .where('ri.ingredientId', id)
-     .count()
-     .groupBy('ri.id')
+     
 
      if(results && results.length > 0){
       /* Calculate number of pages */
-        let numPages = parseInt(Math.floor(recordCount.length / size))
+        let numPages = parseInt(Math.floor(resultCount.length / size))
         if(numPages < 1) numPages = 1
 
        return {
@@ -464,6 +465,7 @@ const findById = async id => {
      }
 
     } catch(e) {
+      
       /* Check for library errors and if found swap them out for a generic
          one to send back over the API for security */
       let message;

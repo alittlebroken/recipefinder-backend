@@ -24,17 +24,19 @@ const create = async (userId, name, description, image) => {
     }
 
     /* Attempt to add the cookbook */
-    await db('cookbooks').
+    const result = await db('cookbooks').
      insert({
        userId: userId,
        name: name,
        description: description,
        image: image
      })
+     .returning('id')
 
      return {
        success: true,
-       message: 'Cookbook successfully added'
+       message: 'Cookbook successfully added',
+       results: result
      }
 
   } catch(e) {
@@ -200,21 +202,41 @@ const findAll = async (options) => {
     /* extract the pagination settings */
     let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
 
+    /* As we have aliased the tablenames we need to alias any filters we pass in */
+    let oldFilter = JSON.parse(filter)
+    let newFilter = {}
+    newFilter['c.userId'] = oldFilter.userId
+    filter = JSON.stringify(newFilter)
+
+    /* Now realias the sortby field */
+    sortBy = `c.${sortBy}`
+
     /* Get a count of all the records we are interested in */
-    const recordCount = await db('cookbooks')
+    const recordCount = await db('cookbooks as c')
       .modify(dbHelper.buildFilters, filter)
-      .select('id')
-      .count('id')
-      .groupBy('id')
+      .select('c.id')
+      .count('c.id')
+      .groupBy('c.id')
 
     /* No need for validation so return all cookbooks */
-    const results = await db('cookbooks')
+    const results = await db('cookbooks as c')
+      .join('files as f', 'f.resourceid', '=', 'c.id')
       .modify(dbHelper.buildFilters, filter)
-      .select('*')
-      .limit(size)
+      .modify(dbHelper.buildLimit, size)
+      .select(
+        'c.id',
+        'c.userId',
+        'c.name',
+        'c.description',
+        'f.src',
+        'f.title',
+        'f.alt',
+        'f.id as imageid'
+      )
+      .where('f.resource', '=', 'Cookbook')
       .offset(offset)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-
+    
     /* Check if any results have been returned */
     if(!results || results.length == 0){
       return [];
@@ -235,7 +257,7 @@ const findAll = async (options) => {
     /* Non custom messages should be returned as a generic message to the front
        end */
     const message = 'There was an issue with the resource, please try again later';
-
+   
     return {
       success: false,
       message: message
@@ -403,7 +425,11 @@ const recipes = async (cookbookId, options) => {
   try{
 
     /* Extract the pagination settings */
-    let {page, size, offset, filterBy, filterValues, limit, sortBy, sortOrder} = options
+    let {page, size, offset, filterBy, filter, filterValues, limit, sortBy, sortOrder} = options
+
+    /* As we use aliases we need to add the alis to the front of the various filter and sort options
+       that we pass in */
+    sortBy = 'cbr.' + sortBy
 
     /* array of recipe objects to return */
     let recipes = [];
@@ -430,10 +456,14 @@ const recipes = async (cookbookId, options) => {
   const results = await db('cookbook_recipes as cbr')
     .join('recipes as r', 'r.id', 'cbr.recipeId')
     .modify(dbHelper.buildFilters, filter)
-    .select('r.id as recipeId', 'r.name', 'r.rating')
+    .modify(dbHelper.buildLimit, size)
+    .select('r.id as recipeId', 
+      'r.name', 
+      'r.rating', 
+      'r.description'
+      )
     .where('cbr.cookbookId', cookbookId)
     .modify(dbHelper.buildSort, { sortBy, sortOrder })
-    .limit(size)
     .offset(offset)
 
   const cats = await db('recipe_categories as rcat')
@@ -442,20 +472,36 @@ const recipes = async (cookbookId, options) => {
 
   /* For each recipe create a new recipe object and assign the appropriate
      categories for the recipe */
-  results.map(recipe => {
+  for(let i = 0; i < results.length; i++){
+    let recipe = results[i]
 
     /* Filter out the cats for the current recipe */
     let recipeCats = cats.filter(cat => cat.recipeId === recipe.recipeId);
+
+    /* Get the images for the recipe */
+    let recipeImages = await db('files as f')
+     .select(
+      'f.id as imageId',
+      'f.userid as imageUser',
+      'f.src as imageSrc',
+      'f.title as imageTitle',
+      'f.alt as imageAlt'
+     )
+      .where('f.resourceid', '=', recipe.recipeId)
+      .where('f.resource', '=', 'recipe')
 
     recipes.push(
       {
         id: recipe.recipeId,
         name: recipe.name,
+        description: recipe.description,
         rating: recipe.rating,
-        categories: recipeCats
+        categories: recipeCats,
+        images: recipeImages
       }
     );
-  })
+
+  }
 
   /* Calculate number of pages */
   let numPages = parseInt(Math.floor(recordCount.length / size))
@@ -469,7 +515,7 @@ const recipes = async (cookbookId, options) => {
   };
 
   } catch(e) {
-
+    
     /* Determine if we have a custom or module produced error. We hide away
       module based messages produced by the DB for security */
     let message;
@@ -518,10 +564,10 @@ const findByUserId = async (id, options) => {
     /* gather the data from the database */
     const result = await db('cookbooks')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .where('userId', id)
      .select('*')
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
     if(!result || result.length === 0){

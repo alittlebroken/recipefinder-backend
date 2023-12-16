@@ -22,7 +22,7 @@ const buildFilters = (queryBuilder, filters) => {
         numParsedFilters.map(filter => {
             /* Check for presence of an ID field as this could contain 
              * multiple ids */
-            if(filter === 'id' || filter === 'ids' || filter === 'userId'){
+            if(filter === 'id' || filter === 'ids' || filter === 'userId' || filter === 'userid'){
 
                 /* All items for id or ids need to be integers so we need
                to ensure they are not strings otherwise the length 
@@ -42,8 +42,15 @@ const buildFilters = (queryBuilder, filters) => {
                  */
                 if(idList.length > 1){
 
-                    /* Use whereIn */
-                    queryBuilder.whereIn('id', idList)
+                    /* Use whereIn, alos check if we are filtering on id or userid */
+                    if(filter === 'id' || filter === 'ids'){
+                        queryBuilder.whereIn('id', idList)
+                    } else if( filter === 'userId'){
+                        queryBuilder.whereIn('userId', idList)
+                    } else if( filter === 'userid'){
+                        queryBuilder.whereIn('userid', idList)
+                    }
+                    
 
                 } else {
 
@@ -52,20 +59,33 @@ const buildFilters = (queryBuilder, filters) => {
                      * as an array
                      */
                     if(Array.isArray(idList)){
-                        queryBuilder.where('id', idList[0])
+                        /* Ensure we filter on the correct field */
+                        if(filter === 'id' || filter === 'ids'){
+                            queryBuilder.where('id', idList[0])
+                        } else if( filter === 'userId'){
+                            queryBuilder.where('userId', idList[0])
+                        } else if( filter === 'userid'){
+                            queryBuilder.where('userid', idList[0])
+                        }
                     } else {
-                        queryBuilder.where('id', idList)
+                        /* Ensure we filter on the correct field */
+                        if(filter === 'id' || filter === 'ids'){
+                            queryBuilder.where('id', idList)
+                        } else if( filter === 'userId'){
+                            queryBuilder.where('userId', idList)
+                        } else if( filter === 'userid'){
+                            queryBuilder.where('userid', idList)
+                        }
                     }
 
                 }
 
             } else {
-
                 /* Non id filed, so next we need to determine if the 
                  * value is of type integer or not so we can add the 
                  * appropriate filter operand*/
-                if(typeof parsedFilters[filter] !== 'string'){
-                    queryBuilder.where(filter, '=', parsedFilters[filter])
+                if(typeof parsedFilters[filter] !== 'string' || filter === 'resourceid'){
+                    queryBuilder.where(filter, '=', parseInt(parsedFilters[filter]))
                 } else {
                     queryBuilder.where(filter, 'like', `%${parsedFilters[filter]}%`)
                 }
@@ -93,7 +113,15 @@ const buildSort = (queryBuilder, sort) => {
 
 }
 
+/* Function using queryBuilder to set pagination on any results returned */
+const buildLimit = (queryBuilder, limit) => {
+    if(limit !== null){
+        queryBuilder.limit(limit)
+    }
+}
+
 module.exports = {
     buildFilters,
-    buildSort
+    buildSort,
+    buildLimit
 }

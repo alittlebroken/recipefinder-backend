@@ -9,21 +9,24 @@ const passport = require('passport');
 
 const recipesController = require('../../controllers/recipesController');
 
-router.get('/',checkToken, setQueryOpts, recipesController.listAll);
-router.get('/:id',checkToken, recipesController.list);
+const uploadFiles = require('../../config/multer')
+
+//router.get('/',checkToken, setQueryOpts, recipesController.listAll);
+router.get('/', setQueryOpts, recipesController.listAll);
+router.get('/:id', recipesController.list);
 router.get('/:id/ingredients',checkToken, setQueryOpts, recipesController.listRecipeIngredients);
 router.get('/:id/steps',checkToken, setQueryOpts, recipesController.listRecipeSteps);
 router.get('/:id/categories',checkToken, setQueryOpts, recipesController.listRecipeCategories);
-router.post('/',checkToken, recipesController.create);
-router.post('/:id/ingredients',checkToken, recipesController.addRecipeIngredients);
-router.post('/:id/steps',checkToken, recipesController.addRecipeSteps);
-router.post('/:id/categories',checkToken, recipesController.addRecipeCategories);
+router.post('/',checkToken, uploadFiles, recipesController.create);
+router.post('/:id/ingredients',checkToken, uploadFiles, recipesController.addRecipeIngredients);
+router.post('/:id/steps',checkToken, uploadFiles, recipesController.addRecipeSteps);
+router.post('/:id/categories',checkToken, uploadFiles, recipesController.addRecipeCategories);
 router.delete('/',checkToken, checkRoles(['Admin']), recipesController.removeAll);
 router.delete('/:id',checkToken, recipesController.remove);
 router.delete('/:id/ingredients',checkToken, recipesController.removeRecipeIngredients);
 router.delete('/:id/steps',checkToken, recipesController.removeRecipeSteps);
 router.delete('/:id/categories',checkToken, recipesController.removeRecipeCategories);
-router.put('/:id',checkToken, recipesController.update);
+router.put('/:id',checkToken, uploadFiles, recipesController.update);
 
 /* Future API expansion
 router.get('/:id/comments', recipesController.listRecipeComments);

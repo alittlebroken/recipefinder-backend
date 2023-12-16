@@ -62,16 +62,6 @@ const performSearch = async (req, res, next) => {
         }
         if(validationErrors) return next(validationErrors)
 
-        if(typeof req.body.categories !== 'string'){
-            validationErrors = {
-                status: 400,
-                success: false,
-                message: 'Wrong format for search categories',
-                results: []
-            }  
-        }
-        if(validationErrors) return next(validationErrors)
-
         /* Now find the recipes */
         let results;
         /* If no search terms have been set then return all recipes */
@@ -83,22 +73,19 @@ const performSearch = async (req, res, next) => {
              * recipes being found by name or if they are being found by
              * one or more ingredients
              */
-            if(req.body.typeOfSearch === 'recipes'){
-
+            
+            if(req.body.typeOfSearch.toLowerCase() === 'recipes'){
                 results = await recipeModel.find(req.body.terms, options);
-
-            } else if (req.body.typeOfSearch === 'ingredients') {
-
+                
+            } else if (req.body.typeOfSearch.toLowerCase() === 'ingredients') {
                 results = await recipeModel.findByIngredients(req.body.terms, options);
                 
             } else {
-
                 results = await recipeModel.findByCategory(req.body.terms, options);
-
+                
             }
         }
 
-        
         /* Run some checks against the results and determine what needs to be returned */
         if(results?.success === false){
             return next({
@@ -120,8 +107,8 @@ const performSearch = async (req, res, next) => {
                 returnMessage = 'No recipes found for the supplied category';
             }
 
-            res.status(404).json({
-                status: 404,
+            return res.status(204).json({
+                status: 204,
                 success: false,
                 message: returnMessage,
                 results: []

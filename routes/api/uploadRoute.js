@@ -15,6 +15,7 @@ const uploadController = require('../../controllers/uploadController')
 router.post(
     '/',
     checkToken,
+    setQueryOpts,
     uploadFiles,
     uploadController.upload
     )
@@ -29,13 +30,15 @@ router.get(
 router.delete(
     '/',
     checkToken,
+    setQueryOpts,
     checkRoles(['Admin']),
     uploadController.remove
 )
 
 router.put(
-    '/',
+    '/:id',
     checkToken,
+    setQueryOpts,
     uploadFiles,
     uploadController.update
 )

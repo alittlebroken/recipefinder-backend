@@ -147,8 +147,7 @@ const loginUser = async (req, res, next) => {
                 }
 
                 const cookieOptions = {
-                    httpOnly: true,
-                    secure: false, 
+                    HttpOnly: true,
                 }
 
                 res.cookie('jwt', refreshToken, cookieOptions);
@@ -305,6 +304,7 @@ const refreshToken = async (req, res, next) => {
                 token: ''
             })
         }*/
+        
         if(!req.cookies['jwt']){
             return res.status(404).json({
                 status: 404,

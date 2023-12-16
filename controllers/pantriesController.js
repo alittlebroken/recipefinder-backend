@@ -41,7 +41,7 @@ const listAll = async (req, res, next) => {
 
         if(result.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'There are no pantries to list'
             }
@@ -76,20 +76,16 @@ const list = async (req, res, next) => {
 
     try{
 
-        /* Get the pagination values */
-        let page = req.query.page;
-        let size = req.query.pageSize;
-
-        if(page < 1) page = 1
-        if(size < 1) size = 1
-
-        let offset = parseInt((page - 1) * size)
-
-        /* Pagination options to send to the method that requires it */
+        /* Pagination, filter and sort  options to send to the method that requires it */
         let options = {
-            page,
-            size,
-            offset
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: req.filter,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
         }
 
         /* Validate any request parameters */
@@ -112,7 +108,7 @@ const list = async (req, res, next) => {
         /* Attempt to retrieve the record from the database */
         let id = parseInt(req.params.id);
         const result = await pantryModel.list(id, options);
-
+        
         if(!result || result.success === false){
             throw {
                 status: 500,
@@ -123,7 +119,7 @@ const list = async (req, res, next) => {
 
         if(result.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'No pantry matched the supplied id'
             }
@@ -369,6 +365,81 @@ const removeAll = async (req, res, next) => {
 
 };
 
+/*
+ * Removes a specififc ingredient from then pantry
+*/
+const removeItem = async (req, res, next) => {
+
+    const moduleMethod = 'removeItem';
+
+    try{
+
+        /* Validate request parameters */
+        /* Validate request parameters */
+        if(!req.params || req.params === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined request parameters'
+            }
+        }
+
+        if(!req.params.pantryid || req.params.pantryid === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined pantryId'
+            }
+        }
+
+        if(!req.params.ingredientid || req.params.ingredientid === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined ingredientID'
+            }
+        }
+
+        if(typeof parseInt(req.params.ingredientid) !== 'number'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for ingredient id'
+            }
+        }
+
+        /* Remove the ingredient from the pantry */
+        const result = await pantryModel.removeItem({
+            pantryId: parseInt(req.params.pantryid),
+            ingredientId: parseInt(req.params.ingredientid)
+        })
+        
+        if(result.success === true){
+            return res.status(200).json({
+                status: 200,
+                success: true,
+                message: 'Ingredient successfully removed from the pantry'
+            });
+        } else {
+            return res.status(400).json({
+                status: 400,
+                success: false,
+                message: 'Unable to remove ingredient from the pantry'
+            });
+        }
+
+    } catch(e) {
+      /* Log out the issue(s) */
+      appLogger.logMessage(
+        'error', 
+        `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+        );
+
+        return next(e);  
+    }
+
+}
+
 /* 
  * Remove all items from a specific pantry
  */
@@ -495,7 +566,7 @@ const update = async (req, res, next) => {
         
         if(result?.length < 1){
             throw {
-                status: 404,
+                status: 204,
                 success: false,
                 message: 'There was no pantry to update'
             }
@@ -550,5 +621,6 @@ module.exports = {
     add,
     removeAll,
     removeItems,
+    removeItem,
     update
 };

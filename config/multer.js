@@ -28,6 +28,7 @@ const upload = multer(
         storage: storage
     }
 )
-.array(uploadFieldName, 10)
+//.array(uploadFieldName, 10)
+.any()
 
 module.exports = upload

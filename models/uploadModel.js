@@ -141,13 +141,15 @@ const list = async (options) => {
        .count('id')
        .groupBy('id')
 
+
       /* Now get the actual data we want */
       const results = await db('files')
       .select('*')
       .modify(dbHelper.buildFilters, filter)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .limit(size)
+      .modify(dbHelper.buildLimit, size)
       .offset(offset)
+
 
      /* Check we have data to return */
      if(results && results.length > 0){
@@ -227,16 +229,18 @@ const remove = async (options) => {
 
           /* Remove the files */
           results.map(result => {
-            let fullPath = path.join(process.cwd(), '/public/media')
-            
-            fs.unlink(path.join(fullPath, result), err => {
-              if (err) throw {
-                  status: 500,
-                  success: false,
-                  message: 'Unable to delete the uploaded files'
-              }
+            if(!result.src.includes('http')){
+              let fullPath = path.join(process.cwd(), '/public/media')
               
-            })
+              fs.unlink(path.join(fullPath, result), err => {
+                if (err) throw {
+                    status: 500,
+                    success: false,
+                    message: 'Unable to delete the uploaded files'
+                }
+                
+              })
+            }
           })
 
           returnResult = {
@@ -260,7 +264,6 @@ const remove = async (options) => {
       return returnResult
       
   } catch(e) {
-    
     let message
     if(e.message === 'delete from \"files\" - Problem connecting to the database'){
       message = 'There was a problem with the resource, please try again later'
@@ -280,15 +283,19 @@ const remove = async (options) => {
 /* Updates a file record witin the DB 
  *
  * @params {object} payload - Contains the details of the file to be updated
+ * @params {object} options - Conatins all the SQL parameters for the request
  * @returns {object} returns an object containg the result of updating the
  * file info to the database
 */
-const update = async (payload) => {
+const update = async (payload, options) => {
   try{
+
+      /* Deconstruct the options */
+      const { filter } = options
 
       /* Deconstruct the payload */
       let {
-        id, src, title, mimetype, resource, resourceid, userid
+        id, src, title, alt, mimetype, resource, resourceid, userid
       } = payload
 
       /* Validate the payload */
@@ -423,11 +430,13 @@ const update = async (payload) => {
        .update({
         src: src,
         title: title,
+        alt: alt || title,
         mimetype: mimetype,
         resource: resource,
         resourceid: parseInt(resourceid),
         userid: parseInt(userid)
        })
+       .modify(dbHelper.buildFilters, filter)
        .returning('id')
 
       if(results.length > 0){
@@ -465,9 +474,109 @@ const update = async (payload) => {
   }
 }
 
+
+/* retrieve a file from the files table
+ *
+ * @params {string} resource   - The resource the file has been associated with
+ * @params {number} resourceid - The id within the resource the file belongs to
+ * @returns {array} containing the files found for the resource and id specified
+ */
+const getFile = async (resource, resourceid) => {
+
+  try{
+
+    /* Validate the passed in values */
+    if(!resource || resource === undefined){
+      return {
+        success: false,
+        message: 'Resource name is required',
+        results: []
+      }
+    }
+
+    if(typeof resource !== 'string'){
+      return {
+        success: false,
+        message: 'Resource name must be in the correct format',
+        results: []
+      }
+    }
+
+    if(!resourceid || resourceid === undefined){
+      return {
+        success: false,
+        message: 'Resource id is required',
+        results: []
+      }
+    }
+
+    if(typeof parseInt(resourceid) !== 'number'){
+      return {
+        success: false,
+        message: 'Resource id must be in the correct format',
+        results: []
+      }
+    }
+
+    /* Extract the details from the database */
+    const results = await db('files as f')
+    .select(
+      'f.src',
+      'f.title',
+      'f.alt'
+    )
+    .where('f.resource', '=', resource)
+    .where('f.resourceid', '=', parseInt(resourceid))
+
+    if(!results) {
+      return {
+        success: false,
+        message: 'There was a problem with the resource, please try again later',
+        results: []
+      }
+    }
+
+    if(results?.length < 1){
+      return {
+        success: false,
+        message: 'There were no files matching the chosen parameters',
+        results: []
+      }
+    } else {
+      return {
+        success: true,
+        message: 'Files successfully found',
+        results: results
+      }
+    }
+
+  } catch(error) {
+
+      /* Check for library errors and if found swap them out for a generic
+       one to send back over the API for security 
+      */
+       let message;
+    
+       if(e.name === 'UPLOADMODEL_ERROR'){
+         message = e.message;
+       } else {
+         message = 'There was a problem with the resource, please try again later';
+       }
+   
+       return {
+         success: false,
+         message: message,
+         results: []
+       }
+
+  }
+
+} 
+
 module.exports = {
     upload,
     list,
     remove,
-    update
+    update,
+    getFile
 }

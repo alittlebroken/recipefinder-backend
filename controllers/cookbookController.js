@@ -26,10 +26,10 @@ const list = async (req, res, next) => {
 
     /* Get the cookbooks from the database */
     const results = await cookbookModel.findAll(options);
-
+    
     if(!results || results.length < 1) {
       let err = new Error('There were no cookbooks to find');
-      err.status = 404;
+      err.status = 204;
       err.success = false;
       throw err;
     };
@@ -79,8 +79,8 @@ const getById = async (req, res, next) => {
     const results = await cookbookModel.findById(id);
 
     if(!results || results.length < 1){
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'No matching cookbook found'
       })
@@ -113,42 +113,45 @@ const create = async (req, res, next) => {
 
     /* Validate the request variables */
 
-    if(req.body.userId === undefined){
+    const userId = parseInt(req?.body?.userId)
+    const {name, description, image} = req?.body;
+
+    if(userId === undefined){
       let err = new Error('Undefined userId');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(typeof req.body.userId !== 'number'){
+    if(typeof userId !== 'number'){
       let err = new Error('Wrong format for userId');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(req.body.name === undefined){
+    if(name === undefined){
       let err = new Error('Undefined name');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(typeof req.body.name !== 'string'){
+    if(typeof name !== 'string'){
       let err = new Error('Wrong format for name');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(req.body.description === undefined){
+    if(description === undefined){
       let err = new Error('Undefined description');
       err.status = 400;
       err.success = false;
       throw err;
     }
 
-    if(typeof req.body.description !== 'string'){
+    if(typeof description !== 'string'){
       let err = new Error('Wrong format for description');
       err.status = 400;
       err.success = false;
@@ -156,14 +159,15 @@ const create = async (req, res, next) => {
     }
 
     /* extract the data from the request object and then create the new record */
-    const {userId, name, description, image} = req.body;
-    const results = await cookbookModel.create(userId, name, description, image);
 
+    const results = await cookbookModel.create(userId, name, description, image);
+    
     if(results.success === false){
       res.status(500).json({
         status: 500,
         success: false,
-        message: 'There was a problem with the resource, please try again later'
+        message: 'There was a problem with the resource, please try again later',
+        results: []
       });
     }
 
@@ -182,6 +186,13 @@ const update = async (req, res, next) => {
 
   try{
 
+    /* Extract the required params */
+    const { 
+     name, description, image
+    } = req.body
+ 
+    const userId = parseInt(req.body.userId)
+
     /* Perform validation */
     let validationErrors;
     if(!req.params.id || req.params.id === 'undefined'){
@@ -193,7 +204,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(!req.body.userId || req.body.userId === undefined){
+    if(!userId || userId === undefined){
       validationErrors = {
         status: 400,
         success: false,
@@ -202,7 +213,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(typeof req.body.userId !== 'number'){
+    if(typeof userId !== 'number'){
       validationErrors = {
         status: 400,
         success: false,
@@ -211,7 +222,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(!req.body.name || req.body.name === undefined){
+    if(!name || name === undefined){
       validationErrors = {
         status: 400,
         success: false,
@@ -220,7 +231,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(typeof req.body.name !== 'string'){
+    if(typeof name !== 'string'){
       validationErrors = {
         status: 400,
         success: false,
@@ -229,7 +240,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(!req.body.description || req.body.description === undefined){
+    if(!description || description === undefined){
       validationErrors = {
         status: 400,
         success: false,
@@ -238,7 +249,7 @@ const update = async (req, res, next) => {
     }
     if(validationErrors) return next(validationErrors);
 
-    if(typeof req.body.description !== 'string'){
+    if(typeof description !== 'string'){
       validationErrors = {
         status: 400,
         success: false,
@@ -249,12 +260,6 @@ const update = async (req, res, next) => {
 
     /* extra the data from the req body and parameters */
     let id = parseInt(req.params.id)
-    const {
-      name,
-      description,
-      userId,
-      image
-    } = req.body;
 
     /* Update the record in the DB */
     const result = await cookbookModel.update(
@@ -351,20 +356,12 @@ const recipes = async (req, res, next) => {
     /* get the desired recipes */
     let id = parseInt(req.params.id)
     let results = await cookbookModel.recipes(id, options);
-
+   
     if(results.length < 1){
-      res.status(404).json({
-        status: 404,
+      return res.status(204).json({
+        status: 204,
         success: false,
         message: 'The cookbook currently has no recipes'
-      })
-    }
-
-    if(results.success === false){
-      res.status(500).json({
-        status: 500,
-        success: false,
-        message: 'There was a problem with the resource, please try again later'
       })
     }
 
@@ -418,8 +415,8 @@ const getCategories = async (req, res, next) => {
     let results = await cookbookCategoriesModel.findByCookbook(id, options);
     
     if(results.length < 1) {
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'The cookbook currently has no categories'
       });
@@ -575,8 +572,8 @@ const addCategory = async (req, res, next) => {
     }
 
     if(results.length < 1) {
-      res.status(404).json({
-        status: 404,
+      res.status(204).json({
+        status: 204,
         success: false,
         message: 'No data found matching supplied values'
       });
@@ -601,6 +598,18 @@ const removeRecipes = async (req, res, next) => {
 
   try{
 
+    /* Pagination, filter and sort  options to send to the method that requires it */
+    let options = {
+      page: req.page,
+      size: req.limit,
+      offset: req.offset,
+      filterBy: req.filterBy,
+      filterValues: req.filterValues,
+      filter: req.filter,
+      sortBy: req.sortBy,
+      sortOrder: req.sortOrder
+    }
+
     /* Validate the request object values we need */
 
     if(!req.params.id || req.params.id === 'undefined'){
@@ -613,10 +622,10 @@ const removeRecipes = async (req, res, next) => {
     let id = parseInt(req.params.id);
 
     /* Delete the cookbooks recipes */
-    let results = await cookbookRecipesModel.removeByCookbook(id);
-
+    let results = await cookbookRecipesModel.removeByCookbook(id, options);
+    
     if(results.success === false){
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         success: false,
         message: 'There was a problem with the resource, please try again later'
@@ -624,8 +633,8 @@ const removeRecipes = async (req, res, next) => {
     }
 
     if(!results || results.length < 1) {
-      res.status(404).json({
-        status: 404,
+      return res.status(204).json({
+        status: 204,
         success: false,
         message: 'No matching records found'
       });
@@ -638,6 +647,7 @@ const removeRecipes = async (req, res, next) => {
     });
 
   } catch(e) {
+    
     /* Log out the issue(s) */
     appLogger.logMessage('error', `cookbookController.removeRecipes - Status Code ${e.status}: ${e.message}`);
 

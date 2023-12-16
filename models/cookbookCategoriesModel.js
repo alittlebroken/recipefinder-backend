@@ -412,6 +412,7 @@ const findByCookbook = async (id, options) => {
     const result = await db('cookbook_categories as cc')
       .join('categories as cat', 'cat.id', '=', 'cc.categoryId')
       .modify(dbHelper.buildFilters, filter)
+      .modify(dbHelper.buildLimit, size)
       .select(
         'cc.id',
         'cat.name as categoryName',
@@ -419,7 +420,6 @@ const findByCookbook = async (id, options) => {
       )
       .where('cookbookId', id)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-      .limit(size)
       .offset(offset)
     
     if(result && result.length > 0){

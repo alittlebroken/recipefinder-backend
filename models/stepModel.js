@@ -351,10 +351,10 @@ const findByRecipeId = async (recipeId, options) => {
     /* Get the steps from the DB */
     const result = await db('steps')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('*')
      .where('recipeId', recipeId)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
      
@@ -415,9 +415,9 @@ const findAll = async (options) => {
     /* Get the steps from the DB */
     const result = await db('steps')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('*')
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset)
 
      if(!result || result.length < 1){

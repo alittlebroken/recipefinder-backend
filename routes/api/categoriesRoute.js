@@ -8,7 +8,7 @@ const router = express.Router();
 
 const categoriesController = require('../../controllers/categoriesController');
 
-router.get('/', checkToken, setQueryOpts, categoriesController.list);
+router.get('/', setQueryOpts, categoriesController.list);
 router.post('/', checkToken, categoriesController.create);
 router.delete('/', checkToken, checkRoles(['Admin']), categoriesController.removeAll);
 router.delete('/:id', checkToken, categoriesController.remove);

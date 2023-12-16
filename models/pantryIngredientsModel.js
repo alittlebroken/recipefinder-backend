@@ -543,6 +543,7 @@ const findByUser = async (id, options) => {
      .join('pantries as p', 'pi.pantryId', '=', 'p.id')
      .join('ingredients as i', 'i.id', '=', 'pi.ingredientId')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select(
        'pi.id as id',
        'pi.pantryId as pantryId',
@@ -553,7 +554,7 @@ const findByUser = async (id, options) => {
      )
      .where('p.userId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
+     
      .offset(offset);
 
      if(result && result.length > 0){

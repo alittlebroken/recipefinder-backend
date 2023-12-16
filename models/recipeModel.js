@@ -140,7 +140,8 @@ const create = async (recipe, steps, ingredients, cookbooks, categories) => {
       
       return {
         success: true,
-        message: 'Recipe successfully added'
+        message: 'Recipe successfully added',
+        results: recipeId
       }
 
     });
@@ -461,7 +462,7 @@ const find = async (terms, options) => {
 
   try{
 
-    let {page, size, offset, filterBy, filterValues, sortBy, sortOrder} = options
+    let {page, size, offset, filter, filterBy, filterValues, sortBy, sortOrder} = options
 
     /* Validate the passed in arguments */
     if(!validation.validator(terms, 'string')){
@@ -481,6 +482,7 @@ const find = async (terms, options) => {
       /* Find all the recipes which match first */
       const results = await trx('recipes')
        .modify(dbHelper.buildFilters, filter)
+       .modify(dbHelper.buildLimit, size)
        .select(
          'id as recipeId',
          'userId',
@@ -494,7 +496,6 @@ const find = async (terms, options) => {
        )
        .whereILike('name',`%${terms}%`)
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
-       .limit(size)
        .offset((page - 1) * size)
        .transacting(trx);
 
@@ -557,11 +558,11 @@ const find = async (terms, options) => {
        }
 
        /* Calculate number of pages */
-       let numPages = parseInt(Math.floor(recordCount.length / size))
+       let numPages = parseInt(Math.floor(resultCount.length / size)) + 1
        if(numPages < 1) numPages = 1
 
        return {
-         ...recipes,
+         results: [...recipes],
          totalRecords: resultCount.length,
          totalPages: numPages,
          currentPage: page
@@ -613,6 +614,7 @@ const findAll = async (options) => {
       /* Find all the recipes which match first */
       const results = await trx('recipes')
        .modify(dbHelper.buildFilters, filter)
+       .modify(dbHelper.buildLimit, size)
        .select(
          'id',
          'userId',
@@ -624,7 +626,6 @@ const findAll = async (options) => {
          'cook_time',
          'rating'
        )
-       .limit(size)
        .offset(offset)
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .transacting(trx);
@@ -669,12 +670,24 @@ const findAll = async (options) => {
            .select('cat.id as id', 'cat.name as name')
            .where('rc.recipeId', result.id).transacting(trx);
 
+          let imageResults = await trx('files as f')
+           .select(
+            'f.id as imageId',
+            'f.src as source',
+            'f.title as title',
+            'f.alt as alt',
+           )
+           .where('f.resource', '=', 'recipe')
+           .andWhere('f.resourceid', '=', result.id)
+           .transacting(trx)
+
           let recipe = {
             ...result,
             ingredients: [...ingredientResults],
             cookbooks: [...cookbookResults],
             steps: [...stepResults],
-            categories: [...categoryResults]
+            categories: [...categoryResults],
+            images: [...imageResults]
           };
 
           recipes.push(recipe);
@@ -686,11 +699,12 @@ const findAll = async (options) => {
        }
 
        /* Calculate number of pages */
-      let numPages = parseInt(Math.floor(recordCount.length / size))
+      let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
+
        return {
-        results: results,
+        results: recipes,
         totalRecords: recordCount.length,
         totalPages: numPages,
         currentPage: page
@@ -700,6 +714,7 @@ const findAll = async (options) => {
 
 
   } catch(e) {
+
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
@@ -720,18 +735,8 @@ const findAll = async (options) => {
  */
 const findByRecipe = async (id, options) => {
 
-  let {
-    page = 1, 
-    size = 5, 
-    offset = 0, 
-    filterBy, 
-    filterValues, 
-    limit = 5, 
-    filter, 
-    sortBy = 'id', 
-    sortOrder = 'desc'
-  } = options
-  
+  let {page, size, offset, filterBy, filterValues, limit, filter, sortBy, sortOrder} = options
+
   try {
     
     /* Validate the passed in arguments */
@@ -765,6 +770,18 @@ const findByRecipe = async (id, options) => {
     /* Only if we have found a recipe should we then go ahead and retrieve from
        the database all the supporting data like steps and categories */
     if(result && result.length > 0){
+
+      /* Get the images for the record */
+      let imageResults = await db('files as f')
+        .select(
+          'f.id as imageId',
+          'f.src as source',
+          'f.title as title',
+          'f.alt as alt',
+          )
+          .where('f.resource', '=', 'recipe')
+          .andWhere('f.resourceid', '=', result[0].id)
+
 
       /* Find appropriate steps and only if we have found some do we then add
       them to the local steps array ready to be added to the recipe and
@@ -826,6 +843,8 @@ const findByRecipe = async (id, options) => {
         };
       };
 
+
+     
       /* build the recipe object we wish to return */
       finalRecipe.push(
         {
@@ -841,7 +860,8 @@ const findByRecipe = async (id, options) => {
           ingredients: [...ingredients],
           steps: [...steps],
           categories: [...categories],
-          cookbooks: [...cookbooks]
+          cookbooks: [...cookbooks],
+          images: [...imageResults]
         }
       );
       return finalRecipe;
@@ -902,7 +922,7 @@ const findByIngredients = async (terms, options) => {
 
       /* Get all ingredients which match first */
       const ingredientResults = await ingredientModel.findAllByName(terms);
-     
+
       /* Check to see if the results contain any errors and handle
        them appropriately */
       if(!Array.isArray(ingredientResults)){
@@ -920,6 +940,9 @@ const findByIngredients = async (terms, options) => {
         }
       }
 
+      /* Keep a tally of the number of records found for each ingredient */
+      let recipesFound = 0
+
       /* Check we have ingredients to look through for the next phase */
       if(ingredientResults && ingredientResults.length > 0){
 
@@ -933,6 +956,8 @@ const findByIngredients = async (terms, options) => {
           totalPages = recipeIngredients.totalPages
           totalRecords = recipeIngredients.totalRecords
           currentPage = recipeIngredients.currentPage
+
+          recipesFound += totalRecords
 
           /*
             If we have any errors, just throw them back up to the calling
@@ -951,11 +976,11 @@ const findByIngredients = async (terms, options) => {
             returning and if none found then return an empty array
           */
             
-            if(data.length > 0){
+            if(data?.length > 0){
             
               await Promise.all(data.map(async record => {
                 
-                let found = await findByRecipe(record.recipeId)
+                let found = await findByRecipe(record.recipeId, options)
                
                 await Promise.all(found.map(async findee => { 
                   recipes.push(findee)
@@ -980,14 +1005,14 @@ const findByIngredients = async (terms, options) => {
       return {
         results: recipes,
         currentPage,
-        totalPages,
-        totalRecords
+        totalPages: parseInt(recipesFound / options.size) < 1 ? 1 : parseInt(recipesFound / options.size),
+        totalRecords: recipesFound
       };
 
     });
 
   } catch(e) {
-        
+
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
@@ -1043,7 +1068,7 @@ const findByCategory = async (terms, options) => {
       for( let foundCategory of foundCategories){
 
         let foundRecipeIds = await recipeCategoriesModel.findByCategory(foundCategory.id, options);
-
+        
         /* get the pagination options and any data returned*/
         let { data } = foundRecipeIds
         totalPages = foundRecipeIds.totalPages
@@ -1056,7 +1081,8 @@ const findByCategory = async (terms, options) => {
           /* for each entry returned get the recipe details and assign to the results array we will
              return later
           */
-         let recipe = await findByRecipe(entry.recipeId);
+         let recipe = await findByRecipe(entry.recipeId, options);
+         
          if(recipe.length > 0){
           
           await Promise.all(recipe.map(item => {
@@ -1128,16 +1154,16 @@ const findByUserId = async (id, options) => {
     /* Gather the required data from the database */
     const results = await db('recipes')
      .modify(dbHelper.buildFilters, filter)
+     .modify(dbHelper.buildLimit, size)
      .select('*')
      .where('userId', id)
      .modify(dbHelper.buildSort, { sortBy, sortOrder })
-     .limit(size)
      .offset(offset);
 
     /* If we any results then send them back  */
     if(results && results.length > 0){
       /* Calculate number of pages */
-      let numPages = parseInt(Math.floor(recordCount.length / size))
+      let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
       return {

@@ -9,7 +9,7 @@ const setQueryOpts = async (req, res, next) => {
 
         /* Extract the pagination options from the query String if set */
         let page = req.query.page ? parseInt(req.query.page) : 1
-        let limit = req.query.limit ? parseInt(req.query.limit) : 10
+        let limit = req.query.limit ? parseInt(req.query.limit) : null
 
         /* Extract the sorting options if set */
         let sortBy = req.query.sort_by ? req.query.sort_by : null
@@ -21,8 +21,12 @@ const setQueryOpts = async (req, res, next) => {
         let filter = req.query.filter ? req.query.filter : null
 
         /* ensure that the pagination options are set within desired ranges */
-        if(limit < 1) limit = 10
-        if(limit > 100 ) limit = 100
+        if(limit !== null){
+            console.log('Limit is set to : ', limit)
+            if(limit < 1) limit = 10
+            if(limit > 100 ) limit = 100
+
+        }
         if(!page || page < 1) page = 1
 
         /* Add the details to the request object */

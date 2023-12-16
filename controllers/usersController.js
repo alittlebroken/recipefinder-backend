@@ -37,8 +37,8 @@ const listAll = async (req, res, next) => {
         const results = await userModel.findAll(options);
 
         if(!results || results.length < 1){
-            return res.status(404).json({
-                status: 404,
+            return res.status(204).json({
+                status: 204,
                 success: false,
                 message: "There currently no users in the system",
                 results: []
@@ -118,8 +118,8 @@ const listUser = async (req, res, next) => {
 
         /* Process any results and then send the expected output back */
         if(!results || results.length < 1){
-            res.status(404).json({
-                status: 404,
+            res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'No user found matching that id',
                 results: []
@@ -205,8 +205,8 @@ const listUserRecipes = async (req, res, next) => {
         
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            res.status(404).json({
-                status: 404,
+            res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'The user currently has no recipes',
                 results: []
@@ -296,8 +296,8 @@ const listUserCookbooks = async (req, res, next) => {
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            return res.status(404).json({
-                status: 404,
+            return res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'The user currently has no cookbooks',
                 results: []
@@ -387,8 +387,8 @@ const listUserPantry = async (req, res, next) => {
 
         /* Check the resaults if any and send back the appropriate response */
         if(results.length < 1){
-            return res.status(404).json({
-                status: 404,
+            return res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'The user currently has no pantry ingredients',
                 results: []
@@ -892,8 +892,8 @@ const addUserPantry = async (req, res, next) => {
            the ingredient to the desired pantry */
         const pantryResult = await pantryIngredients.findByUser(Number.parseInt(req.params.id));
         if(!pantryResult || pantryResult.length < 1 || pantryResult.success === false){
-            return res.status(404).json({
-                status: 404,
+            return res.status(204).json({
+                status: 204,
                 success: false,
                 message: 'Unable to find pantry for user',
                 results: []
@@ -1412,8 +1412,8 @@ const updateUser = async (req, res, next) => {
         if(result.success === false){
             switch(result.message){
                 case "No records matched supplied data":
-                    res.status(404).json({
-                        status: 404,
+                    res.status(204).json({
+                        status: 204,
                         success: false,
                         message: 'No user found matching the specified id',
                         results: []
