@@ -9,6 +9,7 @@ const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
 const dbHelper = require('../helpers/database');
 const pantryModel = require('../models/pantryModel');
+const cookbookModel = require('../models/cookbookModel');
 
 /**
  * Insert a user into the database
@@ -64,6 +65,28 @@ const insert = async (username, password, email, roles = 'Customer') => {
         message: 'Unable to create pantry and user successfully removed'
       }
     }
+
+    /* Create a default cookbook for the user */
+    const cookbookResult = await cookbookModel.create(result[0].id, 'My Favourite Recipes', 'A collection of recipes I like.', null)
+
+    if(cookbookResult.success === false){
+      /* Delete the user account */
+      const removeUser = await db('users').del().where('id', result[0].id)
+      
+      if(removeUser.length < 1)
+      {
+        throw {
+          name: 'USERMODEL_ERROR',
+          message: 'Unable to create default cookbook and remove user account'
+        }
+      }
+
+      throw {
+        name: 'USERMODEL_ERROR',
+        message: 'Unable to create default cookbook and user successfully removed'
+      }
+    }
+
 
     /* No issues so return the data found */
     return records;
