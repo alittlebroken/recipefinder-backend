@@ -15,15 +15,17 @@ const cookbookModel = require('../models/cookbookModel');
  * Insert a user into the database
  * @param {string} username - The login name of the user
  * @param {string} password - The unencrypted password of the user
+ * @param {string} forename - The First name of the user
+ * @param {string} surname - The surname of the user
  */
-const insert = async (username, password, email, roles = 'Customer') => {
+const insert = async (username, password, email, forename, surname, roles = 'Customer') => {
 
   try {
     /* Check that we have valid data passed in */
-    if(!username || !password || !email){
+    if(!username || !password || !email || !forename || !surname){
       throw {
         name: 'USERMODEL_ERROR',
-        message: 'You must provide values for username,password or email.'
+        message: 'You must provide values for username,password,email, forename or surname.'
       }
     }
 
@@ -36,13 +38,15 @@ const insert = async (username, password, email, roles = 'Customer') => {
         username: username,
         password: hashedPassword,
         email: email,
+        forename: forename,
+        surname: surname,
         roles: roles
       }
     ).returning('id');
 
     /* Get the newly added records */
     const records = await db('users')
-    .select('id', 'username', 'email', 'roles')
+    .select('id', 'username', 'email', 'roles', 'forename', 'surname')
     .where('id', result[0].id);
 
     /* Create for the user a pantry model */
@@ -116,6 +120,9 @@ const insert = async (username, password, email, roles = 'Customer') => {
  */
 const findByEmail = async email => {
 
+  console.log(`Trying to find: `)
+  console.log(email)
+
   try{
 
     /* Check we have data passed in */
@@ -141,6 +148,8 @@ const findByEmail = async email => {
       }
 
      })
+
+     console.log(result)
 
     if(!result || !result.length > 0){
       throw {

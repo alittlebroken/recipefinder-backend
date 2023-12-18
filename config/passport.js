@@ -95,7 +95,7 @@ passport.use(
     /* Register the user via the userModel */
     try {
       
-      const result = await userModel.insert(email,password, email, req.body.roles);
+      const result = await userModel.insert(email, password, email, req.body.forename, req.body.surname, email, req.body.roles);
       
       if(result || result.length > 0){
         return done(null, result[0]);
