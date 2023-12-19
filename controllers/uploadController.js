@@ -205,9 +205,9 @@ const list = async (req, res, next) => {
         }
 
         if(result?.results?.length < 1){
-            return res.status(404).json({
+            return res.status(204).json({
                 success: false,
-                status: 404,
+                status: 204,
                 message: 'There were no records found',
                 results: [],
                 pagination: {
