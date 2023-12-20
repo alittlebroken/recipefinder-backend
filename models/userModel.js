@@ -741,9 +741,21 @@ const profile = async (id) => {
     /* Extract the details we need from the DB */
     const result = await db('users as u')
      .join('pantries as p', 'p.userId', '=', 'u.id')
+     .join('files as f', 'f.resourceid', '=', 'u.id')
      .select(
-      'u.id', 'u.username', 'u.email', 'u.roles', 'u.forename', 'u.surname', 'u.created_at', 'p.id as pantryId'
+      'u.id', 
+      'u.username', 
+      'u.email', 
+      'u.roles', 
+      'u.forename', 
+      'u.surname', 
+      'u.created_at', 
+      'p.id as pantryId',
+      'f.src as avatar_src',
+      'f.title as avatar_title',
+      'f.alt as avatar_alt'
      ).where('u.id', '=', id)
+     .where('f.resource', '=', 'users')
 
      if(result?.length > 0){
       return {
