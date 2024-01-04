@@ -14,7 +14,8 @@ const recipeCategoriesModel = require('./recipeCategoriesModel');
 
 const validation = require('../helpers/validation');
 const messageHelper = require('../helpers/constants');
-const dbHelper = require('../helpers/database')
+const dbHelper = require('../helpers/database');
+const e = require('express');
 
 /*
  * Transactional knex method to add a recipe to the database as well as it's
@@ -909,6 +910,9 @@ const findByIngredients = async (terms, options) => {
     /* Store any recipes we found to be returned */
     let recipes = [];
 
+    /* Holds all ingredients found for a recipe */
+    let recipeIngredients = []
+
     /* Validate the passed in values */
     if(!validation.validator(terms, 'string')){
       throw {
@@ -921,8 +925,16 @@ const findByIngredients = async (terms, options) => {
     return await db.transaction( async trx => {
 
       /* Get all ingredients which match first */
-      const ingredientResults = await ingredientModel.findAllByName(terms);
-
+      
+      /* Split out each term we have been sent */
+      const ingredientList = terms.split(' ')
+      
+      let ingredientResults = []
+      for(let i = 0; i < ingredientList.length; i++){
+        let tempIngredient = await ingredientModel.findAllByName(ingredientList[i]);
+        ingredientResults.push(tempIngredient)
+      }
+      
       /* Check to see if the results contain any errors and handle
        them appropriately */
       if(!Array.isArray(ingredientResults)){
@@ -945,18 +957,35 @@ const findByIngredients = async (terms, options) => {
 
       /* Check we have ingredients to look through for the next phase */
       if(ingredientResults && ingredientResults.length > 0){
-
         /* Loop through each result and gather all supporting data */
         for ( ingredient of ingredientResults ){
-
-          let recipeIngredients = await recipeIngredientsModel.findByIngredient(ingredient.id, options);
           
+          /* For each ingredient just get the id of the recipe it belongs to as well as further details
+          on how much of that ingredient it needs */
+          if(Array.isArray(ingredient) && ingredient?.length > 0){
+            for(let i = 0; i < ingredient.length; i++){
+              let tmp = await recipeIngredientsModel.findByIngredient(ingredient[i].id, options);
+              
+              if(tmp?.data?.length > 0){
+                recipeIngredients.push(tmp)
+              }
+            }
+            
+          } 
+
           /* get the pagination options and any data returned*/
-          let { data } = recipeIngredients
+          
+          
+          /* Extract the data and assign to an arry or ease of use */
+          let data = []
+          for(let x = 0; x < recipeIngredients.length; x++){
+            data.push(recipeIngredients[x].data[0])
+          }
+          
           totalPages = recipeIngredients.totalPages
           totalRecords = recipeIngredients.totalRecords
           currentPage = recipeIngredients.currentPage
-
+          console.log('Data: ', data)
           recipesFound += totalRecords
 
           /*
@@ -979,7 +1008,7 @@ const findByIngredients = async (terms, options) => {
             if(data?.length > 0){
             
               await Promise.all(data.map(async record => {
-                
+                console.log('Record: ', record)
                 let found = await findByRecipe(record.recipeId, options)
                
                 await Promise.all(found.map(async findee => { 
@@ -1012,7 +1041,7 @@ const findByIngredients = async (terms, options) => {
     });
 
   } catch(e) {
-
+        console.log(e)
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
