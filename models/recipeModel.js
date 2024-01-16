@@ -927,7 +927,7 @@ const findByIngredients = async (terms, options) => {
       /* Get all ingredients which match first */
       
       /* Split out each term we have been sent */
-      const ingredientList = terms.split(' ')
+      const ingredientList = terms.split(',')
       
       let ingredientResults = []
       for(let i = 0; i < ingredientList.length; i++){
@@ -959,7 +959,7 @@ const findByIngredients = async (terms, options) => {
       if(ingredientResults && ingredientResults.length > 0){
         /* Loop through each result and gather all supporting data */
         for ( ingredient of ingredientResults ){
-          
+         
           /* For each ingredient just get the id of the recipe it belongs to as well as further details
           on how much of that ingredient it needs */
           if(Array.isArray(ingredient) && ingredient?.length > 0){
@@ -975,7 +975,6 @@ const findByIngredients = async (terms, options) => {
 
           /* get the pagination options and any data returned*/
           
-          
           /* Extract the data and assign to an arry or ease of use */
           let data = []
           for(let x = 0; x < recipeIngredients.length; x++){
@@ -985,7 +984,7 @@ const findByIngredients = async (terms, options) => {
           totalPages = recipeIngredients.totalPages
           totalRecords = recipeIngredients.totalRecords
           currentPage = recipeIngredients.currentPage
-          console.log('Data: ', data)
+          
           recipesFound += totalRecords
 
           /*
@@ -1008,13 +1007,15 @@ const findByIngredients = async (terms, options) => {
             if(data?.length > 0){
             
               await Promise.all(data.map(async record => {
-                console.log('Record: ', record)
+                
                 let found = await findByRecipe(record.recipeId, options)
                
                 await Promise.all(found.map(async findee => { 
                   recipes.push(findee)
                 }))
                
+               
+
               }))
 
           } else {
@@ -1041,7 +1042,7 @@ const findByIngredients = async (terms, options) => {
     });
 
   } catch(e) {
-        console.log(e)
+        
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message;
@@ -1286,6 +1287,198 @@ const removeAllByUser  = async id => {
 
 };
 
+/* This method checks an individual ingredient from the panty against an recipe to see if it can be used
+ * @param {number} recipe_id  The id of the recipe whose ingredients we are interested in
+ * @Param {object} ingredient The ingredient to be checking
+ * @returns {boolean} true if we have enough of our ingredient, false if not
+ * TODO: Take into account of an amount_type so if a client has more than the recipe it still matches
+ */
+const canIBeUsed = async (recipe_id, ingredient) => {
+
+  try {
+
+    /* Validate the passed in arguments */
+    if(!recipe_id || typeof recipe_id !== 'number' || recipe_id !== null || recipe_id !== undefined || !isNaN(parseInt(recipe__id))){
+      return false
+    }
+
+    if(!ingredient){
+      return false
+    }
+
+    /* Get the recipe Ingredient */
+    const result = await db("recipe_ingredients")
+     .select('*')
+     .where('recipeId', '=', recipe_id)
+     .where('ingredientId', '=', ingredient.id)
+
+    
+    /* removed old if conditional as not quite ready to test out ingredients amount, but leaving here for future expansion */
+    //if(result[0].amount === ingredient.amount && result[0].amount_type === ingredient.amount_type){
+    if(result && result?.length > 1) {
+      return true
+    } else {
+      return false
+    }
+
+  } catch(e) {
+    console.log('Error from recipeModel->canIBeMade: \n')
+    console.log(e)
+    return false
+  }
+
+}
+   
+/* The method checks an ingredient agaisnt a recipes list of ingredients to see if it matches at all
+ * @param {number} recipe_id  The id of the recipe whose ingredients we are interested in
+ * @param {array} ingredients The ingredients we wish to check against
+ * @returns {boolean} true if we have enough ingredients to make the recipe but false if we do not
+ */
+const canIBeMade = async (recipe_id, ingredients) => {
+
+  try {
+
+    /* Validate the passed in arguments */
+    if(!recipe_id || typeof recipe_id !== 'number' || recipe_id !== null || recipe_id !== undefined || !isNaN(parseInt(recipe__id))){
+      return false
+    }
+
+    if(!Array.isArray(ingredients) || ingredients?.length < 1){
+      return false
+    }
+
+    /* Keep a count of all the ingredients that match */
+    let matches = 0
+
+    /* Check each ingredient against the recipe */
+    for(let idx = 0; idx < ingredients.length; idx++){
+      if(canIBeUsed(recipe_id, ingredients[idx])){
+        matches++
+      } 
+    }
+
+    /* If we can make the recipe, then the number of matches should equal the number of ingredients we have checked */
+    if(matches >= ingredients.length){
+      return true
+    } else {
+      return false
+    }
+
+  } catch(e) {
+
+    console.log('Error from recipeModel->canIBeMade: \n')
+    console.log(e)
+    return false
+
+  }
+
+}
+
+/*
+ * This method determines if a recipe can be made or not based on the passed in ingredients
+ * @param {array} ingredients The list of ingredient objects with which we have to make a recipe
+ * @returns {any} false if not found or we don't have enough of the ingredient otherwise it returns the recipe
+ * 
+*/
+const whatCanIMake = async (ingredients, options) => {
+
+  try{
+
+    /* Validate the passed in arguments */
+
+    if(!Array.isArray(ingredients)){
+      return false
+    }
+
+    if(ingredients?.length < 1) {
+      return false
+    }
+
+    /* Keeps track of the recipes we have found so far */
+    let recipesWeCanMake = []
+
+    /* Keep a count of how many ingredients failed to find a recipe they are in */
+    let failedMatches = 0
+
+    /*
+      Loop through each ingredient and check the recipe has it, then check if we have enough
+      of said ingredient
+    */
+    for(let i = 0; i < ingredients.length; i++){
+
+      /* Check the recipe ingredients table for the information we need */
+      let recipes = await db('recipe_ingredients')
+       .select('*')
+       .where('ingredientId', '=', ingredients[i].ingredientId)
+
+       if(!recipes || recipes?.length < 1){
+        failedMatches++
+       }
+
+       /* Check each recipe in turn against the pantry ingredients and see if the required 
+        amounts match to the quantites we have, if it does the recipe is added to the list and
+        passed back through the API to the client
+       */
+       for(let y = 0; y < recipes?.length; y++){
+
+          /* Can we make the recipe */
+          if(canIBeMade(recipes[y].recipeId, ingredients)){
+            
+            let recipeMatch = await findByRecipe(recipes[y].recipeId, options)
+            
+            if(recipeMatch && recipeMatch.length > 0){
+
+              /* loop through and add each recipe found to the final recipes array */
+              recipeMatch.forEach(recipe => {
+
+                if(recipesWeCanMake?.length < 1){
+                  /* First entry so just add the first recipe */
+                  recipesWeCanMake.push(recipe)
+                } else {
+
+                  /* Loop through the recipes found so far and only add a new recipe if the recipe name is currently not
+                     found within the target array */
+                  recipesWeCanMake.forEach(item => {
+                    if(item.name !== recipe.name){
+                      recipesWeCanMake = [
+                        ...recipesWeCanMake,
+                        recipe
+                      ]
+                    }
+                  })
+
+                }
+
+              })
+              
+            }
+
+          }
+
+        }
+
+      }
+
+      if(!recipesWeCanMake || recipesWeCanMake?.length < 1){
+        return false
+      } else {
+
+        return recipesWeCanMake
+      }
+
+  } catch(e) {
+
+    console.log('Error from recipeModel->whatCanIMake: \n')
+    console.log(e)
+    return false
+
+  }
+
+}
+
+
+
+
 module.exports = {
   create,
   remove,
@@ -1297,5 +1490,6 @@ module.exports = {
   findByCategory,
   removeAll,
   findByUserId,
-  removeAllByUser
+  removeAllByUser,
+  whatCanIMake
 };

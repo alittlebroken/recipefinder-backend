@@ -138,6 +138,94 @@ const performSearch = async (req, res, next) => {
 };
 
 /* 
+ * Searech ffor recipes based on the ingredients a user has in their pantry 
+ */
+const performPantrySearch = async (req,res,next) => {
+
+    const moduleMethod = 'performPantrySearch';
+
+    try {
+
+        /* Pagination, filter and sort  options to send to the method that requires it */
+        let options = {
+            page: req.page,
+            size: req.limit,
+            offset: req.offset,
+            filterBy: req.filterBy,
+            filterValues: req.filterValues,
+            filter: req.filter,
+            sortBy: req.sortBy,
+            sortOrder: req.sortOrder
+          }
+
+        /* Validate any request variables */
+        let validationErrors;
+
+        if(!req.body.ingredients || req.body.ingredients === null || req.body.ingredients === undefined){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'You must supply some ingredients to search with.',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors)
+
+        if(!Array.isArray(req.body.ingredients)){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'List of pantry ingredients are not in the correct format.',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors)
+
+        if(req.body.ingredients.length < 1){
+            validationErrors = {
+                status: 400,
+                success: false,
+                message: 'List of pantry ingredients must contain at least one ingredient.',
+                results: []
+            }
+        }
+        if(validationErrors) return next(validationErrors)
+
+        /* Get a list of recipes we can make */
+        let recipes = await recipeModel.whatCanIMake(req.body.ingredients, options)
+
+        if(!recipes || recipes?.length < 1){
+            return res.status(204).json({
+                status: 204,
+                success: false,
+                message: 'No recipes found containing your pantry ingredients.',
+                results: []
+            })
+        }
+
+        res.status(200).json({
+            status: 200,
+            success: true,
+            message: '',
+            results: recipes
+        })
+
+
+    } catch(e) {
+
+        /* Log out the issue(s) */
+        appLogger.logMessage(
+            'error', 
+            `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
+            );
+
+        return next(e);
+
+    }
+
+}
+
+/* 
  * function template
  */
 const method = async (req, res, next) => {
@@ -159,5 +247,6 @@ const method = async (req, res, next) => {
 };
 
 module.exports = {
-    performSearch
+    performSearch,
+    performPantrySearch
 }
