@@ -431,6 +431,7 @@ const list = async (pantryId, options) => {
      }
 
      return {
+      success: true,
       results: pantry,
       totalRecords: recordCount.length,
       totalPages: parseInt(Math.ceil(recordCount.length/size)),
