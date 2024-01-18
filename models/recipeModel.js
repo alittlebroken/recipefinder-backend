@@ -17,6 +17,9 @@ const messageHelper = require('../helpers/constants');
 const dbHelper = require('../helpers/database');
 const e = require('express');
 
+/* require lodash to allow comparing of objects */
+const _ = require('lodash')
+
 /*
  * Transactional knex method to add a recipe to the database as well as it's
  * associated data.
@@ -1374,6 +1377,31 @@ const canIBeMade = async (recipe_id, ingredients) => {
 
 }
 
+/* This method will check an array to see if an item already exists within it */
+const doIExist = (element, target) => {
+
+  if(target?.length < 1) {
+    console.log('Target is empty')
+    return false
+  }
+
+  for(let loop = 0; loop < target?.length; loop++){
+    
+    let tmp = target[loop]
+
+    if(_.isEqual(element, tmp)){
+      console.log(`Element matches target`)
+      return true
+    } else {
+      console.log(`Element did not match target`)
+    }
+
+    return false
+
+  }
+
+}
+
 /*
  * This method determines if a recipe can be made or not based on the passed in ingredients
  * @param {array} ingredients The list of ingredient objects with which we have to make a recipe
@@ -1401,9 +1429,9 @@ const whatCanIMake = async (ingredients, options) => {
     let failedMatches = 0
 
     /*
-      Loop through each ingredient and check the recipe has it, then check if we have enough
-      of said ingredient
+      Loop through each ingredient and check the recipe has it
     */
+   console.log(ingredients.length)
     for(let i = 0; i < ingredients.length; i++){
 
       /* Check the recipe ingredients table for the information we need */
@@ -1411,60 +1439,50 @@ const whatCanIMake = async (ingredients, options) => {
        .select('*')
        .where('ingredientId', '=', ingredients[i].ingredientId)
 
-       if(!recipes || recipes?.length < 1){
-        failedMatches++
-       }
-
-       /* Check each recipe in turn against the pantry ingredients and see if the required 
-        amounts match to the quantites we have, if it does the recipe is added to the list and
-        passed back through the API to the client
+       /* Check each recipe in turn against the pantry ingredients and see if we can make the recipe
        */
-       for(let y = 0; y < recipes?.length; y++){
-
-          /* Can we make the recipe */
-          if(canIBeMade(recipes[y].recipeId, ingredients)){
+       for(let y = 0; y < recipes.length; y++){
             
-            let recipeMatch = await findByRecipe(recipes[y].recipeId, options)
+            let recipeMatches = await findByRecipe(recipes[y].recipeId, options)
             
-            if(recipeMatch && recipeMatch.length > 0){
+            /* For each recipe found add it to the final list of recipes we can make ready 
+             * to be sent back to the client. We also need to remove duplciates here as well */
+            for(let x = 0; x < recipeMatches?.length; x++){
+            
+              recipesWeCanMake = [...recipesWeCanMake, recipeMatches[x]]
 
-              /* loop through and add each recipe found to the final recipes array */
-              recipeMatch.forEach(recipe => {
-
-                if(recipesWeCanMake?.length < 1){
-                  /* First entry so just add the first recipe */
-                  recipesWeCanMake.push(recipe)
-                } else {
-
-                  /* Loop through the recipes found so far and only add a new recipe if the recipe name is currently not
-                     found within the target array */
-                  recipesWeCanMake.forEach(item => {
-                    if(item.name !== recipe.name){
-                      recipesWeCanMake = [
-                        ...recipesWeCanMake,
-                        recipe
-                      ]
-                    }
-                  })
-
-                }
-
-              })
-              
-            }
-
-          }
+            } 
 
         }
+      
+      
+    }
 
+    if(!recipesWeCanMake || recipesWeCanMake?.length < 1){
+      return false
+    } else {
+
+      /* Get rid of duplicates we may have */
+      let finalisedArray = []
+      let uniqueObjects = {}
+
+      /* Loop through the recipes found and assign them to a new object dictionary using the recipe name as a key.
+      This should then mean any duplicates overwrite the existing entry leavinf at then end, hopefully a set of
+      unique recipes */
+      for(let j = 0; j < recipesWeCanMake.length; j++){
+
+        let keyName = recipesWeCanMake[j].name
+        uniqueObjects[keyName] = recipesWeCanMake[j]
+        
       }
 
-      if(!recipesWeCanMake || recipesWeCanMake?.length < 1){
-        return false
-      } else {
-
-        return recipesWeCanMake
+      /* Add in each unique entry into the array before sending it back to the client */
+      for(i in uniqueObjects){
+        finalisedArray.push(uniqueObjects[i])
       }
+
+      return finalisedArray
+    }
 
   } catch(e) {
 
