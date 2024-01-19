@@ -660,6 +660,81 @@ const removeRecipes = async (req, res, next) => {
 
 };
 
+const removeRecipe = async (req, res, next) => {
+
+  try{
+
+    /* Pagination, filter and sort  options to send to the method that requires it */
+    let options = {
+      page: req.page,
+      size: req.limit,
+      offset: req.offset,
+      filterBy: req.filterBy,
+      filterValues: req.filterValues,
+      filter: req.filter,
+      sortBy: req.sortBy,
+      sortOrder: req.sortOrder
+    }
+
+    /* Validate the request object values we need */
+
+    if(!req.params.id || req.params.id === 'undefined'){
+      let err = new Error('Undefined id');
+      err.status = 400;
+      err.success = false;
+      throw err;
+    }
+
+    if(!req.params.recipeId || req.params.recipeId === 'undefined'){
+      let err = new Error('Undefined recipe id');
+      err.status = 400;
+      err.success = false;
+      throw err;
+    }
+
+
+    let id = parseInt(req.params.id);
+    let recipeId = parseInt(req.params.recipeId);
+
+    /* Delete the cookbooks recipes */
+    let results = await cookbookRecipesModel.removeCookBookRecipe(id, recipeId, options);
+    
+    if(results.success === false){
+      return res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later'
+      });
+    }
+
+    if(!results || results.length < 1) {
+      return res.status(204).json({
+        status: 204,
+        success: false,
+        message: 'No matching records found'
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      success: true,
+      message: results.message
+    });
+
+  } catch(e) {
+    
+    /* Log out the issue(s) */
+    appLogger.logMessage('error', `cookbookController.removeRecipe - Status Code ${e.status}: ${e.message}`);
+
+    return next({
+      status: e.status,
+      success: false,
+      message: e.message
+    });
+  }
+
+};
+
 const removeCategories = async (req, res, next) => {
 
   try{
@@ -803,6 +878,7 @@ module.exports = {
   addRecipe,
   addCategory,
   removeRecipes,
+  removeRecipe,
   removeCategories,
   removeAll,
   removeById,

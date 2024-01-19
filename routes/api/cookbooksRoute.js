@@ -23,6 +23,7 @@ router.post('/:id/categories', checkToken, uploadFiles, cookbookController.addCa
 router.delete('/', checkToken, checkRoles(['Admin']),cookbookController.removeAll);
 router.delete('/:id', checkToken, cookbookController.removeById);
 router.delete('/:id/recipes', checkToken, cookbookController.removeRecipes);
+router.delete('/:id/recipe/:recipeId', checkToken, cookbookController.removeRecipe);
 router.delete('/:id/categories', checkToken, cookbookController.removeCategories);
 router.put('/:id', checkToken, uploadFiles, cookbookController.update);
 

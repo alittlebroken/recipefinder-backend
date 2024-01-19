@@ -139,10 +139,76 @@ const removeByCookbook = async (id, options) => {
        }
      };
 
-     /* Add the entry to the database */
+     /* Add the entry to the database*/
      const result = await db('cookbook_recipes')
       .modify(dbHelper.buildFilters, filter)
       .delete()
+
+      /* Check we deleted a record */
+      if(result && result > 0){
+        return {
+            success: true,
+            message: 'Cookbook recipes removed successfully'
+          }
+      } else {
+        return []
+      }
+
+   } catch(e) {
+     /* Check for library errors and if found swap them out for a generic
+        one to send back over the API for security */
+     let message;
+
+     if(e.name === 'COOKBOOKRECIPESMODEL_ERROR'){
+       message = e.message;
+     } else {
+       message = 'There was a problem with the resource, please try again later';
+     }
+
+     return {
+       success: false,
+       message: message
+     }
+   }
+ };
+
+
+ /* Removes a singular recipe from the cookbook
+  * @param {number} id - The unique identifier of the cookbook being amended
+  * @param {number} recipeId - The unique identifier of the recipe being removed
+  * @param {object} options  - Settings for manipulating the records further
+  * @returns {object} Contains the success state of the requested action and
+  * any accompanying message to explain further
+ */
+ 
+ const removeCookBookRecipe = async (id, recipeId, options) => {
+
+   try {
+
+    /* Extract the pagination settings */
+    let {page, size, offset, filterBy, filter, filterValues, limit, sortBy, sortOrder} = options
+
+     /* Validate the passed in data */
+     if(!validation.validator(id, 'number')){
+       throw {
+         name: 'COOKBOOKRECIPESMODEL_ERROR',
+         message: 'One or more required values are missing or incorrect'
+       }
+     };
+
+     /* Validate the passed in data */
+     if(!validation.validator(recipeId, 'number')){
+      throw {
+        name: 'COOKBOOKRECIPESMODEL_ERROR',
+        message: 'One or more required values are missing or incorrect'
+      }
+    };
+
+     /* Add the entry to the database*/
+     const result = await db('cookbook_recipes')
+      .where('cookbookId', id)
+      .where('recipeId', recipeId)
+      .del()
 
       /* Check we deleted a record */
       if(result && result > 0){
@@ -454,5 +520,6 @@ module.exports = {
     update,
     findByCookbook,
     findByRecipe,
-    findAll
+    findAll,
+    removeCookBookRecipe
 };
