@@ -59,6 +59,13 @@ const create = async (recipe, steps, ingredients, cookbooks, categories) => {
       }
     };
 
+    if(!validation.validator(recipe.description, 'string')){
+      throw {
+        name: 'RECIPEMODEL_ERROR',
+        message: 'recipe description is missing or incorrect'
+      }
+    };
+
     if(!validation.validator(recipe.servings, 'number')){
       throw {
         name: 'RECIPEMODEL_ERROR',

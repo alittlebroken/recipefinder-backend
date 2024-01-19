@@ -390,6 +390,7 @@ const create = async (req, res, next) => {
        types */
     const userid = parseInt(req.body.userId)
     const name = req.body.name
+    const description = req.body.description
     const servings = parseInt(req.body.servings)
     const calories_per_serving = parseInt(req.body.calories_per_serving)
     const prep_time = parseInt(req.body.prep_time)
@@ -427,6 +428,22 @@ const create = async (req, res, next) => {
                 status: 400,
                 success: false,
                 message: 'Wrong format for name'
+            };
+        }
+
+        if(!description || description === undefined){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Undefined description'
+            }
+        }
+
+        if(typeof description !== 'string'){
+            throw {
+                status: 400,
+                success: false,
+                message: 'Wrong format for description'
             };
         }
 
@@ -501,6 +518,7 @@ const create = async (req, res, next) => {
         let recipe = {
             userId: userid,
             name: name,
+            description: description,
             servings: servings,
             calories_per_serving: calories_per_serving,
             prep_time: prep_time,
