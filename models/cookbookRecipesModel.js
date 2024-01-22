@@ -37,6 +37,20 @@ const create = async data => {
       }
     };
 
+     /* Check if we have an existing entry first */
+     const existing = await db('cookbook_recipes')
+     .where('cookbookId', data.cookbookId)
+     .where('recipeId', data.recipeId)
+
+     
+     if(existing && existing?.length >= 1){
+      return {
+        status: 409,
+        success: false,
+        message: 'The cookbook already contains the specified recipe.'
+      }
+     }
+
     /* Add the entry to the database */
     const result = await db('cookbook_recipes')
      .insert(data)
@@ -48,6 +62,7 @@ const create = async data => {
       };
 
   } catch(e) {
+    
     /* Check for library errors and if found swap them out for a generic
        one to send back over the API for security */
     let message;
@@ -82,6 +97,8 @@ const remove = async id => {
         message: 'One or more required values are missing or incorrect'
       }
     };
+
+   
 
     /* Add the entry to the database */
     const result = await db('cookbook_recipes')

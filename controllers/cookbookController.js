@@ -490,9 +490,18 @@ const addRecipe = async (req, res, next) => {
     }
 
     let results = await cookbookRecipesModel.create(data);
+    console.log(results)
+
+    if(results.status === 409){
+      return res.status(409).json({
+        status: results.status,
+        success: results.success,
+        message: results.message
+      })
+    }
 
     if(results.success === false){
-      res.status(500).json({
+      return res.status(500).json({
         status: 500,
         success: false,
         message: 'There was a problem with the resource, please try again later'
