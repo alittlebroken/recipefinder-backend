@@ -87,7 +87,7 @@ const buildFilters = (queryBuilder, filters) => {
                 if(typeof parsedFilters[filter] !== 'string' || filter === 'resourceid'){
                     queryBuilder.where(filter, '=', parseInt(parsedFilters[filter]))
                 } else {
-                    queryBuilder.where(filter, 'like', `%${parsedFilters[filter]}%`)
+                    queryBuilder.where(filter, 'ilike', `%${parsedFilters[filter]}%`)
                 }
 
             }
