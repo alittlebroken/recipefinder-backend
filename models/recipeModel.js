@@ -551,13 +551,24 @@ const find = async (terms, options) => {
            .select('cat.id as id', 'cat.name as name')
            .where('rc.recipeId', result.recipeId).transacting(trx);
           
+          /* get the images for the current recipe */
+          let imageResults = await trx('files')
+          .select(
+            'id',
+            'src as source',
+            'title',
+            'alt'
+          )
+          .where('resource', '=', 'recipe')
+          .where('resourceid', '=', result.recipeId)
 
           let recipe = {
             ...result,
             ingredients: [...ingredientResults],
             cookbooks: [...cookbookResults],
             steps: [...stepResults],
-            categories: [...categoryResults]
+            categories: [...categoryResults],
+            images: [...imageResults]
           };
 
           recipes.push(recipe);
