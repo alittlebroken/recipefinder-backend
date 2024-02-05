@@ -207,6 +207,7 @@ const findAll = async (options) => {
     let newFilter = {}
     newFilter['c.userId'] = oldFilter.userId
     filter = JSON.stringify(newFilter)
+    
 
     /* Now realias the sortby field */
     sortBy = `c.${sortBy}`
@@ -228,6 +229,7 @@ const findAll = async (options) => {
         'c.userId',
         'c.name',
         'c.description',
+        'f.id as relationid',
         'f.src',
         'f.title',
         'f.alt',
@@ -236,7 +238,7 @@ const findAll = async (options) => {
       .where('f.resource', '=', 'Cookbook')
       .offset(offset)
       .modify(dbHelper.buildSort, { sortBy, sortOrder })
-    
+
     /* Check if any results have been returned */
     if(!results || results.length == 0){
       return [];
