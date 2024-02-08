@@ -19,7 +19,8 @@ const cookieParser = require('cookie-parser');
  app.use(cookieParser());
  app.use(cors({
   //origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  origin: 'http://localhost:3000',
+  //origin: 'http://localhost:3000',
+  origin: 'https://recipefinder-client.onrender.com',
   credentials: true,
   allowedHeaders: "authorisation,Authorisation,Content-Type,content-type,Content-type,token,range",
   exposedHeaders: "Content-Range, X-Content-Range"
