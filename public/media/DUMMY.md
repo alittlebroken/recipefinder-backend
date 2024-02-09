@@ -1,0 +1,1 @@
+Dummy file to allow creation of the location for storing images
