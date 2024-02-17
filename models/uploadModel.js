@@ -93,7 +93,8 @@ const upload = async (payload) => {
           if(result.length > 0){
             return {
               success: true,
-              message: 'File(s) successfully uploaded'
+              message: 'File(s) successfully uploaded',
+              results: result
             }
           } else {
             return {

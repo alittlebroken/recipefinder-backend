@@ -145,7 +145,8 @@ const upload = async (req, res, next) => {
         res.status(200).json({
             status: 200,
             success: true,
-            message: 'File(s) successfully uploaded'
+            message: 'File(s) successfully uploaded',
+            results: result?.results || []
         })
 
 
