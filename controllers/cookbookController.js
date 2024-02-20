@@ -26,19 +26,29 @@ const list = async (req, res, next) => {
 
     /* Get the cookbooks from the database */
     const results = await cookbookModel.findAll(options);
-    
+
     if(!results || results.length < 1) {
-      let err = new Error('There were no cookbooks to find');
-      err.status = 204;
-      err.success = false;
-      throw err;
+      return res.status(200).json({
+        status: 200,
+        success: true,
+        message: 'There were no cookbooks to find',
+        results: [],
+        totalPages: 1,
+        totalRecords: 0,
+        currentPage: 1
+      })
     };
 
     if(results.success === false){
-      let err = new Error('There was a problem with the resource, please try again later');
-      err.status = 500;
-      err.success = false;
-      throw err;
+      return res.status(500).json({
+        status: 500,
+        success: false,
+        message: 'There was a problem with the resource, please try again later',
+        results: [],
+        totalPages: 1,
+        totalRecords: 0,
+        currentPage: 1
+      })
     }
 
     res.status(200).json({
