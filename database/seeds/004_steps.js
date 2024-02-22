@@ -243,37 +243,37 @@ exports.seed = async function(knex) {
       then cook in a microwave for around 5 minutes.`
     },
     {
-      id: 38,
+      id: 39,
       recipeId: 7,
       stepNo: 1,
       content: `Heat 1 tablespoon of oil in a big pan.`
     },
     {
-      id: 39,
+      id: 40,
       recipeId: 7,
       stepNo: 2,
       content: `Dice the carrots and potato into small cubes and place into the large pan and cook until they start to soften.`
     },
     {
-      id: 40,
+      id: 41,
       recipeId: 7,
       stepNo: 3,
       content: `Make up 700ml of low fodmap vegetable stock and pour over the vegetables in the pan and simmer for 10 to 15 minutes.`
     },
     {
-      id: 41,
+      id: 42,
       recipeId: 7,
       stepNo: 4,
       content: `Blend the ingredients in the pan until smooth and then season.`
     },
     {
-      id: 42,
+      id: 43,
       recipeId: 8,
       stepNo: 1,
       content: `Put the flour into a bowl and make a hole in the center.`
     },
     {
-      id: 43,
+      id: 44,
       recipeId: 8,
       stepNo: 2,
       content: `Crack the egg into the hole you made into the flour and pour a quarter of the milk in as well.
@@ -282,7 +282,7 @@ exports.seed = async function(knex) {
       and leave for around twenty minutes. Mix again before using.`
     },
     {
-      id: 44,
+      id: 45,
       recipeId: 8,
       stepNo: 3,
       content: `Heat up a small frying pan and place in a knob of butter. Once the butter has started to
@@ -290,7 +290,7 @@ exports.seed = async function(knex) {
       pan.`
     },
     {
-      id: 45,
+      id: 46,
       recipeId: 8,
       stepNo: 3,
       content: `Cook until the bottom is a golden brown and then flip the pancake over and cook until the other
@@ -298,7 +298,7 @@ exports.seed = async function(knex) {
       inbetween cooking and adding fresh butter if needed.`
     },
     {
-      id: 46,
+      id: 47,
       recipeId: 8,
       stepNo: 4,
       content: `Serve either with lemon juice and sugar or your favourite topping of choice.`

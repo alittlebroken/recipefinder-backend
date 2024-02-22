@@ -63,7 +63,7 @@ exports.seed = async function(knex) {
     },
     {
       id: 6,
-      userid: 1,
+      userId: 1,
       name: 'Spaghetti Bolognese',
       description: 'An Italian classic great for all the family.',
       servings: 4,
@@ -74,7 +74,7 @@ exports.seed = async function(knex) {
     },
     {
       id: 7,
-      userid: 1,
+      userId: 1,
       name: 'Vegetable Soup',
       description: 'A healthy soup packed full of goodness that is low fat and calories.',
       servings: 2,
@@ -85,7 +85,7 @@ exports.seed = async function(knex) {
     },
     {
       id: 8,
-      userid: 1,
+      userId: 1,
       name: 'Gluten and Dairy free pancakes',
       description: 'A delicious treat that is gluten and dairy free and still tastes just as great.',
       servings: 6,
