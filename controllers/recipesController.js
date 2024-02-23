@@ -33,6 +33,8 @@ const listAll = async (req, res, next) => {
             sortOrder: req.sortOrder
           }
 
+          console.log('Options: ', options)
+
         /* Get a list of all recipes */
         const results = await recipeModel.findAll(options);
         
