@@ -667,6 +667,8 @@ const findAll = async (options) => {
        if(results && results.length > 0)
        {
 
+        console.log('Running through results...')
+
          for( let result of results) {
          //results.forEach( async result => {
 
@@ -681,19 +683,27 @@ const findAll = async (options) => {
             )
             .where('ri.recipeId', result.id).transacting(trx);
 
+          console.log('ingredientResults', ingredientResults)
+
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
            .where('cr.recipeId', result.id).transacting(trx);
 
+           console.log('cookbookResults',cookbookResults)
+
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
            .where('recipeId', result.id).transacting(trx);
+
+           console.log('stepResults', stepResults)
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
            .where('rc.recipeId', result.id).transacting(trx);
+
+           console.log('categoryResults', categoryResults)
 
           let imageResults = await trx('files as f')
            .select(
@@ -706,6 +716,8 @@ const findAll = async (options) => {
            .andWhere('f.resourceid', '=', result.id)
            .transacting(trx)
 
+           console.log('imageResults', imageResults)
+
           let recipe = {
             ...result,
             ingredients: [...ingredientResults],
@@ -714,6 +726,8 @@ const findAll = async (options) => {
             categories: [...categoryResults],
             images: [...imageResults]
           };
+
+          console.log('recipe', recipe)
 
           recipes.push(recipe);
 
