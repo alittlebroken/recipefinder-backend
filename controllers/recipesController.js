@@ -36,6 +36,8 @@ const listAll = async (req, res, next) => {
         /* Get a list of all recipes */
         const results = await recipeModel.findAll(options);
         
+        console.log('Resultset: ', results)
+
         if(!results || results.success === false){
             throw {
                 status: 500,
