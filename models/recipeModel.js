@@ -755,6 +755,8 @@ const findAll = async (options) => {
 
   } catch(e) {
 
+    console.log(e)
+
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
         let message = 'There was a problem with the resource, please try again later';
