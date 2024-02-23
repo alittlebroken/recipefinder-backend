@@ -64,6 +64,7 @@ const listAll = async (req, res, next) => {
 
     } catch(e) {
         /* Log out the issue(s) */
+        console.log(e)
         appLogger.logMessage(
             'error', 
             `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`
