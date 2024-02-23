@@ -652,6 +652,8 @@ const findAll = async (options) => {
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .transacting(trx);
 
+       console.log('Recipe Results: ', results)
+
       const recordCount = await trx('recipes')
         .modify(dbHelper.buildFilters, filter)
         .select('id')
@@ -659,7 +661,7 @@ const findAll = async (options) => {
         .groupBy('id')
         .transacting(trx)
       
-        console.log('Recipe Results: ', results)
+        
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
