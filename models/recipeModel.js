@@ -659,6 +659,7 @@ const findAll = async (options) => {
         .groupBy('id')
         .transacting(trx)
       
+        console.log('Recipe Results: ', results)
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
@@ -724,6 +725,7 @@ const findAll = async (options) => {
       let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
+      console.log('Final recipe list: ', recipes)
 
        return {
         results: recipes,
