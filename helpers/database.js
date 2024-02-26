@@ -13,7 +13,7 @@ const buildFilters = (queryBuilder, filters) => {
         */
 
         /* Parse the filter we are working with */
-        console.log('DEBUG: ', filters)
+        console.log('DEBUG: ', filters.toString())
         let parsedFilters = JSON.parse(filters)
         
 
