@@ -29,8 +29,6 @@ const performSearch = async (req, res, next) => {
             sortOrder: req.sortOrder
           }
 
-          console.log('Options for performSearch: ', options)
-
         /* Validate any request variables */
         let validationErrors;
 
@@ -68,9 +66,7 @@ const performSearch = async (req, res, next) => {
         let results;
         /* If no search terms have been set then return all recipes */
         if(req.body.terms === '' || req.body.terms.length === 0){
-            console.log('No terms set and filter is: ', req.filter)
             results = await recipeModel.findAll(options);
-            console.log(results)
         } else {
             /* some terms have been set.
              * next we have to check if the search term is applicable to
@@ -130,7 +126,6 @@ const performSearch = async (req, res, next) => {
 
         
     } catch(e) {
-        console.log('Catch from performSearch: ', e)
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 

@@ -500,7 +500,6 @@ const addRecipe = async (req, res, next) => {
     }
 
     let results = await cookbookRecipesModel.create(data);
-    console.log(results)
 
     if(results.status === 409){
       return res.status(409).json({

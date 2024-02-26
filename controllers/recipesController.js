@@ -33,12 +33,8 @@ const listAll = async (req, res, next) => {
             sortOrder: req.sortOrder
           }
 
-          console.log('Options: ', options)
-
         /* Get a list of all recipes */
         const results = await recipeModel.findAll(options);
-        
-        console.log('Resultset: ', results)
 
         if(!results || results.success === false){
             throw {
@@ -68,7 +64,7 @@ const listAll = async (req, res, next) => {
 
     } catch(e) {
         /* Log out the issue(s) */
-        console.log(e)
+
         appLogger.logMessage(
             'error', 
             `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`

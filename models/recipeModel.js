@@ -652,8 +652,6 @@ const findAll = async (options) => {
        .modify(dbHelper.buildSort, { sortBy, sortOrder })
        .transacting(trx);
 
-       console.log('Recipe Results: ', results)
-
       const recordCount = await trx('recipes')
         .modify(dbHelper.buildFilters, filter)
         .select('id')
@@ -666,8 +664,6 @@ const findAll = async (options) => {
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
        {
-
-        console.log('Running through results...')
 
          for( let result of results) {
          //results.forEach( async result => {
@@ -683,27 +679,19 @@ const findAll = async (options) => {
             )
             .where('ri.recipeId', result.id).transacting(trx);
 
-          console.log('ingredientResults', ingredientResults)
-
           let cookbookResults = await trx('cookbook_recipes as cr')
            .join('cookbooks as c', 'cr.cookbookId', '=', 'c.id')
            .select('c.id as id', 'c.name as name')
            .where('cr.recipeId', result.id).transacting(trx);
 
-           console.log('cookbookResults',cookbookResults)
-
           let stepResults = await trx('steps')
            .select('id', 'stepNo', 'content')
            .where('recipeId', result.id).transacting(trx);
-
-           console.log('stepResults', stepResults)
 
           let categoryResults = await trx('recipe_categories as rc')
            .join('categories as cat', 'rc.categoryId', '=', 'cat.id')
            .select('cat.id as id', 'cat.name as name')
            .where('rc.recipeId', result.id).transacting(trx);
-
-           console.log('categoryResults', categoryResults)
 
           let imageResults = await trx('files as f')
            .select(
@@ -716,8 +704,6 @@ const findAll = async (options) => {
            .andWhere('f.resourceid', '=', result.id)
            .transacting(trx)
 
-           console.log('imageResults', imageResults)
-
           let recipe = {
             ...result,
             ingredients: [...ingredientResults],
@@ -726,8 +712,6 @@ const findAll = async (options) => {
             categories: [...categoryResults],
             images: [...imageResults]
           };
-
-          console.log('recipe', recipe)
 
           recipes.push(recipe);
 
@@ -741,8 +725,6 @@ const findAll = async (options) => {
       let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
-      console.log('Final recipe list: ', recipes)
-
        return {
         results: recipes,
         totalRecords: recordCount.length,
@@ -755,7 +737,6 @@ const findAll = async (options) => {
 
   } catch(e) {
 
-    console.log(e)
 
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
@@ -1363,8 +1344,7 @@ const canIBeUsed = async (recipe_id, ingredient) => {
     }
 
   } catch(e) {
-    console.log('Error from recipeModel->canIBeMade: \n')
-    console.log(e)
+
     return false
   }
 
@@ -1407,8 +1387,7 @@ const canIBeMade = async (recipe_id, ingredients) => {
 
   } catch(e) {
 
-    console.log('Error from recipeModel->canIBeMade: \n')
-    console.log(e)
+
     return false
 
   }
@@ -1419,7 +1398,7 @@ const canIBeMade = async (recipe_id, ingredients) => {
 const doIExist = (element, target) => {
 
   if(target?.length < 1) {
-    console.log('Target is empty')
+ 
     return false
   }
 
@@ -1428,10 +1407,10 @@ const doIExist = (element, target) => {
     let tmp = target[loop]
 
     if(_.isEqual(element, tmp)){
-      console.log(`Element matches target`)
+      
       return true
     } else {
-      console.log(`Element did not match target`)
+      
     }
 
     return false
@@ -1469,7 +1448,7 @@ const whatCanIMake = async (ingredients, options) => {
     /*
       Loop through each ingredient and check the recipe has it
     */
-   console.log(ingredients.length)
+   
     for(let i = 0; i < ingredients.length; i++){
 
       /* Check the recipe ingredients table for the information we need */
@@ -1524,8 +1503,7 @@ const whatCanIMake = async (ingredients, options) => {
 
   } catch(e) {
 
-    console.log('Error from recipeModel->whatCanIMake: \n')
-    console.log(e)
+
     return false
 
   }

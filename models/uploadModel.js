@@ -440,9 +440,6 @@ const update = async (payload, options) => {
        .modify(dbHelper.buildFilters, filter)
        .returning('id')
 
-       console.log(results)
-       console.log(getFile(resource, parseInt(resourceid)))
-
       if(results.length > 0){
         return {
           success: true,

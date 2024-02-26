@@ -22,7 +22,6 @@ const setQueryOpts = async (req, res, next) => {
 
         /* ensure that the pagination options are set within desired ranges */
         if(limit !== null){
-            console.log('Limit is set to : ', limit)
             if(limit < 1) limit = 10
             if(limit > 100 ) limit = 100
 
