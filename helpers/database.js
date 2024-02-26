@@ -13,7 +13,9 @@ const buildFilters = (queryBuilder, filters) => {
         */
 
         /* Parse the filter we are working with */
+        console.log('DEBUG: ', filters)
         let parsedFilters = JSON.parse(filters)
+        
 
         /* How many filters do we have */
         let numParsedFilters = Object.getOwnPropertyNames(parsedFilters)
