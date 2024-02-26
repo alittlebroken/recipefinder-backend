@@ -7,13 +7,14 @@ const buildFilters = (queryBuilder, filters) => {
     /* Make sure to only perform any work if we actually 
      * have a filter to apply
      */
-    if(filters){
+    if(filters && typeof filters !== 'function'){
         /* The filters should be passed to us as an object with each key 
          * being a new filter and it's content to filter by 
         */
 
         /* Parse the filter we are working with */
         let parsedFilters = JSON.parse(filters)
+        
 
         /* How many filters do we have */
         let numParsedFilters = Object.getOwnPropertyNames(parsedFilters)

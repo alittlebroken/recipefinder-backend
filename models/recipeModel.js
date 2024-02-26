@@ -659,6 +659,7 @@ const findAll = async (options) => {
         .groupBy('id')
         .transacting(trx)
       
+        
 
        /* Loop through all recipes found and gather the supporting data */
        if(results && results.length > 0)
@@ -724,7 +725,6 @@ const findAll = async (options) => {
       let numPages = parseInt(Math.floor(recordCount.length / size)) + 1
       if(numPages < 1) numPages = 1
 
-
        return {
         results: recipes,
         totalRecords: recordCount.length,
@@ -736,6 +736,7 @@ const findAll = async (options) => {
 
 
   } catch(e) {
+
 
         /* Check for library errors and if found swap them out for a generic
            one to send back over the API for security */
@@ -1343,8 +1344,7 @@ const canIBeUsed = async (recipe_id, ingredient) => {
     }
 
   } catch(e) {
-    console.log('Error from recipeModel->canIBeMade: \n')
-    console.log(e)
+
     return false
   }
 
@@ -1387,8 +1387,7 @@ const canIBeMade = async (recipe_id, ingredients) => {
 
   } catch(e) {
 
-    console.log('Error from recipeModel->canIBeMade: \n')
-    console.log(e)
+
     return false
 
   }
@@ -1399,7 +1398,7 @@ const canIBeMade = async (recipe_id, ingredients) => {
 const doIExist = (element, target) => {
 
   if(target?.length < 1) {
-    console.log('Target is empty')
+ 
     return false
   }
 
@@ -1408,10 +1407,10 @@ const doIExist = (element, target) => {
     let tmp = target[loop]
 
     if(_.isEqual(element, tmp)){
-      console.log(`Element matches target`)
+      
       return true
     } else {
-      console.log(`Element did not match target`)
+      
     }
 
     return false
@@ -1449,7 +1448,7 @@ const whatCanIMake = async (ingredients, options) => {
     /*
       Loop through each ingredient and check the recipe has it
     */
-   console.log(ingredients.length)
+   
     for(let i = 0; i < ingredients.length; i++){
 
       /* Check the recipe ingredients table for the information we need */
@@ -1504,8 +1503,7 @@ const whatCanIMake = async (ingredients, options) => {
 
   } catch(e) {
 
-    console.log('Error from recipeModel->whatCanIMake: \n')
-    console.log(e)
+
     return false
 
   }

@@ -35,7 +35,7 @@ const listAll = async (req, res, next) => {
 
         /* Get a list of all recipes */
         const results = await recipeModel.findAll(options);
-        
+
         if(!results || results.success === false){
             throw {
                 status: 500,
@@ -64,6 +64,7 @@ const listAll = async (req, res, next) => {
 
     } catch(e) {
         /* Log out the issue(s) */
+
         appLogger.logMessage(
             'error', 
             `${moduleName}.${moduleMethod} - Status Code ${e.status}: ${e.message}`

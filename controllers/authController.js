@@ -674,7 +674,6 @@ const updateProfile = async (req, res, next) => {
             })
         }
 
-        console.log(typeof req.body.username)
         if(typeof req.body.username !== 'string'){
             return res.status(400).json({
                status: 400,

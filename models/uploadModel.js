@@ -88,12 +88,13 @@ const upload = async (payload) => {
         return await db.transaction( async trx => {
   
           const result = await db('files')
-           .insert(payload, ['id'])
+           .insert(payload, ['id', 'src'])
 
           if(result.length > 0){
             return {
               success: true,
-              message: 'File(s) successfully uploaded'
+              message: 'File(s) successfully uploaded',
+              results: result
             }
           } else {
             return {
@@ -521,9 +522,12 @@ const getFile = async (resource, resourceid) => {
     /* Extract the details from the database */
     const results = await db('files as f')
     .select(
+      'f.id',
       'f.src',
       'f.title',
-      'f.alt'
+      'f.alt',
+      'f.resource',
+      'f.resourceid'
     )
     .where('f.resource', '=', resource)
     .where('f.resourceid', '=', parseInt(resourceid))

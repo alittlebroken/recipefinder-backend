@@ -186,7 +186,6 @@ const resourceStats = async (tableName) => {
     }
 
   } catch(e) {
-    console.log(e)
     return {
         success: false,
         message: 'There was a problem with the resource, please try again later'

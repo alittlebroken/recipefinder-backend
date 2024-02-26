@@ -61,6 +61,39 @@ exports.seed = async function(knex) {
       cook_time: 25,
       rating: 19
     },
+    {
+      id: 6,
+      userId: 1,
+      name: 'Spaghetti Bolognese',
+      description: 'An Italian classic great for all the family.',
+      servings: 4,
+      calories_per_serving: 624,
+      prep_time: 15,
+      cook_time: 20,
+      rating: 0
+    },
+    {
+      id: 7,
+      userId: 1,
+      name: 'Vegetable Soup',
+      description: 'A healthy soup packed full of goodness that is low fat and calories.',
+      servings: 2,
+      calories_per_serving: 218,
+      prep_time: 10,
+      cook_time: 15,
+      rating: 0,
+    },
+    {
+      id: 8,
+      userId: 1,
+      name: 'Gluten and Dairy free pancakes',
+      description: 'A delicious treat that is gluten and dairy free and still tastes just as great.',
+      servings: 6,
+      calories_per_serving: 119,
+      prep_time: 5,
+      cook_time: 20,
+      rating: 0,
+    }
   ]);
 
   await knex.raw('select setval(\'recipes_id_seq\', max(id)) from recipes');

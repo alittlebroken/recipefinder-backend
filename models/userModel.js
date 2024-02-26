@@ -120,9 +120,6 @@ const insert = async (username, password, email, forename, surname, roles = 'Cus
  */
 const findByEmail = async email => {
 
-  console.log(`Trying to find: `)
-  console.log(email)
-
   try{
 
     /* Check we have data passed in */
@@ -148,8 +145,6 @@ const findByEmail = async email => {
       }
 
      })
-
-     console.log(result)
 
     if(!result || !result.length > 0){
       throw {

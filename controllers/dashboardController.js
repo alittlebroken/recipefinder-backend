@@ -55,7 +55,6 @@ const getDashboard = async (req, res, next) => {
         })
 
     } catch(e) {
-        console.log(e)
         /* Log out the issue(s) */
         appLogger.logMessage(
             'error', 

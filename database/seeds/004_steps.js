@@ -191,6 +191,118 @@ exports.seed = async function(knex) {
       stepNo: 8,
       content: "Serve with dip of your choice and enjoy"
     },
+    {
+      id: 31,
+      recipeId: 6,
+      stepNo: 1,
+      content: `For the sauce, combine the 2 tins of chopped tomato's, tomato puree, mixed herbs, a pinch 
+      of salt and pepper, the low fodmap garlic and onion substitutes.`
+    },
+    {
+      id: 32,
+      recipeId: 6,
+      stepNo: 2,
+      content: `Make up 250ml of the low fodmap beef stock cubes and pour into the bowl containing the 
+      sauce ingredients and mix well.`
+    },
+    {
+      id: 33,
+      recipeId: 6,
+      stepNo: 3,
+      content: `Pour 1 tablespoon of oil into a large sauce pan and turn to a medium heat.`
+    },
+    {
+      id: 34,
+      recipeId: 6,
+      stepNo: 4,
+      content: `Brown the mince in the pan for 5 minutes, then place in the chopped carrots and cook for a further 3 minutes.`
+    },
+    {
+      id: 35,
+      recipeId: 6,
+      stepNo: 5,
+      content: `Pour the sauce over the mince and carrots and simmer for 15 minutes.`
+    },
+    {
+      id: 36,
+      recipeId: 6,
+      stepNo: 6,
+      content: `Cook the spaghetti whilst the mince and sauce is simmering.`
+    },
+    {
+      id: 37,
+      recipeId: 6,
+      stepNo: 7,
+      content: `Divide the spaghetti and bolognese into the correct number of dishes and enjoy.`
+    },
+    {
+      id: 38,
+      recipeId: 6,
+      stepNo: 8,
+      content: `Any leftover bolognese can be frozen for a later date. When ready to eat, first defrost the bolognese and 
+      then cook in a microwave for around 5 minutes.`
+    },
+    {
+      id: 39,
+      recipeId: 7,
+      stepNo: 1,
+      content: `Heat 1 tablespoon of oil in a big pan.`
+    },
+    {
+      id: 40,
+      recipeId: 7,
+      stepNo: 2,
+      content: `Dice the carrots and potato into small cubes and place into the large pan and cook until they start to soften.`
+    },
+    {
+      id: 41,
+      recipeId: 7,
+      stepNo: 3,
+      content: `Make up 700ml of low fodmap vegetable stock and pour over the vegetables in the pan and simmer for 10 to 15 minutes.`
+    },
+    {
+      id: 42,
+      recipeId: 7,
+      stepNo: 4,
+      content: `Blend the ingredients in the pan until smooth and then season.`
+    },
+    {
+      id: 43,
+      recipeId: 8,
+      stepNo: 1,
+      content: `Put the flour into a bowl and make a hole in the center.`
+    },
+    {
+      id: 44,
+      recipeId: 8,
+      stepNo: 2,
+      content: `Crack the egg into the hole you made into the flour and pour a quarter of the milk in as well.
+      using an electric whisk, mix the ingredients together until it resembles a paste and then mix in another
+      quarter of the milk. When the mixture is lump free mix in the remaining milk and then decant into a jug
+      and leave for around twenty minutes. Mix again before using.`
+    },
+    {
+      id: 45,
+      recipeId: 8,
+      stepNo: 3,
+      content: `Heat up a small frying pan and place in a knob of butter. Once the butter has started to
+      foam then pour in some of the mixture ensuring it is swirled around to cover the base of the frying
+      pan.`
+    },
+    {
+      id: 46,
+      recipeId: 8,
+      stepNo: 3,
+      content: `Cook until the bottom is a golden brown and then flip the pancake over and cook until the other
+      side is golden brown as well. Repeat for the remaining mixture ensuring that you mix the remaining batter
+      inbetween cooking and adding fresh butter if needed.`
+    },
+    {
+      id: 47,
+      recipeId: 8,
+      stepNo: 4,
+      content: `Serve either with lemon juice and sugar or your favourite topping of choice.`
+    },
   ]);
 
   await knex.raw('select setval(\'steps_id_seq\', max(id)) from steps');
