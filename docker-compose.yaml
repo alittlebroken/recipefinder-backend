@@ -2,6 +2,19 @@
 name: recipe-finder
 
 services:
+  api:
+    image: node:latest
+    ports:
+      - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    working_dir: /app
+    volumes:
+     - ./:/app
+    command: bash -c "npm ci && npm run dev"
+
   db:
     image: postgres:14-alpine
     ports: 
@@ -12,3 +25,8 @@ services:
       - POSTGRES_PASSWORD=S3cret
       - POSTGRES_USER=rfdbuser
       - POSTGRES_DB=recipefinder
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready', '-d', 'db_prod']
+      interval: 30s
+      retries: 5
+      start_period: 80s
