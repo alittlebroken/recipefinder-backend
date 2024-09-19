@@ -23,7 +23,7 @@ services:
      - LOG_HTTP_ERROR=http_error.log
      - LOG_HTTP_ACCESS=http_access.log
      - LOG_APP_COMMON=application.log
-     - DB_HOST=localhost
+     - DB_HOST=db
      - DB_NAME=recipefinder
      - DB_USER=rfdbuser
      - DB_PASS=S3cret
@@ -33,7 +33,8 @@ services:
      - SALT_ROUNDS=10
      - JWT_TOKEN_EXPIRY=7m
      - JWT_REFRESH_TOKEN_EXPIRY=31d
-    command: bash -c "npm ci && npm run dev"
+     - SEED_PASS=S3cret
+    command: bash -c "npm ci && npm run migrate && npm run seed && npm run dev"
 
   db:
     image: postgres:14-alpine
