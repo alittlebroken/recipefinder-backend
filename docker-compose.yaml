@@ -1,0 +1,53 @@
+# Set the project name
+name: recipe-finder
+
+services:
+  api:
+    image: node:latest
+    ports:
+      - 5000:5000
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    working_dir: /app
+    volumes:
+     - ./:/app
+    environment:
+     - APP_NAME=recipefinder
+     - ENVIRONMENT=development
+     - LOG_LEVEL=debug
+     - LOG_LOCATION=logs
+     - LOG_APP=application.log
+     - LOG_ROTATION=1d
+     - LOG_HTTP_ERROR=http_error.log
+     - LOG_HTTP_ACCESS=http_access.log
+     - LOG_APP_COMMON=application.log
+     - DB_HOST=db
+     - DB_NAME=recipefinder
+     - DB_USER=rfdbuser
+     - DB_PASS=S3cret
+     - EXPRESS_PORT=5000
+     - JWT_TOKEN_SECRET=S3cret
+     - JWT_REFRESH_TOKEN_SECRET=S3cret
+     - SALT_ROUNDS=10
+     - JWT_TOKEN_EXPIRY=7m
+     - JWT_REFRESH_TOKEN_EXPIRY=31d
+     - SEED_PASS=S3cret
+    command: bash -c "npm ci && npm run migrate && npm run seed && npm run dev"
+
+  db:
+    image: postgres:14-alpine
+    ports: 
+      - 5432:5432
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=S3cret
+      - POSTGRES_USER=rfdbuser
+      - POSTGRES_DB=recipefinder
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready', '-d', 'db_prod']
+      interval: 30s
+      retries: 5
+      start_period: 80s
